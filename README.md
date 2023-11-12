@@ -14,7 +14,7 @@ python -m venv .venv_llm_jp_eval
 python -m venv .venv_harness_jp
 python -m venv .venv_harness_en
 ```
-`jalm-evaluation/`にて
+`jalm-evaluation-private/`にて
 ```
 source .venv_llm_jp_eval/bin/activate
 cd llm-jp-eval
@@ -22,7 +22,7 @@ pip install .
 pip install protobuf
 pip install sentencepiece
 ```
-`jalm-evaluation/`にて
+`jalm-evaluation-private/`にて
 ```
 source .venv_harness_jp/bin/activate
 cd lm-evaluation-harness-jp
@@ -31,7 +31,7 @@ pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
 ```
-`jalm-evaluation/`にて
+`jalm-evaluation-private/`にて
 ```
 source .venv_harness_en/bin/activate
 cd lm-evaluation-harness-en
@@ -48,12 +48,12 @@ pip install protobuf
 * llm-jp-evalのREADME.mdに従って、データセットをダウンロードする
 `llm-jp-eval/`にて
 ```bash
-  poetry run python scripts/preprocess_dataset.py  \
+  python scripts/preprocess_dataset.py  \
   --dataset-name all  \
   --output-dir ./datasets
 ```
     
-`jalm-evaluation/`にて
+`jalm-evaluation-private/`にて
 
 llm-jp-evalのタスクで評価
 ```
@@ -96,7 +96,7 @@ $NUM_TESTCASE
     * 文書読解: SQuAD
     * 数学: GSM8K
 
-`jalm-evaluation/`にて
+`jalm-evaluation-private/`にて
 ```
 bash scripts/evaluate_english.sh \
 $MODEL_PATH \
@@ -105,3 +105,9 @@ $NUM_TESTCASE
 ```
 全テストケースで評価する場合は、`evaluate_english.sh`内の`--limit`を消してください。
 
+# ABCI上
+* `rt_AG.small=1` と `rt_AF=1` で全タスク全テストケースで評価するスクリプトは `scripts/abci/rt_{AGsmall,AF}/qsub_all.sh` です。
+`jalm-evaluation-private/`にて
+```
+bash scripts/abci/rt_{AGsmall,AF}/qsub_all.sh $MODEL_NAME_OR_PATH
+```
