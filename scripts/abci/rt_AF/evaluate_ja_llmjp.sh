@@ -1,4 +1,21 @@
 #!/bin/bash
+#$ -l rt_AF=1
+#$ -l h_rt=12:00:00
+#$ -j y
+#$ -o outputs-full/
+#$ -cwd
+
+# module load
+source /etc/profile.d/modules.sh
+module load python/3.10/3.10.10
+module load cuda/11.8/11.8.0
+module load cudnn/8.9/8.9.2
+module load nccl/2.16/2.16.2-1
+module load hpcx/2.12
+
+export HF_HOME=/bb/llm/gaf51275/jalm/.cache
+export HF_DATASETS_CACHE=/bb/llm/gaf51275/jalm/.cache
+export TRANSFORMERS_CACHE=/bb/llm/gaf51275/jalm/.cache
 
 # running llm-jp-eval for basic japanese task
 source .venv_llm_jp_eval/bin/activate
