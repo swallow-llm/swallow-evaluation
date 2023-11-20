@@ -45,12 +45,23 @@ pip install protobuf
     * 多肢選択・自然言語推論・質問応答・文書読解・数学
     * 生成タスク: XLSum
 
-* llm-jp-evalのREADME.mdに従って、データセットをダウンロードする
+* llm-jp-evalのREADME.mdに従って、データセットをダウンロードする  
+
+## 公式設定
 `llm-jp-eval/`にて
 ```bash
   python scripts/preprocess_dataset.py  \
   --dataset-name all  \
   --output-dir ./datasets
+```
+
+## NLIタスクを日本語化
+`llm-jp-eval/`にて
+```bash
+  python scripts/preprocess_dataset.py  \
+  --dataset-name all  \
+  --output-dir ./datasets_nli_localize \
+  --localize_nli_verbalizer
 ```
     
 `jalm-evaluation-private/`にて
