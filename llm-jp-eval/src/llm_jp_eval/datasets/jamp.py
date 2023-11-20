@@ -14,7 +14,7 @@ class JAMPDatasetProcessor(BaseDatasetProcessor):
             self.output_info.instruction = "前提と仮説の関係をentailment、contradiction、neutralの中から回答してください。それ以外には何も含めないことを厳守してください。\n\n制約：\n- 前提から仮説が、時間関係上導出可能である場合はentailmentと出力\n- 前提と仮説が両立しえない場合はcontradictionと出力\n- そのいずれでもない場合はneutralと出力"
             self.verbalizer = nil_function
         else:
-            self.output_info.instruction = "前提と仮説の関係を含意、矛盾、中立の中から回答してください。それ以外には何も含めないことを厳守してください。\n\n制約：\n- 前提から仮説が、時間関係上導出可能である場合はentailmentと出力\n- 前提と仮説が両立しえない場合はcontradictionと出力\n- そのいずれでもない場合はneutralと出力"
+            self.output_info.instruction = "前提と仮説の関係を含意、矛盾、中立の中から回答してください。それ以外には何も含めないことを厳守してください。\n\n制約：\n- 前提から仮説が、時間関係上導出可能である場合は含意と出力\n- 前提と仮説が両立しえない場合は矛盾と出力\n- そのいずれでもない場合は中立と出力"
             self.verbalizer = localize_nli_class_labels
         self.output_info.output_length = 3
         self.output_info.metrics = ["exact_match"]

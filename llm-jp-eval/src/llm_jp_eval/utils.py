@@ -81,7 +81,11 @@ def localize_nli_class_labels(class_label_en: str) -> str:
         "entailment": "含意",
         "contradiction": "矛盾",
         "neutral": "中立",
-        "non-entailment": "非含意"
+        "non-entailment": "非含意",
+        "yes": "含意", # JSeM
+        "no": "矛盾", # JSeM
+        "unknown": "中立", # JSeM
+        "undef": "不明", # JSeM
     }
     return dict_mapping[class_label_en]
 

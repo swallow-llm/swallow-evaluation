@@ -29,8 +29,7 @@ DATA_NAME_TO_PROCESSOR = {
     "chabsa": ChabsaDatasetProcessor,
 }
 
-# NLI_TASKS = {"jamp", "jnli", "janli", "jsem", "jsick"}
-NLI_TASKS = {"jamp", }
+NLI_TASKS = {"jamp", "jnli", "janli", "jsem", "jsick"}
 
 def main():
     parser = ArgumentParser()
