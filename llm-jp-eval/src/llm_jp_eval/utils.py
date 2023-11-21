@@ -75,3 +75,19 @@ def post_process_score_results(score_results: dict[str, float], add_avg_score: b
         post_processed_score_results["csv_line"] = ",".join([str(x) for x in post_processed_score_results.values()])
 
     return post_processed_score_results
+
+def localize_nli_class_labels(class_label_en: str) -> str:
+    dict_mapping = {
+        "entailment": "含意",
+        "contradiction": "矛盾",
+        "neutral": "中立",
+        "non-entailment": "非含意",
+        "yes": "含意", # JSeM
+        "no": "矛盾", # JSeM
+        "unknown": "中立", # JSeM
+        "undef": "不明", # JSeM
+    }
+    return dict_mapping[class_label_en]
+
+def nil_function(input: str) -> str:
+    return input

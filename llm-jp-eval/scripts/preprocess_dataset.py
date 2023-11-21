@@ -29,6 +29,7 @@ DATA_NAME_TO_PROCESSOR = {
     "chabsa": ChabsaDatasetProcessor,
 }
 
+NLI_TASKS = {"jamp", "jnli", "janli", "jsem", "jsick"}
 
 def main():
     parser = ArgumentParser()
@@ -40,15 +41,23 @@ def main():
         choices=list(DATA_NAME_TO_PROCESSOR.keys()) + ["all"],
     )
     parser.add_argument("-o", "--output-dir", type=str, required=True)
+    parser.add_argument("--localize_nli_verbalizer", action="store_true", help="NLIタスクの識別ラベルを日本語(含意・中立・矛盾)にする")
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
 
     if args.dataset_name == "all":
-        for processor in DATA_NAME_TO_PROCESSOR.values():
-            processor(output_dir).pipeline()
+        for dataset_name, processor in DATA_NAME_TO_PROCESSOR.items():
+            if dataset_name in NLI_TASKS:
+                # print(processor.__init__())
+                processor(output_dir, args.localize_nli_verbalizer).pipeline()
+            else:
+                processor(output_dir).pipeline()
     else:
-        DATA_NAME_TO_PROCESSOR[args.dataset_name](output_dir).pipeline()
+        if args.dataset_name in NLI_TASKS:
+            DATA_NAME_TO_PROCESSOR[args.dataset_name](output_dir, args.localize_nli_verbalizer).pipeline()
+        else:
+            DATA_NAME_TO_PROCESSOR[args.dataset_name](output_dir).pipeline()
 
 
 if __name__ == "__main__":
