@@ -57,7 +57,7 @@ pip install protobuf
 前提と仮説の関係をentailment、contradiction、neutralの中から回答してください。
 
 # (b)NLIタスクを日本語化 の場合
-"前提と仮説の関係を含意、矛盾、中立の中から回答してください。
+前提と仮説の関係を含意、矛盾、中立の中から回答してください。
 ```
 
 ```bash
@@ -68,7 +68,7 @@ python scripts/preprocess_dataset.py  \
 --dataset-name all  \
 --output-dir ./datasets
 
-# (b)NLIタスクを日本語化
+# (b)NLIタスクを日本語化 の場合
 python scripts/preprocess_dataset.py  \
 --dataset-name all  \
 --output-dir ./datasets_nli_localize \
