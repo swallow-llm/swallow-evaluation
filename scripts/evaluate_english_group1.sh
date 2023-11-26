@@ -7,10 +7,10 @@ source .venv_harness_en/bin/activate
 # to evaluate with all testcases, set NUM_TESTCASE=None
 
 MODEL_NAME_PATH=$1
-TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squad2"
+TASK_NAME="gsm8k,openbookqa,xwinograd_en"
 NUM_FEWSHOT=$2
 NUM_TESTCASE="all"
-OUTDIR="results/${MODEL_NAME_PATH}/en/alltasks_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="results/${MODEL_NAME_PATH}/en/group1_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
 mkdir -p $OUTDIR
 

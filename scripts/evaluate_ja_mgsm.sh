@@ -6,7 +6,7 @@ export TOKENIZERS_PARALLELISM=false
 
 MODEL_NAME_PATH=$1
 NUM_FEWSHOT=$2
-NUM_TESTCASE=$3
+NUM_TESTCASE="all"
 
 OUTDIR="results/${MODEL_NAME_PATH}/ja/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
@@ -14,9 +14,8 @@ python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
     --model_args pretrained=$MODEL_NAME_PATH \
     --tasks "mgsm" \
-    --limit $NUM_TESTCASE \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
     --verbose \
-    --device cuda:0 \
+    --device cuda \
     --output_path ${OUTDIR}/score_math.json
