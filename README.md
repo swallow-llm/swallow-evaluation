@@ -113,12 +113,12 @@ $NUM_TESTCASE
 ## WMT20（機械翻訳）のタスクで評価
 
 ```
-bash scripts/evaluate_ja_wmt20_{enja, jaen}.sh \
+bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh \
 $MODEL_PATH \
 $NUM_FEWSHOT \
 $NUM_TESTCASE
 ```
-全テストケースで評価する場合は、`evaluate_ja_wmt20_en_ja.sh`内の`--limit`を消してください。
+全テストケースで評価する場合は、`evaluate_ja_wmt20_{enja,jaen}.sh`内の`--limit`を消してください。
 
 結果は
 `results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
