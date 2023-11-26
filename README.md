@@ -43,7 +43,7 @@ pip install protobuf
 # 日本語の評価
 * `llm-jp-eval` および `JP LM Evaluation Harness` の一部を採用
     * 多肢選択・自然言語推論・質問応答・文書読解・数学
-    * 生成タスク: XLSum
+    * 生成タスク: XLSum, WMT20-en-ja, WMT20-ja-en
 
 ## llm-jp-eval データセットの前処理
 * まず[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする  
@@ -109,6 +109,16 @@ $NUM_FEWSHOT \
 $NUM_TESTCASE
 ```
 全テストケースで評価する場合は、`evaluate_ja_mgsm.sh`内の`--limit`を消してください。
+
+## WMT20（機械翻訳）のタスクで評価
+
+```
+bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh \
+$MODEL_PATH \
+$NUM_FEWSHOT \
+$NUM_TESTCASE
+```
+全テストケースで評価する場合は、`evaluate_ja_wmt20_{enja,jaen}.sh`内の`--limit`を消してください。
 
 結果は
 `results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
