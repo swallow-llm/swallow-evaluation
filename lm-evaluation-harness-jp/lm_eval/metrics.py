@@ -268,7 +268,7 @@ def stderr_for_metric(metric, bootstrap_iters):
         perplexity,
         bleu,
         chrf,
-        ter,
+#        ter,
     ]
 
     if metric in bootstrappable:
