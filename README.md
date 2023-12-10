@@ -89,6 +89,27 @@ $NUM_TESTCASE
 ```
 全テストケースで評価する場合は、NUM_TESTCASEを`-1`にしてください。
 
+### NLIタスクのbalanced accuracyを計算する
+* NLIタスクデータセット(`jamp,janli,jnli,jsem,jsick`)のbalanced accuracyを計算するには  
+  `./scripts/re_evaluate_nli_task.py` に `llm-jp-eval` が出力した `output_eval.json` を渡してください．  
+  計算結果はjson形式でstdoutに出力されます．  
+
+```
+python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存先のjsonファイルパス}
+
+# 出力されるjsonの見本
+{
+  "macro_accuracy": 0.38721748069591116, # accuracyのマクロ平均
+  "macro_balanced_accuracy": 0.3709781734463517, # balanced accuracyのマクロ平均
+  "jamp_balanced_accuracy": 0.33338203779466197, # 個別データセットのbalanced accuracy
+  ...
+}
+```
+
+* 多数の`output_eval.json`を一括で処理する場合は `./scripts/batch_re_evaluate_nli_task.sh` を実行してください．  
+  ただし find コマンドの対象パスをあなたのフォルダ構造に合わせて書き換えて使ってください．  
+  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます．
+
 ## xlsum（自動要約）のタスクで評価
 
 ```
