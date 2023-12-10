@@ -108,7 +108,15 @@ python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存�
 
 * 多数の`output_eval.json`を一括で処理する場合は `./scripts/batch_re_evaluate_nli_task.sh` を実行してください．  
   ただし find コマンドの対象パスをあなたのフォルダ構造に合わせて書き換えて使ってください．  
-  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます．
+  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます．  
+* ndjsonファイルをtsv形式に変換したい場合は jq を使うとよいでしょう．  
+
+```
+# ヘッダ行の生成
+head -n 1 {ndjsonファイル} | jq -r 'first | keys_unsorted | @tsv' > output.tsv
+# 各行のデータの生成
+cat {ndjsonファイル} | jq -r '[.[]] | @tsv' >> output.tsv
+```
 
 ## xlsum（自動要約）のタスクで評価
 
