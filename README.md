@@ -113,7 +113,7 @@ python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存�
 
 ```
 # ヘッダ行の生成
-head -n 1 {ndjsonファイル} | jq -r 'first | keys_unsorted | @tsv' > output.tsv
+head -n 1 {ndjsonファイル} | jq -r 'keys_unsorted | @tsv' > output.tsv
 # 各行のデータの生成
 cat {ndjsonファイル} | jq -r '[.[]] | @tsv' >> output.tsv
 ```
