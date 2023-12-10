@@ -99,6 +99,7 @@ python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存�
 
 # 出力されるjsonの見本
 {
+  "input_path": "{入力したoutput_eval.jsonのパス}",
   "macro_accuracy": 0.38721748069591116, # accuracyのマクロ平均
   "macro_balanced_accuracy": 0.3709781734463517, # balanced accuracyのマクロ平均
   "jamp_balanced_accuracy": 0.33338203779466197, # 個別データセットのbalanced accuracy
