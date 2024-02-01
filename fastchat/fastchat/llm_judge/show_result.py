@@ -7,6 +7,9 @@ import pandas as pd
 import json
 
 
+CATEGORIES = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
+
+
 def display_result_single(args):
     if args.input_file is None:
         if args.azure:
@@ -22,7 +25,8 @@ def display_result_single(args):
 
     print(f"Input file: {input_file}")
     df_all = pd.read_json(input_file, lines=True)
-    df = df_all[["model", "score", "turn"]]
+    df_all["category"] = df_all["question_id"].apply(lambda x: CATEGORIES[(x - 81) // 10])
+    df = df_all[["model", "score", "turn", "category"]]
     df = df[df["score"] != -1]
 
     if args.model_list is not None:
@@ -32,24 +36,28 @@ def display_result_single(args):
     for model_id in args.model_list:
         result[model_id] = dict()
 
-    print("\n########## First turn ##########")
-    df_1 = df[df["turn"] == 1].groupby(["model", "turn"]).mean()
-    print(df_1.sort_values(by="score", ascending=False))
-    for model_id in args.model_list:
-        result[model_id]["first_turn"] = float(df_1.loc[model_id]["score"].item())
-
-    if args.bench_name == "mt_bench" or args.bench_name == "japanese_mt_bench":
-        print("\n########## Second turn ##########")
-        df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
-        print(df_2.sort_values(by="score", ascending=False))
+    def score_category(category):
+        if category != "overall":
+            df_cat = df[df["category"] == category][["model", "score", "turn"]]
+        else:
+            df_cat = df[["model", "score", "turn"]]
+        df_1 = df_cat[df_cat["turn"] == 1].groupby(["model", "turn"]).mean()
+        print(df_1.sort_values(by="score", ascending=False))
         for model_id in args.model_list:
-            result[model_id]["second_turn"] = float(df_2.loc[model_id]["score"].item())
+            result[model_id][category] = dict()
+            result[model_id][category]["first_turn"] = float(df_1.loc[model_id]["score"].item())
+        if args.bench_name == "mt_bench" or args.bench_name == "japanese_mt_bench":
+            df_2 = df_cat[df_cat["turn"] == 2].groupby(["model", "turn"]).mean()
+            print(df_2.sort_values(by="score", ascending=False))
+            for model_id in args.model_list:
+                result[model_id][category]["second_turn"] = float(df_2.loc[model_id]["score"].item())
+            df_3 = df_cat[["model", "score"]].groupby(["model"]).mean()
+            print(df_3.sort_values(by="score", ascending=False))
+            for model_id in args.model_list:
+                result[model_id][category]["average"] = float(df_3.loc[model_id]["score"].item())
 
-        print("\n########## Average ##########")
-        df_3 = df[["model", "score"]].groupby(["model"]).mean()
-        print(df_3.sort_values(by="score", ascending=False))
-        for model_id in args.model_list:
-            result[model_id]["average"] = float(df_3.loc[model_id]["score"].item())
+    for category in ["overall"] + CATEGORIES:
+        score_category(category)
 
     if args.output_file is not None:
         with open(args.output_file, "w") as f:
@@ -147,6 +155,8 @@ if __name__ == "__main__":
         "--azure", action="store_true", help="Did you use Azure API instead of openai when generating the judgment?", default=True
     )
     args = parser.parse_args()
+
+    args.model_list = [model_name.replace("/", "_") for model_name in args.model_list]
 
     if args.mode == "single":
         display_result_func = display_result_single
