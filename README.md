@@ -179,6 +179,7 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH
 結果は
 `results/${MODEL_PATH}/ja/ja_mt_bench/`
 に保存される。
+* GPT-4を呼び出すためお金がかかるので注意が必要。
 
 # 英語の評価
 * `llm-evaluation-harness` を採用
