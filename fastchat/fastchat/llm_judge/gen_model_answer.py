@@ -277,6 +277,8 @@ if __name__ == "__main__":
 
         ray.init()
 
+    args.model_id = args.model_id.replace("/", "_")
+
     question_file = f"data/{args.bench_name}/question.jsonl"
     if args.answer_file:
         answer_file = args.answer_file

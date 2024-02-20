@@ -212,6 +212,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    args.model_list = [model_path.replace("/", "_") for model_path in args.model_list]
+
     question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"
     ref_answer_dir = f"data/{args.bench_name}/reference_answer"
