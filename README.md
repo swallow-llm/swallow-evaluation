@@ -40,10 +40,26 @@ pip install sentencepiece
 pip install protobuf
 ```
 
+`jalm-evaluation-private/`にて
+```bash
+source .venv_fastchat/bin/activate
+cd fastchat
+pip install -U pip
+# 環境にあったtorchをinstall
+pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install python-dotenv pandas
+pip install -e ".[model_worker,llm_judge]"
+```
+`jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
+```
+AZURE_OPENAI_KEY=...
+AZURE_OPENAI_ENDPOINT=...
+```
+
 # 日本語の評価
-* `llm-jp-eval` および `JP LM Evaluation Harness` の一部を採用
+* `llm-jp-eval`, `lm-sys/FastChat`,および `JP LM Evaluation Harness` の一部を採用
     * 多肢選択・自然言語推論・質問応答・文書読解・数学
-    * 生成タスク: XLSum, WMT20-en-ja, WMT20-ja-en
+    * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en
 
 ## llm-jp-eval データセットの前処理
 * まず[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする  
@@ -152,6 +168,15 @@ $NUM_TESTCASE
 
 結果は
 `results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
+に保存される。
+
+## fastchat(mt_bench)の評価の実行
+```bash
+bash scripts/ja_mt_bench.sh $MODEL_PATH
+```
+
+結果は
+`results/${MODEL_PATH}/ja/ja_mt_bench/`
 に保存される。
 
 # 英語の評価
