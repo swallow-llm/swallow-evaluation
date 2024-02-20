@@ -69,6 +69,7 @@ def display_result_single(args):
             ]
         )
 
+
     if args.output_file is not None:
         with open(args.output_file, "w") as f:
             json.dump(result, f, indent=4)
