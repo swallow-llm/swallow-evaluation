@@ -13,6 +13,7 @@
 python -m venv .venv_llm_jp_eval
 python -m venv .venv_harness_jp
 python -m venv .venv_harness_en
+python -m venv .venv_fastchat
 ```
 `jalm-evaluation-private/`にて
 ```
