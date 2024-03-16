@@ -141,6 +141,22 @@ class Conversation:
                 else:
                     ret += tag
             return ret
+        elif self.sep_style == SeparatorStyle.SWALLOW:
+            seps = [self.sep, self.sep2]
+            if self.system_message:
+                ret = system_prompt
+            else:
+                ret = "[INST] "
+            for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
+                if message:
+                    if i == 0:
+                        ret += message + " "
+                    else:
+                        ret += tag + message + seps[i % 2]
+                else:
+                    ret += tag
+            return ret
         elif self.sep_style == SeparatorStyle.CHATGLM:
             # source: https://huggingface.co/THUDM/chatglm-6b/blob/1d240ba371910e9282298d4592532d7f0f3e9f3e/modeling_chatglm.py#L1302-L1308
             # source2: https://huggingface.co/THUDM/chatglm2-6b/blob/e186c891cf64310ac66ef10a87e6635fa6c2a579/modeling_chatglm.py#L926
@@ -245,14 +261,6 @@ class Conversation:
                     ret += role + ": " + message + seps[i % 2]
                 else:
                     ret += role + ":"
-            return ret
-        elif self.sep_style == SeparatorStyle.SWALLOW:
-            ret = system_prompt + self.sep
-            for role, message in self.messages:
-                if message:
-                    ret += role + ": \n" + message + self.sep
-                else:
-                    ret += role + ": \n"
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
@@ -1459,6 +1467,22 @@ register_conv_template(
 
 
 # Swallow default template
+# reference: https://huggingface.co/tokyotech-llm/Swallow-7b-VE-instruct-v1.0-baseline-lr_2e-5-minlr_2e-6-iter0002430/blob/main/tokenizer_config.json#L12
+register_conv_template(
+    Conversation(
+        name="swallow",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="あなたは誠実で優秀な日本人のアシスタントです。",
+        roles=("[INST] ", "[/INST]"),
+        sep_style=SeparatorStyle.SWALLOW,
+        sep=" ",
+        sep2="</s>"
+    )
+)
+
+# 以前のテンプレート(もう使わない)
+"""
+# Swallow default template
 # source: https://huggingface.co/tokyotech-llm/Swallow-70b-instruct-hf
 register_conv_template(
     Conversation(
@@ -1470,10 +1494,10 @@ register_conv_template(
         offset=0,
         sep_style=SeparatorStyle.SWALLOW,
         sep="\n\n### ",
-        stop_str="<|endoftext|>",
         stop_token_ids=[3],
     )
 )
+"""
 
 if __name__ == "__main__":
     from fastchat.conversation import get_conv_template
@@ -1521,8 +1545,8 @@ if __name__ == "__main__":
 
     print("Swallow template:")
     conv = get_conv_template("swallow")
-    conv.append_message(conv.roles[0], "こんにちは。")
-    conv.append_message(conv.roles[1], "こんにちは！")
-    conv.append_message(conv.roles[0], "日本で一番高い山は？")
+    conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
+    conv.append_message(conv.roles[1], "元気です、ありがとう。")
+    conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
