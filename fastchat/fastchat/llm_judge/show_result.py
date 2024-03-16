@@ -59,16 +59,11 @@ def display_result_single(args):
     for category in ["overall"] + CATEGORIES:
         score_category(category)
 
-    # 各カテゴリのaverageのスコアをコンマで区切って"all"に入れる, 小数点は第４位まで
+    # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
-        result[model_id]["all"] = dict()
-        result[model_id]["all"]["average"] = ",".join(
-            [
-                f"{(result[model_id][category]['average'])/10:.4f}"
-                for category in ["overall"] + CATEGORIES
-            ]
+        result[model_id]["result"] = ",".join(
+            [f"{(result[model_id][category]['average'] / 10):.4f}" for category in ["overall"] + CATEGORIES]
         )
-
 
     if args.output_file is not None:
         with open(args.output_file, "w") as f:
