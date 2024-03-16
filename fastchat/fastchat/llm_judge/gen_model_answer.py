@@ -106,12 +106,14 @@ def get_model_answers(
             torch.manual_seed(i)
             conv = get_conversation_template(model_id)
             turns = []
+            prompts = []
             for j in range(len(question["turns"])):
                 qs = question["turns"][j]
                 conv.append_message(conv.roles[0], qs)
                 conv.append_message(conv.roles[1], None)
                 prompt = conv.get_prompt()
                 input_ids = tokenizer([prompt]).input_ids
+                prompts.append(prompt)
 
                 if temperature < 1e-4:
                     do_sample = False
@@ -175,7 +177,7 @@ def get_model_answers(
                 conv.update_last_message(output)
                 turns.append(output)
 
-            choices.append({"index": i, "turns": turns})
+            choices.append({"index": i, "turns": turns, "prompts": prompts})
 
         # Dump answers
         os.makedirs(os.path.dirname(answer_file), exist_ok=True)
