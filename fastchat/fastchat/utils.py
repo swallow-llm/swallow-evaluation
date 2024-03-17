@@ -10,7 +10,10 @@ import platform
 import sys
 from typing import AsyncGenerator, Generator
 import warnings
+import random
 
+import torch
+import numpy as np
 import requests
 
 from fastchat.constants import LOGDIR
@@ -349,3 +352,13 @@ def str_to_torch_dtype(dtype: str):
         return torch.bfloat16
     else:
         raise ValueError(f"Unrecognized dtype: {dtype}")
+
+
+def set_seed(seed: int) -> None:
+    # Set the seeds for reproducibility
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False

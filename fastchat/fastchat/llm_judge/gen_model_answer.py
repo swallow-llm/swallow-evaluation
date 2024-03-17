@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 from fastchat.llm_judge.common import load_questions, temperature_config
 from fastchat.model import load_model, get_conversation_template
-from fastchat.utils import str_to_torch_dtype
+from fastchat.utils import str_to_torch_dtype, set_seed
 
 
 def run_eval(
@@ -112,8 +112,8 @@ def get_model_answers(
                 conv.append_message(conv.roles[0], qs)
                 conv.append_message(conv.roles[1], None)
                 prompt = conv.get_prompt()
-                input_ids = tokenizer([prompt]).input_ids
                 prompts.append(prompt)
+                input_ids = tokenizer([prompt]).input_ids
 
                 if temperature < 1e-4:
                     do_sample = False
@@ -271,6 +271,12 @@ if __name__ == "__main__":
         default="main",
         help="The model revision to load.",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=14,
+        help="Random seed for reproducibility.",
+    )
 
     args = parser.parse_args()
 
@@ -288,6 +294,9 @@ if __name__ == "__main__":
         answer_file = f"data/{args.bench_name}/model_answer/{args.model_id}.jsonl"
 
     print(f"Output to {answer_file}")
+
+    print(f"Set random seed to {args.seed}")
+    set_seed(args.seed)
 
     run_eval(
         model_path=args.model_path,
