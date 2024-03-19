@@ -2175,7 +2175,7 @@ class SwallowAdapter(BaseModelAdapter):
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(
-            model_path, low_cpu_mem_usage=True, device_map="auto", **from_pretrained_kwargs,
+            model_path, **from_pretrained_kwargs,
         )
         return model, tokenizer
 
