@@ -173,7 +173,7 @@ $NUM_TESTCASE
 
 ## fastchat(mt_bench)の評価の実行
 ```bash
-bash scripts/ja_mt_bench.sh $MODEL_PATH
+bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
 結果は
