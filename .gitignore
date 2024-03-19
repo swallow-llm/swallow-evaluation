@@ -1,0 +1,5 @@
+.venv*/
+lm_cache/
+results/
+outputs/
+.env
