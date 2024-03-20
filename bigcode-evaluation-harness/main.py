@@ -340,7 +340,8 @@ def main():
                 tokenizer.eos_token = tokenizer.bos_token
                 print("bos_token used as eos_token")
             else:
-                raise ValueError("No eos_token or bos_token found")
+                if "Qwen" not in args.model:
+                    raise ValueError("No eos_token or bos_token found")
         try:
             tokenizer.pad_token = tokenizer.eos_token
 
@@ -357,6 +358,8 @@ def main():
             tokenizer.bos_token = "<s>"
             tokenizer.bos_token_id = 1
             print("Changing bos_token to <s>")
+        if "Qwen" in args.model:
+            tokenizer.pad_token = "<|endoftext|>"
 
         evaluator = Evaluator(accelerator, model, tokenizer, args)
 
