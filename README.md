@@ -13,6 +13,7 @@
 python -m venv .venv_llm_jp_eval
 python -m venv .venv_harness_jp
 python -m venv .venv_harness_en
+python -m venv .venv_bigcode
 python -m venv .venv_fastchat
 ```
 `jalm-evaluation-private/`にて
@@ -40,6 +41,15 @@ pip install -e .
 pip install sentencepiece
 pip install protobuf
 ```
+`jalm-evaluation-private/`にて
+```bash
+source .venv_bigcode/bin/activate
+cd bigcode-evaluation-harness
+# 環境にあったtorchをインストール
+pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install -e .
+```
+bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
 `jalm-evaluation-private/`にて
 ```bash
@@ -58,9 +68,10 @@ AZURE_OPENAI_ENDPOINT=...
 ```
 
 # 日本語の評価
-* `llm-jp-eval`, `lm-sys/FastChat`,および `JP LM Evaluation Harness` の一部を採用
+* `llm-jp-eval` , `bigcode-evaluation-harness`, `lm-sys/FastChat`, および `JP LM Evaluation Harness` の一部を採用
     * 多肢選択・自然言語推論・質問応答・文書読解・数学
-    * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en
+    * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
+
 
 ## llm-jp-eval データセットの前処理
 * まず[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする  
@@ -171,6 +182,27 @@ $NUM_TESTCASE
 `results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
 に保存される。
 
+## Humanevalのタスクで評価
+
+データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
+
+### 出力の生成
+
+```bash
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH
+```
+
+### 評価 (未整備)
+
+通常の環境でモデルが生成したコードを実行することは危険なので、docker環境下でコードを実行し、評価する。
+
+```bash
+cd bigcode-evaluation-harness
+bash eval_ja.sh $MODEL_PATH
+```
+
+* 結果の保存はされないので目視で確認してください（整備中です）
+
 ## fastchat(mt_bench)の評価の実行
 ```bash
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
@@ -182,6 +214,8 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 * GPT-4を呼び出すためお金がかかるので注意が必要。
 
 # 英語の評価
+
+## `llm-evaluation-harness`での評価
 * `llm-evaluation-harness` を採用
     * 常識推論: HellaSwag, WinoGrande, OpenBookQA
     * 世界知識: TriviaQA
@@ -196,6 +230,26 @@ $NUM_FEWSHOT \
 $NUM_TESTCASE
 ```
 全テストケースで評価する場合は、`evaluate_english.sh`内の`--limit`を消してください。
+
+## Humanevalのタスクで評価
+
+### 出力の生成
+
+```bash
+bash scripts/evaluate_en_humaneval.sh $MODEL_PATH
+```
+
+### 評価 (未整備)
+
+通常の環境でモデルが生成したコードを実行することは危険なので、docker環境下でコードを実行し、評価する。
+
+```bash
+cd bigcode-evaluation-harness
+bash eval_en.sh $MODEL_PATH
+```
+
+* 結果の保存はされないので目視で確認してください（整備中です）
+
 
 # ABCI上
 * `rt_AG.small=1` と `rt_AF=1` で全タスク全テストケースで評価するスクリプトは `scripts/abci/rt_{AGsmall,AF}/qsub_all.sh` です。
