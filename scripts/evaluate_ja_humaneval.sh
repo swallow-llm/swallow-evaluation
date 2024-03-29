@@ -10,7 +10,8 @@ OUTDIR="results/${MODEL_NAME_PATH}/ja/humaneval"
 
 mkdir -p $OUTDIR
 
-accelerate launch bigcode-evaluation-harness/main.py \
+#accelerate launch bigcode-evaluation-harness/main.py \
+python bigcode-evaluation-harness/main.py \
   --model ${MODEL_NAME_PATH} \
   --tasks jhumaneval \
   --do_sample True \
@@ -20,4 +21,7 @@ accelerate launch bigcode-evaluation-harness/main.py \
   --save_generations \
   --generation_only \
   --save_generations_path ${OUTDIR}/generation.json \
-  --use_auth_token
+  --use_auth_token \
+  --max_memory_per_gpu auto \
+  --trust_remote_code \
+  --max_length_generation 1024
