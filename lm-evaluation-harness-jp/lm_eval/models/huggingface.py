@@ -177,6 +177,10 @@ class HuggingFaceAutoLM(BaseLM):
             revision=revision + ("/" + subfolder if subfolder is not None else ""),
         )
 
+        # Adjust max_position_embeddings to 4096 to avoid out-of-memory issues in XLSUM tasks
+        if self._config.max_position_embeddings > 4096:
+            self._config.max_position_embeddings = 4096
+
         self._add_special_tokens = add_special_tokens
         self.tokenizer = self._create_auto_tokenizer(
             pretrained=pretrained,

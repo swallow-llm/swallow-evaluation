@@ -14,6 +14,7 @@ python -m venv .venv_llm_jp_eval
 python -m venv .venv_harness_jp
 python -m venv .venv_harness_en
 python -m venv .venv_bigcode
+python -m venv .venv_fastchat
 ```
 `jalm-evaluation-private/`にて
 ```
@@ -50,10 +51,27 @@ pip install -e .
 ```
 bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
+`jalm-evaluation-private/`にて
+```bash
+source .venv_fastchat/bin/activate
+cd fastchat
+pip install -U pip
+# 環境にあったtorchをinstall
+pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install python-dotenv pandas
+pip install -e ".[model_worker,llm_judge]"
+```
+`jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
+```
+AZURE_OPENAI_KEY=...
+AZURE_OPENAI_ENDPOINT=...
+```
+
 # 日本語の評価
-* `llm-jp-eval` , `bigcode-evaluation-harness`, および `JP LM Evaluation Harness` の一部を採用
+* `llm-jp-eval` , `bigcode-evaluation-harness`, `lm-sys/FastChat`, および `JP LM Evaluation Harness` の一部を採用
     * 多肢選択・自然言語推論・質問応答・文書読解・数学
-    * 生成タスク: XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
+    * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
+
 
 ## llm-jp-eval データセットの前処理
 * まず[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする  
@@ -184,6 +202,16 @@ bash eval_ja.sh $MODEL_PATH
 ```
 
 * 結果の保存はされないので目視で確認してください（整備中です）
+
+## fastchat(mt_bench)の評価の実行
+```bash
+bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
+```
+
+結果は
+`results/${MODEL_PATH}/ja/ja_mt_bench/`
+に保存される。
+* GPT-4を呼び出すためお金がかかるので注意が必要。
 
 # 英語の評価
 
