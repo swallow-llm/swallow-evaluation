@@ -48,6 +48,9 @@ cd bigcode-evaluation-harness
 # 環境にあったtorchをインストール
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install -e .
+# For Llama
+pip install sentencepiece
+pip install protobuf
 ```
 bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
