@@ -1,5 +1,5 @@
 #!/bin/bash
-#YBATCH -r a100_1
+#YBATCH -r a100_4
 #SBATCH --nodes 1
 #SBATCH -J en_human_eval
 #SBATCH --time=168:00:00
@@ -22,15 +22,11 @@ source .venv_bigcode/bin/activate
 MODEL_NAME_PATH=$1
 NUM_SAMPLES=$2
 BATCH_SIZE=1
-OUTDIR="results/${MODEL_NAME_PATH}/ja/humaneval"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/humaneval_${NUM_SAMPLES}NUM_SAMPLES_${BATCH_SIZE}BATCH_SIZE"
 
 mkdir -p $OUTDIR
 
-export MASTER_ADDR=$(/usr/sbin/ip a show | grep inet | grep 192.168.205 | head -1 | cut -d " " -f 6 | cut -d "/" -f 1)
-export MASTER_PORT=$((10000 + ($SLURM_JOBID % 50000)))
-export NNODES=1
-export WORLD_SIZE=1
-accelerate launch bigcode-evaluation-harness/main.py \
+python bigcode-evaluation-harness/main.py \
   --model ${MODEL_NAME_PATH} \
   --tasks jhumaneval \
   --do_sample True \
@@ -40,5 +36,7 @@ accelerate launch bigcode-evaluation-harness/main.py \
   --save_generations \
   --generation_only \
   --save_generations_path ${OUTDIR}/generation.json \
+  --max_memory_per_gpu auto \
+  --precision bf16 \
 
 echo "Done!"
