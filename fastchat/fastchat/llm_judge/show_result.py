@@ -2,24 +2,30 @@
 Usage:
 python3 show_result.py --mode [single|pairwise-baseline|pairwise-all]
 """
+
 import argparse
 import pandas as pd
 import json
+import numpy as np
 
 
 CATEGORIES = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
 
 
+def calculate_averages(scores):
+    # scores: [N, T], N: 設問数, T: ターン数(5)
+    scores = np.array(list(scores))
+    question_mean = np.mean(scores, axis=0)
+    mu = np.mean(question_mean)
+    sigma = np.std(question_mean, ddof=1)
+    return mu, sigma
+
 def display_result_single(args):
     if args.input_file is None:
         if args.azure:
-            input_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_single_azure.jsonl"
-            )
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_single_azure.jsonl"
         else:
-            input_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
-            )
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
     else:
         input_file = args.input_file
 
@@ -27,7 +33,6 @@ def display_result_single(args):
     df_all = pd.read_json(input_file, lines=True)
     df_all["category"] = df_all["question_id"].apply(lambda x: CATEGORIES[(x - 81) // 10])
     df = df_all[["model", "score", "turn", "category"]]
-    df = df[df["score"] != -1]
 
     if args.model_list is not None:
         df = df[df["model"].isin(args.model_list)]
@@ -41,28 +46,38 @@ def display_result_single(args):
             df_cat = df[df["category"] == category][["model", "score", "turn"]]
         else:
             df_cat = df[["model", "score", "turn"]]
-        df_1 = df_cat[df_cat["turn"] == 1].groupby(["model", "turn"]).mean()
-        print(df_1.sort_values(by="score", ascending=False))
+        df_1 = df_cat[df_cat["turn"] == 1].groupby("model")["score"].apply(calculate_averages)
+        print(df_1)
         for model_id in args.model_list:
             result[model_id][category] = dict()
-            result[model_id][category]["first_turn"] = float(df_1.loc[model_id]["score"].item())
+            result[model_id][category]["first_turn"] = dict()
+            result[model_id][category]["first_turn"]["score"] = float(df_1.loc[model_id][0])
+            result[model_id][category]["first_turn"]["new_variance"] = float(df_1.loc[model_id][1])
         if args.bench_name == "mt_bench" or args.bench_name == "japanese_mt_bench":
-            df_2 = df_cat[df_cat["turn"] == 2].groupby(["model", "turn"]).mean()
-            print(df_2.sort_values(by="score", ascending=False))
+            df_2 = df_cat[df_cat["turn"] == 2].groupby("model")["score"].apply(calculate_averages)
+            print(df_2)
             for model_id in args.model_list:
-                result[model_id][category]["second_turn"] = float(df_2.loc[model_id]["score"].item())
-            df_3 = df_cat[["model", "score"]].groupby(["model"]).mean()
-            print(df_3.sort_values(by="score", ascending=False))
+                result[model_id][category]["second_turn"] = dict()
+                result[model_id][category]["second_turn"]["score"] = float(df_2.loc[model_id][0])
+                result[model_id][category]["second_turn"]["new_variance"] = float(df_2.loc[model_id][1])
+            df_3 = df_cat.groupby("model")["score"].apply(calculate_averages)
+            print(df_3)
             for model_id in args.model_list:
-                result[model_id][category]["average"] = float(df_3.loc[model_id]["score"].item())
+                result[model_id][category]["average"] = dict()
+                result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
+                result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
 
     for category in ["overall"] + CATEGORIES:
         score_category(category)
 
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
-        result[model_id]["result"] = ",".join(
-            [f"{(result[model_id][category]['average'] / 10):.4f}" for category in ["overall"] + CATEGORIES]
+        result[model_id]["result"] = dict()
+        result[model_id]["result"]["score"] = ",".join(
+            [f"{(result[model_id][category]['average']['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES]
+        )
+        result[model_id]["result"]["new_variance"] = ",".join(
+            [f"{result[model_id][category]['average']['new_variance']:.4f}" for category in ["overall"] + CATEGORIES]
         )
 
     if args.output_file is not None:
@@ -73,13 +88,9 @@ def display_result_single(args):
 def display_result_pairwise(args):
     if args.input_file is None:
         if args.azure:
-            input_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair_azure.jsonl"
-            )
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair_azure.jsonl"
         else:
-            input_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
-            )
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
     else:
         input_file = args.input_file
 
@@ -87,9 +98,7 @@ def display_result_pairwise(args):
     df_all = pd.read_json(input_file, lines=True)
     df_all = df_all[(df_all["g1_winner"] != "error") & (df_all["g2_winner"] != "error")]
 
-    model_list = (
-        df_all["model_1"].unique().tolist() + df_all["model_2"].unique().tolist()
-    )
+    model_list = df_all["model_1"].unique().tolist() + df_all["model_2"].unique().tolist()
     model_list = list(set(model_list))
 
     list_res = []
@@ -123,11 +132,7 @@ def display_result_pairwise(args):
     df["win_rate"] = df["win"] / (df["win"] + df["loss"] + df["tie"])
     df["loss_rate"] = df["loss"] / (df["win"] + df["loss"] + df["tie"])
     # each tie counts as 0.5 win + 0.5 loss
-    df["win_rate_adjusted"] = (df["win"] + 0.5 * df["tie"]) / (
-        df["win"] + df["loss"] + df["tie"]
-    )
-    # print(df.sort_values(by="win_rate", ascending=False))
-    # print(df.sort_values(by="loss_rate", ascending=True))
+    df["win_rate_adjusted"] = (df["win"] + 0.5 * df["tie"]) / (df["win"] + df["loss"] + df["tie"])
     print(df.sort_values(by="win_rate_adjusted", ascending=False))
 
 
@@ -158,7 +163,10 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
-        "--azure", action="store_true", help="Did you use Azure API instead of openai when generating the judgment?", default=True
+        "--azure",
+        action="store_true",
+        help="Did you use Azure API instead of openai when generating the judgment?",
+        default=True,
     )
     args = parser.parse_args()
 
