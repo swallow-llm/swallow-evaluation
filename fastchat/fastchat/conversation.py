@@ -32,6 +32,8 @@ class SeparatorStyle(IntEnum):
     DEEPSEEK_CHAT = auto()
     METAMATH = auto()
     SWALLOW = auto()
+    CALM2 = auto()
+    STABLELM_GAMMA = auto()
 
 
 @dataclasses.dataclass
@@ -261,6 +263,22 @@ class Conversation:
                     ret += role + ": " + message + seps[i % 2]
                 else:
                     ret += role + ":"
+            return ret
+        elif self.sep_style == SeparatorStyle.CALM2:
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += role + message + self.sep
+                else:
+                    ret += role
+            return ret
+        elif self.sep_style == SeparatorStyle.STABLELM_GAMMA:
+            ret = system_prompt
+            for role, message in self.messages:
+                if message:
+                    ret += self.sep + role + self.sep2 + message
+                else:
+                    ret += self.sep + role + self.sep2
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
@@ -1480,7 +1498,86 @@ register_conv_template(
     )
 )
 
-# 以前のテンプレート(もう使わない)
+# japanese-stablelm-instrcut-beta default template
+# reference: https://huggingface.co/stabilityai/japanese-stablelm-instruct-beta-70b
+register_conv_template(
+    Conversation(
+        name="japanese-stablelm-instruct-beta",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="あなたは役立つアシスタントです。",
+        roles=("[INST] ", "[/INST]"),
+        sep_style=SeparatorStyle.SWALLOW,
+        sep=" ",
+        sep2="</s>"
+    )
+)
+
+# ELYZA-japanese-Llama-2 default template
+# reference: https://huggingface.co/elyza/ELYZA-japanese-Llama-2-13b-instruct
+register_conv_template(
+    Conversation(
+        name="ELYZA-japanese-Llama-2",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="あなたは誠実で優秀な日本人のアシスタントです。",
+        roles=("[INST] ", "[/INST]"),
+        sep_style=SeparatorStyle.SWALLOW,
+        sep=" ",
+        sep2="</s>"
+    )
+)
+
+# calm2 template
+# reference: https://huggingface.co/cyberagent/calm2-7b-chat
+register_conv_template(
+    Conversation(
+        name="calm2",
+        roles=("USER: ", "ASSISTANT: "),
+        sep_style=SeparatorStyle.CALM2,
+        sep="\n",
+    )
+)
+
+# RakutenAI template
+# reference: https://huggingface.co/Rakuten/RakutenAI-7B-instruct
+register_conv_template(
+    Conversation(
+        name="RakutenAI",
+        system_template="{system_message}",
+        system_message="A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. ",
+        roles=("USER: ", "ASSISTANT: "),
+        sep_style=SeparatorStyle.CALM2,
+        sep=" ",
+    )
+)
+
+# nekomata template
+# reference: https://huggingface.co/rinna/nekomata-7b-instruction
+register_conv_template(
+    Conversation(
+        name="nekomata",
+        system_template="{system_message}",
+        system_message="以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。\n\n###指示:\n入力文に対して、適切な応答を生成してください。\n\n",
+        roles=("### 入力:", "### 応答:"),
+        sep_style=SeparatorStyle.CALM2,
+        sep="\n\n",
+    )
+)
+
+# japanese-stablelm-instruct-gamma template
+# reference: https://huggingface.co/stabilityai/japanese-stablelm-instruct-gamma-7b
+register_conv_template(
+    Conversation(
+        name="japanese-stablelm-instruct-gamma",
+        system_template="{system_message}",
+        system_message="以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。",
+        roles=("指示", "応答"),
+        sep_style=SeparatorStyle.STABLELM_GAMMA,
+        sep="\n\n### ",
+        sep2=": \n",
+    )
+)
+
+# 以前のSwallowテンプレート(もう使わない)
 """
 # Swallow default template
 # source: https://huggingface.co/tokyotech-llm/Swallow-70b-instruct-hf
@@ -1543,8 +1640,8 @@ if __name__ == "__main__":
 
     print("\n")
 
-    print("Swallow template:")
-    conv = get_conv_template("swallow")
+    print("Japaneselm template:")
+    conv = get_conv_template("japanese-stablelm-instruct-gamma")
     conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
     conv.append_message(conv.roles[1], "元気です、ありがとう。")
     conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
