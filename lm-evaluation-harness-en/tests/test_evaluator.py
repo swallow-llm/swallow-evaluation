@@ -1,70 +1,65 @@
-import os
-import lm_eval.base as base
-import lm_eval.tasks as tasks
-import lm_eval.models as models
-import lm_eval.evaluator as evaluator
-import random
+# import lm_eval.base as base
+from typing import List
+
 import pytest
+
+# import lm_eval.models as models
+import lm_eval.api as api
+import lm_eval.evaluator as evaluator
+from lm_eval import tasks
 
 
 # TODO: more fine grained unit tests rather than this big honking integration
 # test once we break evaluator into smaller, more manageable pieces
 
 
-@pytest.mark.parametrize("taskname,task_class", tasks.TASK_REGISTRY.items())
-def test_evaluator(taskname, task_class):
-    task_dict = tasks.get_task_dict([taskname])
-
-    os.system("rm test_cache.db")
-    lm = base.CachingLM(models.get_model("dummy")(), "test_cache.db")
-
-    def ll_fn(reqs):
-        for ctx, cont in reqs:
-            if len(ctx) == 0:
-                continue
-            # space convention
-            assert ctx[-1] != " "
-            assert cont[0] == " " or ctx[-1] == "\n"
-
-        res = []
-
-        random.seed(42)
-        for _ in reqs:
-            res.append((-random.random(), False))
-
-        return res
-
-    def ll_perp_fn(reqs):
-        for (string,) in reqs:
-            assert isinstance(string, str)
-
-        res = []
-        random.seed(42)
-        for _ in reqs:
-            res.append(-random.random())
-
-        return res
-
-    lm.loglikelihood = ll_fn
-    lm.loglikelihood_rolling = ll_perp_fn
-
+@pytest.mark.parametrize(
+    "task_name,limit,model,model_args",
+    [
+        (
+            ["arc_easy"],
+            10,
+            "hf",
+            "pretrained=EleutherAI/pythia-160m,dtype=float32,device=cpu",
+        )
+    ],
+)
+def test_evaluator(task_name: List[str], limit: int, model: str, model_args: str):
+    task_name = task_name
     limit = 10
-    e1 = evaluator.evaluate(
-        lm=lm,
-        task_dict=task_dict,
-        num_fewshot=0,
+
+    e1 = evaluator.simple_evaluate(
+        model=model,
+        tasks=task_name,
         limit=limit,
-        bootstrap_iters=10,
-        description_dict=None,
+        model_args=model_args,
     )
+    assert e1 is not None
+
+    lm = api.registry.get_model(model).create_from_arg_string(
+        model_args,
+        {
+            "batch_size": None,
+            "max_batch_size": None,
+            "device": None,
+        },
+    )
+    task_manager = tasks.TaskManager()
+    task_dict = tasks.get_task_dict(task_name, task_manager)
+
     e2 = evaluator.evaluate(
         lm=lm,
         task_dict=task_dict,
-        num_fewshot=0,
         limit=limit,
-        bootstrap_iters=10,
-        description_dict=None,
     )
 
+    assert e2 is not None
     # check that caching is working
-    assert e1 == e2
+
+    def r(x):
+        return x["results"]["arc_easy"]
+
+    assert all(
+        x == y
+        for x, y in zip([y for _, y in r(e1).items()], [y for _, y in r(e2).items()])
+    )
