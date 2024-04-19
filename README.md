@@ -3,45 +3,64 @@
 英語の事前学習済み大規模言語モデルから継続学習されたモデルの評価。
 
 評価軸：
+
 * 日本語能力が改善されるか？
 * 英語能力が維持されるか？
 
 # 準備：環境構築
+
 各フレームワークに対し、別々の仮想環境を用意することを推奨します
 
-```
+```bash
 python -m venv .venv_llm_jp_eval
 python -m venv .venv_harness_jp
 python -m venv .venv_harness_en
 python -m venv .venv_bigcode
 python -m venv .venv_fastchat
 ```
+
 `jalm-evaluation-private/`にて
-```
+
+```bash
 source .venv_llm_jp_eval/bin/activate
 cd llm-jp-eval
-pip install .
+pip install --upgrade pip
+pip install -e .
 pip install protobuf
 pip install sentencepiece
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
+
 `jalm-evaluation-private/`にて
-```
+
+```bash
 source .venv_harness_jp/bin/activate
 cd lm-evaluation-harness-jp
+pip install --upgrade pip
 pip install -e ".[ja]"
 pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
+
 `jalm-evaluation-private/`にて
-```
+
+```bash
 source .venv_harness_en/bin/activate
 cd lm-evaluation-harness-en
+pip install --upgrade pip
 pip install -e .
 pip install sentencepiece
 pip install protobuf
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
+
 `jalm-evaluation-private/`にて
+
 ```bash
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
@@ -52,9 +71,11 @@ pip install -e .
 pip install sentencepiece
 pip install protobuf
 ```
+
 bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
 `jalm-evaluation-private/`にて
+
 ```bash
 source .venv_fastchat/bin/activate
 cd fastchat
@@ -64,68 +85,60 @@ pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 ```
+
 `jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
-```
+
+```txt
 AZURE_OPENAI_KEY=...
 AZURE_OPENAI_ENDPOINT=...
 ```
 
 # 日本語の評価
-* `llm-jp-eval` , `bigcode-evaluation-harness`, `lm-sys/FastChat`, および `JP LM Evaluation Harness` の一部を採用
-    * 多肢選択・自然言語推論・質問応答・文書読解・数学
-    * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
 
+* `llm-jp-eval` , `bigcode-evaluation-harness`, `lm-sys/FastChat`, および `JP LM Evaluation Harness` の一部を採用
+  * 多肢選択・自然言語推論・質問応答・文書読解・数学
+  * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
 
 ## llm-jp-eval データセットの前処理
-* まず[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする  
-* つぎに (a)公式設定 または (b)NLIタスクを日本語化 のいずれかの設定を選んで、前処理を実行する。  
-  両者の違いは、NLIタスクのクラスラベルを(a)英語にするか または (b)日本語化するか である。  
-  日本語に特化したLLM、特に指示チューニングしていないLLMの性能を評価する場合は (b)のほうが適切ではないかという説がある。  
-  参考：[Stability AI 日本語大規模言語モデル「Japanese Stable LM Beta」シリーズをリリースしました](https://ja.stability.ai/blog/japanese-stable-lm-beta)
 
-```
-# (a)公式設定 の場合
-前提と仮説の関係をentailment、contradiction、neutralの中から回答してください。
-
-# (b)NLIタスクを日本語化 の場合
-前提と仮説の関係を含意、矛盾、中立の中から回答してください。
-```
+* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする
 
 ```bash
 cd llm-jp-eval
 
-# (a)公式設定 の場合
 python scripts/preprocess_dataset.py  \
 --dataset-name all  \
---output-dir ./datasets
-
-# (b)NLIタスクを日本語化 の場合
-python scripts/preprocess_dataset.py  \
---dataset-name all  \
---output-dir ./datasets_nli_localize \
---localize_nli_verbalizer
+--output-dir ./dataset
 ```
+
+MEMO: `preprocess_dataset.py`を実行した際、データセットのダウンロード中にサーバーとの接続エラーでプログラムが落ちることがかなりある。現状では我慢して複数回プログラムを実行しているが、解決できそうなら誰かしてください。
 
 ## llm-jp-eval 評価の実行
 
 `jalm-evaluation-private/`にて
 
 llm-jp-evalのタスクで評価
-```
+
+```bash
 bash scripts/evaluate_ja_llmjp.sh \
 $MODEL_PATH \
 $TOKENIZER_PATH \
-$NUM_FEWSHOT \
-$NUM_TESTCASE
 ```
-全テストケースで評価する場合は、NUM_TESTCASEを`-1`にしてください。
 
-### NLIタスクのbalanced accuracyを計算する
-* NLIタスクデータセット(`jamp,janli,jnli,jsem,jsick`)のbalanced accuracyを計算するには  
-  `./scripts/re_evaluate_nli_task.py` に `llm-jp-eval` が出力した `output_eval.json` を渡してください．  
-  計算結果はjson形式でstdoutに出力されます．  
+fewshot数は
 
-```
+* jmmlu: 5
+* その他(jamp, janli, jcommonsenseqa, jnli, jsem, jsick, jsquad, jsts, niilc): 4
+
+
+<details>
+<summary> NLIタスクのbalanced accuracyを計算する</summary>
+
+* NLIタスクデータセット(`jamp,janli,jnli,jsem,jsick`)のbalanced accuracyを計算するには
+  `./scripts/re_evaluate_nli_task.py` に `llm-jp-eval` が出力した `output_eval.json` を渡してください．
+  計算結果はjson形式でstdoutに出力されます．
+
+```txt
 python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存先のjsonファイルパス}
 
 # 出力されるjsonの見本
@@ -138,48 +151,42 @@ python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存�
 }
 ```
 
-* 多数の`output_eval.json`を一括で処理する場合は `./scripts/batch_re_evaluate_nli_task.sh` を実行してください．  
-  ただし find コマンドの対象パスをあなたのフォルダ構造に合わせて書き換えて使ってください．  
-  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます．  
-* ndjsonファイルをtsv形式に変換したい場合は jq を使うとよいでしょう．  
+* 多数の`output_eval.json`を一括で処理する場合は `./scripts/batch_re_evaluate_nli_task.sh` を実行してください．
+  ただし find コマンドの対象パスをあなたのフォルダ構造に合わせて書き換えて使ってください．
+  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます．
+* ndjsonファイルをtsv形式に変換したい場合は jq を使うとよいでしょう．
 
-```
+```bash
 # ヘッダ行の生成
 head -n 1 {ndjsonファイル} | jq -r 'keys_unsorted | @tsv' > output.tsv
 # 各行のデータの生成
 cat {ndjsonファイル} | jq -r '[.[]] | @tsv' >> output.tsv
 ```
+</details>
 
 ## xlsum（自動要約）のタスクで評価
 
+```bash
+bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
 ```
-bash scripts/evaluate_ja_xlsum.sh \
-$MODEL_PATH \
-$NUM_FEWSHOT \
-$NUM_TESTCASE
-```
-全テストケースで評価する場合は、`evaluate_ja_xlsum.sh`内の`--limit`を消してください。
 
+few-shot数: 1
 
 ## mgsm（数学）のタスクで評価
 
+```bash
+bash scripts/evaluate_ja_mgsm.sh $MODEL_PATH
 ```
-bash scripts/evaluate_ja_mgsm.sh \
-$MODEL_PATH \
-$NUM_FEWSHOT \
-$NUM_TESTCASE
-```
-全テストケースで評価する場合は、`evaluate_ja_mgsm.sh`内の`--limit`を消してください。
+
+few-shot数: 4
 
 ## WMT20（機械翻訳）のタスクで評価
 
+```bash
+bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 ```
-bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh \
-$MODEL_PATH \
-$NUM_FEWSHOT \
-$NUM_TESTCASE
-```
-全テストケースで評価する場合は、`evaluate_ja_wmt20_{enja,jaen}.sh`内の`--limit`を消してください。
+
+few-shot数: 4
 
 結果は
 `results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
@@ -195,6 +202,8 @@ $NUM_TESTCASE
 bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH
 ```
 
+few-shot数: 10
+
 ### 評価 (未整備)
 
 通常の環境でモデルが生成したコードを実行することは危険なので、docker環境下でコードを実行し、評価する。
@@ -205,34 +214,38 @@ bash eval_ja.sh $MODEL_PATH
 ```
 
 * 結果の保存はされないので目視で確認してください（整備中です）
+* dockerコンテナ内での出力をコンテナ外に保存すれば良いのですが、まだ実装していません。（誰か時間があったらやってください）
 
 ## fastchat(mt_bench)の評価の実行
+
 ```bash
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
+few-shot数: 0 (zero-shot)
+
 結果は
 `results/${MODEL_PATH}/ja/ja_mt_bench/`
 に保存される。
-* GPT-4を呼び出すためお金がかかるので注意が必要。
+
+**GPT-4を呼び出すためAPI料金がかかるので注意が必要。**
 
 # 英語の評価
 
 ## `llm-evaluation-harness`での評価
+
 * `llm-evaluation-harness` を採用
-    * 常識推論: HellaSwag, WinoGrande, OpenBookQA
-    * 世界知識: TriviaQA
-    * 文書読解: SQuAD
-    * 数学: GSM8K
+  * 常識推論: HellaSwag, WinoGrande, OpenBookQA
+  * 世界知識: TriviaQA
+  * 文書読解: SQuAD
+  * 数学: GSM8K
+  * 一般教養・学術知識: MMLU
 
 `jalm-evaluation-private/`にて
+
+```bash
+bash scripts/evaluate_english.sh $MODEL_PATH
 ```
-bash scripts/evaluate_english.sh \
-$MODEL_PATH \
-$NUM_FEWSHOT \
-$NUM_TESTCASE
-```
-全テストケースで評価する場合は、`evaluate_english.sh`内の`--limit`を消してください。
 
 ## Humanevalのタスクで評価
 
@@ -253,10 +266,10 @@ bash eval_en.sh $MODEL_PATH
 
 * 結果の保存はされないので目視で確認してください（整備中です）
 
-
 # ABCI上
-* `rt_AG.small=1` と `rt_AF=1` で全タスク全テストケースで評価するスクリプトは `scripts/abci/rt_{AGsmall,AF}/qsub_all.sh` です。
-`jalm-evaluation-private/`にて
-```
-bash scripts/abci/rt_{AGsmall,AF}/qsub_all.sh $MODEL_NAME_OR_PATH
-```
+
+整備中です。
+
+# TSUBAME4.0上
+
+整備中です。
