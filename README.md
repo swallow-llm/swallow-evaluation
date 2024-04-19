@@ -9,7 +9,9 @@
 
 # 準備：環境構築
 
-各フレームワークに対し、別々の仮想環境を用意することを推奨します
+各フレームワークに対し、別々の仮想環境を用意することを推奨します。
+
+Pythonのバージョンは3.9を使ってください。
 
 ```bash
 python -m venv .venv_llm_jp_eval
@@ -55,6 +57,10 @@ pip install --upgrade pip
 pip install -e .
 pip install sentencepiece
 pip install protobuf
+
+# accelerateの設定を行う。
+# Multi-GPUを行う場合は、基本的にNoを答え、最後にGPU数とdevice idを選択すれば良い。
+accelerate config
 ```
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
