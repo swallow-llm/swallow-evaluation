@@ -5,8 +5,8 @@ source .venv_harness_jp/bin/activate
 export TOKENIZERS_PARALLELISM=false
 
 MODEL_NAME_PATH=$1
-NUM_FEWSHOT=$2
-NUM_TESTCASE=$3
+NUM_FEWSHOT=4
+NUM_TESTCASE="all"
 
 OUTDIR="results/${MODEL_NAME_PATH}/ja/wmt20_ja_en_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 

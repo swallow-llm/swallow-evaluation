@@ -1,408 +1,375 @@
-from pprint import pprint
-from typing import List, Union
+import collections
+import logging
+import os
+from functools import partial
+from typing import Dict, List, Mapping, Optional, Union
 
-import sacrebleu
-import lm_eval.base
-
-from . import babi
-from . import superglue
-from . import glue
-from . import arc
-from . import coqa
-from . import race
-from . import webqs
-from . import anli
-from . import wsc273
-from . import winogrande
-from . import quac
-from . import hellaswag
-from . import swag
-from . import openbookqa
-from . import squad
-from . import naturalqs
-from . import nqopen
-from . import sat
-from . import arithmetic
-from . import lambada
-from . import piqa
-from . import prost
-from . import mc_taco
-from . import triviaqa
-from . import pubmedqa
-from . import sciq
-from . import qasper
-from . import qa4mre
-from . import translation
-from . import headqa
-from . import mathqa
-from . import hendrycks_ethics
-from . import drop
-from . import unscramble
-from . import logiqa
-from . import hendrycks_test
-from . import hendrycks_math
-from . import cbt
-from . import lambada_cloze
-from . import pile
-from . import wikitext
-from . import lambada_multilingual
-from . import mutual
-from . import truthfulqa
-from . import blimp
-from . import asdiv
-from . import gsm8k
-from . import storycloze
-from . import toxigen
-from . import crowspairs
-from . import json
-from . import xcopa
-from . import bigbench
-from . import xstorycloze
-from . import xwinograd
-from . import pawsx
-from . import xnli
-from . import mgsm
-from . import scrolls
-from . import ceval
-from . import csatqa
-from . import haerae
-from . import cmmlu
-
-########################################
-# Translation tasks
-########################################
-
-# 6 total
-gpt3_translation_benchmarks = {
-    "wmt14": ["en-fr", "fr-en"],  # French
-    "wmt16": ["en-ro", "ro-en", "de-en", "en-de"],  # German, Romanian
-}
+from lm_eval import utils
+from lm_eval.api.task import ConfigurableTask, Task
 
 
-# 28 total
-selected_translation_benchmarks = {
-    **gpt3_translation_benchmarks,
-    "wmt20": sacrebleu.get_langpairs_for_testset("wmt20"),
-    "iwslt17": ["en-ar", "ar-en"],  # Arabic
-}
+class TaskManager:
+    """TaskManager indexes all tasks from the default `lm_eval/tasks/`
+    and an optional directory if provided.
 
-# 319 total
-all_translation_benchmarks = {
-    ts: sacrebleu.get_langpairs_for_testset(ts)
-    for ts in sacrebleu.get_available_testsets()
-}
-
-
-########################################
-# All tasks
-########################################
-
-
-TASK_REGISTRY = {
-    "babi": babi.Babi,
-    # GLUE
-    "cola": glue.CoLA,
-    "mnli": glue.MNLI,
-    "mnli_mismatched": glue.MNLIMismatched,
-    "mrpc": glue.MRPC,
-    "rte": glue.RTE,
-    "qnli": glue.QNLI,
-    "qqp": glue.QQP,
-    # "stsb": glue.STSB, # not implemented yet
-    "sst": glue.SST,
-    "wnli": glue.WNLI,
-    # SuperGLUE
-    "boolq": superglue.BoolQ,
-    "cb": superglue.CommitmentBank,
-    "copa": superglue.Copa,
-    "multirc": superglue.MultiRC,
-    "record": superglue.ReCoRD,
-    "wic": superglue.WordsInContext,
-    "wsc": superglue.SGWinogradSchemaChallenge,
-    # Order by benchmark/genre?
-    "coqa": coqa.CoQA,
-    "drop": drop.DROP,
-    "lambada_openai": lambada.LambadaOpenAI,
-    "lambada_standard": lambada.LambadaStandard,
-    "lambada_openai_cloze": lambada_cloze.LambadaOpenAICloze,
-    "lambada_standard_cloze": lambada_cloze.LambadaStandardCloze,
-    # multilingual lambada
-    **lambada_multilingual.construct_tasks(),
-    "wikitext": wikitext.WikiText,
-    # "cbt-cn": cbt.CBTCN, # disabled pending context length fix
-    # "cbt-ne": cbt.CBTNE, # disabled pending context length fix
-    "piqa": piqa.PiQA,
-    "prost": prost.PROST,
-    "mc_taco": mc_taco.MCTACO,
-    # Science related
-    "pubmedqa": pubmedqa.Pubmed_QA,
-    "sciq": sciq.SciQ,
-    "qasper": qasper.QASPER,
-    "qa4mre_2011": qa4mre.QA4MRE_2011,
-    "qa4mre_2012": qa4mre.QA4MRE_2012,
-    "qa4mre_2013": qa4mre.QA4MRE_2013,
-    "triviaqa": triviaqa.TriviaQA,
-    "arc_easy": arc.ARCEasy,
-    "arc_challenge": arc.ARCChallenge,
-    # "quac": quac.QuAC, # not implemented yet
-    "logiqa": logiqa.LogiQA,
-    "hellaswag": hellaswag.HellaSwag,
-    "swag": swag.SWAG,
-    "openbookqa": openbookqa.OpenBookQA,
-    "squad2": squad.SQuAD2,
-    "race": race.RACE,
-    # "naturalqs": naturalqs.NaturalQs, # not implemented yet
-    "nq_open": nqopen.NQOpen,
-    "headqa": headqa.HeadQAEsDeprecated,  # for backwards compat - headqa used to default to es
-    "headqa_es": headqa.HeadQAEs,
-    "headqa_en": headqa.HeadQAEn,
-    "mathqa": mathqa.MathQA,
-    "webqs": webqs.WebQs,
-    "wsc273": wsc273.WinogradSchemaChallenge273,
-    "winogrande": winogrande.Winogrande,
-    "anli_r1": anli.ANLIRound1,
-    "anli_r2": anli.ANLIRound2,
-    "anli_r3": anli.ANLIRound3,
-    "ethics_cm": hendrycks_ethics.EthicsCM,
-    "ethics_deontology": hendrycks_ethics.EthicsDeontology,
-    "ethics_justice": hendrycks_ethics.EthicsJustice,
-    "ethics_utilitarianism_original": hendrycks_ethics.EthicsUtilitarianismOriginal,
-    "ethics_utilitarianism": hendrycks_ethics.EthicsUtilitarianism,
-    "ethics_virtue": hendrycks_ethics.EthicsVirtue,
-    "truthfulqa_mc": truthfulqa.TruthfulQAMultipleChoice,
-    "truthfulqa_gen": truthfulqa.TruthfulQAGeneration,
-    # dialogue
-    "mutual": mutual.MuTual,
-    "mutual_plus": mutual.MuTualPlus,
-    # math
-    "math_algebra": hendrycks_math.MathAlgebra,
-    "math_counting_and_prob": hendrycks_math.MathCountingAndProbability,
-    "math_geometry": hendrycks_math.MathGeometry,
-    "math_intermediate_algebra": hendrycks_math.MathIntermediateAlgebra,
-    "math_num_theory": hendrycks_math.MathNumberTheory,
-    "math_prealgebra": hendrycks_math.MathPrealgebra,
-    "math_precalc": hendrycks_math.MathPrecalculus,
-    "math_asdiv": asdiv.Asdiv,
-    "gsm8k": gsm8k.GradeSchoolMath8K,
-    # arithmetic
-    "arithmetic_2da": arithmetic.Arithmetic2DPlus,
-    "arithmetic_2ds": arithmetic.Arithmetic2DMinus,
-    "arithmetic_3da": arithmetic.Arithmetic3DPlus,
-    "arithmetic_3ds": arithmetic.Arithmetic3DMinus,
-    "arithmetic_4da": arithmetic.Arithmetic4DPlus,
-    "arithmetic_4ds": arithmetic.Arithmetic4DMinus,
-    "arithmetic_5da": arithmetic.Arithmetic5DPlus,
-    "arithmetic_5ds": arithmetic.Arithmetic5DMinus,
-    "arithmetic_2dm": arithmetic.Arithmetic2DMultiplication,
-    "arithmetic_1dc": arithmetic.Arithmetic1DComposite,
-    # TODO Perhaps make these groups of tasks
-    #   e.g. anli, arithmetic, openai_translations, harness_translations
-    # hendrycksTest (57 tasks)
-    **hendrycks_test.create_all_tasks(),
-    # e.g. wmt14-fr-en
-    **translation.create_tasks_from_benchmarks(gpt3_translation_benchmarks),
-    # chef's selection, mostly wmt20
-    **translation.create_tasks_from_benchmarks(selected_translation_benchmarks),
-    # Word Scrambling and Manipulation Tasks
-    "anagrams1": unscramble.Anagrams1,
-    "anagrams2": unscramble.Anagrams2,
-    "cycle_letters": unscramble.CycleLetters,
-    "random_insertion": unscramble.RandomInsertion,
-    "reversed_words": unscramble.ReversedWords,
-    # Pile
-    "pile_arxiv": pile.PileArxiv,
-    "pile_books3": pile.PileBooks3,
-    "pile_bookcorpus2": pile.PileBookCorpus2,
-    "pile_dm-mathematics": pile.PileDmMathematics,
-    "pile_enron": pile.PileEnron,
-    "pile_europarl": pile.PileEuroparl,
-    "pile_freelaw": pile.PileFreeLaw,
-    "pile_github": pile.PileGithub,
-    "pile_gutenberg": pile.PileGutenberg,
-    "pile_hackernews": pile.PileHackernews,
-    "pile_nih-exporter": pile.PileNIHExporter,
-    "pile_opensubtitles": pile.PileOpenSubtitles,
-    "pile_openwebtext2": pile.PileOpenWebText2,
-    "pile_philpapers": pile.PilePhilPapers,
-    "pile_pile-cc": pile.PilePileCc,
-    "pile_pubmed-abstracts": pile.PilePubmedAbstracts,
-    "pile_pubmed-central": pile.PilePubmedCentral,
-    "pile_stackexchange": pile.PileStackExchange,
-    "pile_uspto": pile.PileUspto,
-    "pile_ubuntu-irc": pile.PileUbuntuIrc,
-    "pile_wikipedia": pile.PileWikipedia,
-    "pile_youtubesubtitles": pile.PileYoutubeSubtitles,
-    # BLiMP
-    "blimp_adjunct_island": blimp.BlimpAdjunctIsland,
-    "blimp_anaphor_gender_agreement": blimp.BlimpAnaphorGenderAgreement,
-    "blimp_anaphor_number_agreement": blimp.BlimpAnaphorNumberAgreement,
-    "blimp_animate_subject_passive": blimp.BlimpAnimateSubjectPassive,
-    "blimp_animate_subject_trans": blimp.BlimpAnimateSubjectTrans,
-    "blimp_causative": blimp.BlimpCausative,
-    "blimp_complex_NP_island": blimp.BlimpComplex_NPIsland,
-    "blimp_coordinate_structure_constraint_complex_left_branch": blimp.BlimpCoordinateStructureConstraintComplexLeftBranch,
-    "blimp_coordinate_structure_constraint_object_extraction": blimp.BlimpCoordinateStructureConstraintObjectExtraction,
-    "blimp_determiner_noun_agreement_1": blimp.BlimpDeterminerNounAgreement_1,
-    "blimp_determiner_noun_agreement_2": blimp.BlimpDeterminerNounAgreement_2,
-    "blimp_determiner_noun_agreement_irregular_1": blimp.BlimpDeterminerNounAgreementIrregular_1,
-    "blimp_determiner_noun_agreement_irregular_2": blimp.BlimpDeterminerNounAgreementIrregular_2,
-    "blimp_determiner_noun_agreement_with_adj_2": blimp.BlimpDeterminerNounAgreementWithAdj_2,
-    "blimp_determiner_noun_agreement_with_adj_irregular_1": blimp.BlimpDeterminerNounAgreementWithAdjIrregular_1,
-    "blimp_determiner_noun_agreement_with_adj_irregular_2": blimp.BlimpDeterminerNounAgreementWithAdjIrregular_2,
-    "blimp_determiner_noun_agreement_with_adjective_1": blimp.BlimpDeterminerNounAgreementWithAdjective_1,
-    "blimp_distractor_agreement_relational_noun": blimp.BlimpDistractorAgreementRelationalNoun,
-    "blimp_distractor_agreement_relative_clause": blimp.BlimpDistractorAgreementRelativeClause,
-    "blimp_drop_argument": blimp.BlimpDropArgument,
-    "blimp_ellipsis_n_bar_1": blimp.BlimpEllipsisNBar_1,
-    "blimp_ellipsis_n_bar_2": blimp.BlimpEllipsisNBar_2,
-    "blimp_existential_there_object_raising": blimp.BlimpExistentialThereObjectRaising,
-    "blimp_existential_there_quantifiers_1": blimp.BlimpExistentialThereQuantifiers_1,
-    "blimp_existential_there_quantifiers_2": blimp.BlimpExistentialThereQuantifiers_2,
-    "blimp_existential_there_subject_raising": blimp.BlimpExistentialThereSubjectRaising,
-    "blimp_expletive_it_object_raising": blimp.BlimpExpletiveItObjectRaising,
-    "blimp_inchoative": blimp.BlimpInchoative,
-    "blimp_intransitive": blimp.BlimpIntransitive,
-    "blimp_irregular_past_participle_adjectives": blimp.BlimpIrregularPastParticipleAdjectives,
-    "blimp_irregular_past_participle_verbs": blimp.BlimpIrregularPastParticipleVerbs,
-    "blimp_irregular_plural_subject_verb_agreement_1": blimp.BlimpIrregularPluralSubjectVerbAgreement_1,
-    "blimp_irregular_plural_subject_verb_agreement_2": blimp.BlimpIrregularPluralSubjectVerbAgreement_2,
-    "blimp_left_branch_island_echo_question": blimp.BlimpLeftBranchIslandEchoQuestion,
-    "blimp_left_branch_island_simple_question": blimp.BlimpLeftBranchIslandSimpleQuestion,
-    "blimp_matrix_question_npi_licensor_present": blimp.BlimpMatrixQuestionNpiLicensorPresent,
-    "blimp_npi_present_1": blimp.BlimpNpiPresent_1,
-    "blimp_npi_present_2": blimp.BlimpNpiPresent_2,
-    "blimp_only_npi_licensor_present": blimp.BlimpOnlyNpiLicensorPresent,
-    "blimp_only_npi_scope": blimp.BlimpOnlyNpiScope,
-    "blimp_passive_1": blimp.BlimpPassive_1,
-    "blimp_passive_2": blimp.BlimpPassive_2,
-    "blimp_principle_A_c_command": blimp.BlimpPrinciple_ACCommand,
-    "blimp_principle_A_case_1": blimp.BlimpPrinciple_ACase_1,
-    "blimp_principle_A_case_2": blimp.BlimpPrinciple_ACase_2,
-    "blimp_principle_A_domain_1": blimp.BlimpPrinciple_ADomain_1,
-    "blimp_principle_A_domain_2": blimp.BlimpPrinciple_ADomain_2,
-    "blimp_principle_A_domain_3": blimp.BlimpPrinciple_ADomain_3,
-    "blimp_principle_A_reconstruction": blimp.BlimpPrinciple_AReconstruction,
-    "blimp_regular_plural_subject_verb_agreement_1": blimp.BlimpRegularPluralSubjectVerbAgreement_1,
-    "blimp_regular_plural_subject_verb_agreement_2": blimp.BlimpRegularPluralSubjectVerbAgreement_2,
-    "blimp_sentential_negation_npi_licensor_present": blimp.BlimpSententialNegationNpiLicensorPresent,
-    "blimp_sentential_negation_npi_scope": blimp.BlimpSententialNegationNpiScope,
-    "blimp_sentential_subject_island": blimp.BlimpSententialSubjectIsland,
-    "blimp_superlative_quantifiers_1": blimp.BlimpSuperlativeQuantifiers_1,
-    "blimp_superlative_quantifiers_2": blimp.BlimpSuperlativeQuantifiers_2,
-    "blimp_tough_vs_raising_1": blimp.BlimpToughVsRaising_1,
-    "blimp_tough_vs_raising_2": blimp.BlimpToughVsRaising_2,
-    "blimp_transitive": blimp.BlimpTransitive,
-    "blimp_wh_island": blimp.BlimpWhIsland,
-    "blimp_wh_questions_object_gap": blimp.BlimpWhQuestionsObjectGap,
-    "blimp_wh_questions_subject_gap": blimp.BlimpWhQuestionsSubjectGap,
-    "blimp_wh_questions_subject_gap_long_distance": blimp.BlimpWhQuestionsSubjectGapLongDistance,
-    "blimp_wh_vs_that_no_gap": blimp.BlimpWhVsThatNoGap,
-    "blimp_wh_vs_that_no_gap_long_distance": blimp.BlimpWhVsThatNoGapLongDistance,
-    "blimp_wh_vs_that_with_gap": blimp.BlimpWhVsThatWithGap,
-    "blimp_wh_vs_that_with_gap_long_distance": blimp.BlimpWhVsThatWithGapLongDistance,
-    "toxigen": toxigen.ToxiGen,
-    "crows_pairs_english": crowspairs.CrowsPairsEnglish,
-    "crows_pairs_english_race_color": crowspairs.CrowsPairsEnglishRaceColor,
-    "crows_pairs_english_socioeconomic": crowspairs.CrowsPairsEnglishSocioeconomic,
-    "crows_pairs_english_gender": crowspairs.CrowsPairsEnglishGender,
-    "crows_pairs_english_age": crowspairs.CrowsPairsEnglishAge,
-    "crows_pairs_english_religion": crowspairs.CrowsPairsEnglishReligion,
-    "crows_pairs_english_disability": crowspairs.CrowsPairsEnglishDisability,
-    "crows_pairs_english_sexual_orientation": crowspairs.CrowsPairsEnglishSexualOrientation,
-    "crows_pairs_english_nationality": crowspairs.CrowsPairsEnglishNationality,
-    "crows_pairs_english_physical_appearance": crowspairs.CrowsPairsEnglishPhysicalAppearance,
-    "crows_pairs_english_autre": crowspairs.CrowsPairsEnglishAutre,
-    "crows_pairs_french": crowspairs.CrowsPairsFrench,
-    "crows_pairs_french_race_color": crowspairs.CrowsPairsFrenchRaceColor,
-    "crows_pairs_french_socioeconomic": crowspairs.CrowsPairsFrenchSocioeconomic,
-    "crows_pairs_french_gender": crowspairs.CrowsPairsFrenchGender,
-    "crows_pairs_french_age": crowspairs.CrowsPairsFrenchAge,
-    "crows_pairs_french_religion": crowspairs.CrowsPairsFrenchReligion,
-    "crows_pairs_french_disability": crowspairs.CrowsPairsFrenchDisability,
-    "crows_pairs_french_sexual_orientation": crowspairs.CrowsPairsFrenchSexualOrientation,
-    "crows_pairs_french_nationality": crowspairs.CrowsPairsFrenchNationality,
-    "crows_pairs_french_physical_appearance": crowspairs.CrowsPairsFrenchPhysicalAppearance,
-    "crows_pairs_french_autre": crowspairs.CrowsPairsFrenchAutre,
-    "csatqa_wr": csatqa.WR,
-    "csatqa_gr": csatqa.GR,
-    "csatqa_rcs": csatqa.RCS,
-    "csatqa_rcss": csatqa.RCSS,
-    "csatqa_rch": csatqa.RCH,
-    "csatqa_li": csatqa.LI,
-    "haerae_hi": haerae.HI,
-    "haerae_kgk": haerae.KGK,
-    "haerae_lw": haerae.LW,
-    "haerae_rc": haerae.RC,
-    "haerae_rw": haerae.RW,
-    "haerae_sn": haerae.SN,
-    # Requires manual download
-    # Requires manual download of data.
-    # "storycloze_2016": storycloze.StoryCloze2016,
-    # "storycloze_2018": storycloze.StoryCloze2018,
-    # "sat": sat.SATAnalogies,
-    **xcopa.construct_tasks(),
-    **bigbench.create_all_tasks(),
-    **xstorycloze.create_all_tasks(),
-    **xwinograd.create_all_tasks(),
-    **pawsx.construct_tasks(),
-    **xnli.construct_tasks(),
-    **mgsm.construct_tasks(),
-    **scrolls.construct_tasks(),
-    **ceval.create_all_tasks(),
-    **cmmlu.create_all_tasks(),
-}
-
-
-ALL_TASKS = sorted(list(TASK_REGISTRY))
-
-_EXAMPLE_JSON_PATH = "split:key:/absolute/path/to/data.json"
-
-
-def add_json_task(task_name):
-    """Add a JSON perplexity task if the given task name matches the
-    JSON task specification.
-
-    See `json.JsonPerplexity`.
     """
-    if not task_name.startswith("json"):
-        return
 
-    def create_json_task():
-        splits = task_name.split("=", 1)
-        if len(splits) != 2 or not splits[1]:
-            raise ValueError(
-                "json tasks need a path argument pointing to the local "
-                "dataset, specified like this: json="
-                + _EXAMPLE_JSON_PATH
-                + ' (if there are no splits, use "train")'
-            )
+    def __init__(self, verbosity="INFO", include_path: Optional[str] = None) -> None:
+        self.verbosity = verbosity
+        self.include_path = include_path
+        self.logger = utils.eval_logger
+        self.logger.setLevel(getattr(logging, f"{verbosity}"))
 
-        json_path = splits[1]
-        if json_path == _EXAMPLE_JSON_PATH:
-            raise ValueError(
-                "please do not copy the example path directly, but substitute "
-                "it with a path to your local dataset"
-            )
-        return lambda: json.JsonPerplexity(json_path)
+        self._task_index = self.initialize_tasks(include_path=include_path)
+        self._all_tasks = sorted(list(self._task_index.keys()))
 
-    TASK_REGISTRY[task_name] = create_json_task()
+        self.task_group_map = collections.defaultdict(list)
+
+    def initialize_tasks(self, include_path: Optional[str] = None):
+        """Creates a dictionary of tasks index.
+
+        :param include_path: str = None
+            An additional path to be searched for tasks
+
+        :return
+            Dictionary of task names as key and task metadata
+        """
+        all_paths = [os.path.dirname(os.path.abspath(__file__)) + "/"]
+        if include_path is not None:
+            if isinstance(include_path, str):
+                include_path = [include_path]
+            all_paths.extend(include_path)
+
+        task_index = {}
+        for task_dir in all_paths:
+            tasks = self._get_task_and_group(task_dir)
+            task_index = {**tasks, **task_index}
+
+        return task_index
+
+    @property
+    def all_tasks(self):
+        return self._all_tasks
+
+    @property
+    def task_index(self):
+        return self._task_index
+
+    def match_tasks(self, task_list):
+        return utils.pattern_match(task_list, self.all_tasks)
+
+    def _name_is_registered(self, name) -> bool:
+        if name in self.all_tasks:
+            return True
+        return False
+
+    def _name_is_task(self, name) -> bool:
+        if self._name_is_registered(name) and ("task" in self.task_index[name]["type"]):
+            return True
+        return False
+
+    def _name_is_group(self, name) -> bool:
+        if self._name_is_registered(name) and (
+            self.task_index[name]["type"] == "group"
+        ):
+            return True
+        return False
+
+    def _name_is_python_task(self, name):
+        if self._name_is_registered(name) and (
+            self.task_index[name]["type"] == "python_task"
+        ):
+            return True
+        return False
+
+    def _config_is_task(self, config) -> bool:
+        if ("task" in config) and isinstance(config["task"], str):
+            return True
+        return False
+
+    def _config_is_group(self, config) -> bool:
+        if ("task" in config) and isinstance(config["task"], list):
+            return True
+        return False
+
+    def _config_is_python_task(self, config) -> bool:
+        if "class" in config:
+            return True
+        return False
+
+    def _get_yaml_path(self, name):
+        if name not in self.task_index:
+            raise ValueError
+        return self.task_index[name]["yaml_path"]
+
+    def _get_config(self, name):
+        if name not in self.task_index:
+            raise ValueError
+        yaml_path = self._get_yaml_path(name)
+        if yaml_path == -1:
+            return {}
+        else:
+            return utils.load_yaml_config(yaml_path, mode="full")
+
+    def _get_tasklist(self, name):
+        if self._name_is_task(name):
+            raise ValueError
+        return self.task_index[name]["task"]
+
+    def _process_alias(self, config, group=None):
+        # If the group is not the same as the original
+        # group which the group alias was intended for,
+        # Set the group_alias to None instead.
+        if ("group_alias" in config) and ("group" in config) and group is not None:
+            if config["group"] != group:
+                config["group_alias"] = None
+        return config
+
+    def _load_individual_task_or_group(
+        self,
+        name_or_config: Optional[Union[str, dict]] = None,
+        parent_name: Optional[str] = None,
+        update_config: Optional[dict] = None,
+        yaml_path: Optional[str] = None,
+    ) -> Mapping:
+        def load_task(config, task, group=None, yaml_path=None):
+            if "include" in config:
+                if yaml_path is None:
+                    raise ValueError
+                config.update(
+                    utils.load_yaml_config(
+                        yaml_path,
+                        yaml_config={"include": config.pop("include")},
+                        mode="full",
+                    )
+                )
+            if self._config_is_python_task(config):
+                task_object = config["class"]()
+            else:
+                config = self._process_alias(config, group=group)
+                task_object = ConfigurableTask(config=config)
+            if group is not None:
+                task_object = (group, task_object)
+            return {task: task_object}
+
+        if isinstance(name_or_config, str):
+            if update_config is not None:
+                # Process name_or_config as a dict instead
+                name_or_config = {"task": name_or_config, **update_config}
+            elif self._name_is_task(name_or_config):
+                task_config = self._get_config(name_or_config)
+                return load_task(task_config, task=name_or_config, group=parent_name)
+            else:
+                group_name = name_or_config
+                subtask_list = self._get_tasklist(name_or_config)
+                if subtask_list == -1:
+                    group_config = self._get_config(name_or_config)
+                    subtask_list = group_config["task"]
+
+                # This checks if we're at the root.
+                if parent_name is None:
+                    group_config = self._get_config(name_or_config)
+                    if set(group_config.keys()) > {"task", "group"}:
+                        update_config = {
+                            k: v
+                            for k, v in group_config.items()
+                            if k not in ["task", "group"]
+                        }
+                    yaml_path = self._get_yaml_path(group_name)
+
+                    if (update_config is not None) and ("group_alias" in update_config):
+                        group_name = update_config["group_alias"]
+                        update_config.pop("group_alias")
+
+        if isinstance(name_or_config, dict):
+            if update_config is not None:
+                name_or_config = {
+                    **name_or_config,
+                    **update_config,
+                }
+
+            if self._config_is_task(name_or_config):
+                name = name_or_config["task"]
+                # If the name is registered as a group
+                # if self._name_is_task(name) is False:
+                if self._name_is_group(name):
+                    group_name = name
+                    update_config = {
+                        k: v for k, v in name_or_config.items() if k != "task"
+                    }
+                    subtask_list = self._get_tasklist(name)
+                    if subtask_list == -1:
+                        subtask_list = self._get_config(name)["task"]
+                else:
+                    if self._name_is_registered(name):
+                        base_task_config = self._get_config(name)
+
+                        # Check if this is a duplicate.
+                        if parent_name is not None:
+                            name_or_config["group"] = parent_name
+                            num_duplicate = len(
+                                list(
+                                    filter(
+                                        lambda x: x.startswith(name),
+                                        self.task_group_map[parent_name],
+                                    )
+                                )
+                            )
+                            if num_duplicate > 0:
+                                name = f"{name}-{num_duplicate}"
+                            self.task_group_map[parent_name].append(name)
+
+                        task_config = {
+                            **base_task_config,
+                            **name_or_config,
+                        }
+                    else:
+                        task_config = name_or_config
+                    return load_task(
+                        task_config, task=name, group=parent_name, yaml_path=yaml_path
+                    )
+            else:
+                group_name = name_or_config["group"]
+                subtask_list = name_or_config["task"]
+                if set(name_or_config.keys()) > {"task", "group"}:
+                    update_config = {
+                        k: v
+                        for k, v in name_or_config.items()
+                        if k not in ["task", "group"]
+                    }
+
+        all_subtasks = {}
+        if parent_name is not None:
+            all_subtasks = {group_name: (parent_name, None)}
+
+        fn = partial(
+            self._load_individual_task_or_group,
+            parent_name=group_name,
+            update_config=update_config,
+            yaml_path=yaml_path,
+        )
+        all_subtasks = {
+            **all_subtasks,
+            **dict(collections.ChainMap(*map(fn, subtask_list))),
+        }
+        return all_subtasks
+
+    def load_task_or_group(self, task_list: Optional[Union[str, list]] = None) -> dict:
+        """Loads a dictionary of task objects from a list
+
+        :param task_list: Union[str, list] = None
+            Single string or list of string of task names to be loaded
+
+        :return
+            Dictionary of task objects
+        """
+        if isinstance(task_list, str):
+            task_list = [task_list]
+
+        all_loaded_tasks = dict(
+            collections.ChainMap(*map(self._load_individual_task_or_group, task_list))
+        )
+        return all_loaded_tasks
+
+    def load_config(self, config: Dict):
+        return self._load_individual_task_or_group(config)
+
+    def _get_task_and_group(self, task_dir: str):
+        """Creates a dictionary of tasks index with the following metadata,
+        - `type`, that can be either `task`, `python_task`, or `group`.
+            `task` refer to regular task configs, `python_task` are special
+            yaml files that only consists of `task` and `class` parameters.
+            `group` are group configs.
+        - `yaml_path`, path to the yaml file. If the entry is a `group` that
+            was configured through a task config, the yaml_path will be -1
+            and all subtasks will be listed in `task` (see below)
+        - `task`, reserved for entries with `type` as `group`. This will list
+            all subtasks. When a group config is created (as opposed to task
+            config having `group` parameter set), this will be set to -1 to
+            avoid recursive indexing. The whole list of subtasks will be loaded
+            at evaluation.
+
+        :param task_dir: str
+            A directory to check for tasks
+
+        :return
+            Dictionary of task names as key and task metadata
+        """
+        tasks_and_groups = collections.defaultdict()
+        for root, _, file_list in os.walk(task_dir):
+            for f in file_list:
+                if f.endswith(".yaml"):
+                    yaml_path = os.path.join(root, f)
+                    config = utils.load_yaml_config(yaml_path, mode="simple")
+                    if self._config_is_python_task(config):
+                        # This is a python class config
+                        tasks_and_groups[config["task"]] = {
+                            "type": "python_task",
+                            "yaml_path": yaml_path,
+                        }
+                    elif self._config_is_group(config):
+                        # This is a group config
+                        tasks_and_groups[config["group"]] = {
+                            "type": "group",
+                            "task": -1,  # This signals that
+                            # we don't need to know
+                            # the task list for indexing
+                            # as it can be loaded
+                            # when called.
+                            "yaml_path": yaml_path,
+                        }
+
+                        # # Registered the level 1 tasks from a group config
+                        # for config in config["task"]:
+                        #     if isinstance(config, dict) and self._config_is_task(config):
+                        #         task = config["task"]
+                        #         tasks_and_groups[task] = {
+                        #             "type": "task",
+                        #             "yaml_path": yaml_path,
+                        #             }
+
+                    elif self._config_is_task(config):
+                        # This is a task config
+                        task = config["task"]
+                        tasks_and_groups[task] = {
+                            "type": "task",
+                            "yaml_path": yaml_path,
+                        }
+
+                        if "group" in config:
+                            groups = config["group"]
+                            if isinstance(config["group"], str):
+                                groups = [groups]
+
+                            for group in groups:
+                                if group not in tasks_and_groups:
+                                    tasks_and_groups[group] = {
+                                        "type": "group",
+                                        "task": [task],
+                                        "yaml_path": -1,
+                                    }
+                                else:
+                                    tasks_and_groups[group]["task"].append(task)
+                    else:
+                        self.logger.debug(f"File {f} in {root} could not be loaded")
+
+        return tasks_and_groups
 
 
-def get_task(task_name):
-    try:
-        add_json_task(task_name)
-        return TASK_REGISTRY[task_name]
-    except KeyError:
-        print("Available tasks:")
-        pprint(TASK_REGISTRY)
-        raise KeyError(f"Missing task {task_name}")
+def get_task_name_from_config(task_config: Dict[str, str]) -> str:
+    if "task" in task_config:
+        return task_config["task"]
+    if "dataset_name" in task_config:
+        return "{dataset_path}_{dataset_name}".format(**task_config)
+    else:
+        return "{dataset_path}".format(**task_config)
 
 
 def get_task_name_from_object(task_object):
-    for name, class_ in TASK_REGISTRY.items():
-        if class_ is task_object:
-            return name
+    if hasattr(task_object, "config"):
+        return task_object._config["task"]
 
+    # TODO: scrap this
     # this gives a mechanism for non-registered tasks to have a custom name anyways when reporting
     return (
         task_object.EVAL_HARNESS_NAME
@@ -411,16 +378,69 @@ def get_task_name_from_object(task_object):
     )
 
 
-def get_task_dict(task_name_list: List[Union[str, lm_eval.base.Task]]):
-    task_name_dict = {
-        task_name: get_task(task_name)()
-        for task_name in task_name_list
-        if isinstance(task_name, str)
+def get_task_dict(
+    task_name_list: Union[str, List[Union[str, Dict, Task]]],
+    task_manager: Optional[TaskManager] = None,
+):
+    """Creates a dictionary of task objects from either a name of task, config, or prepared Task object.
+
+    :param task_name_list: List[Union[str, Dict, Task]]
+        Name of model or LM object, see lm_eval.models.get_model
+    :param task_manager: TaskManager = None
+        A TaskManager object that stores indexed tasks. If not set,
+        task_manager will load one. This should be set by the user
+        if there are additional paths that want to be included
+        via `include_path`
+
+    :return
+        Dictionary of task objects
+    """
+    task_name_from_string_dict = {}
+    task_name_from_config_dict = {}
+    task_name_from_object_dict = {}
+
+    if isinstance(task_name_list, str):
+        task_name_list = [task_name_list]
+    elif isinstance(task_name_list, list):
+        if not all([isinstance(task, (str, dict, Task)) for task in task_name_list]):
+            raise TypeError(
+                "Expected all list items to be of types 'str', 'dict', or 'Task', but at least one entry did not match."
+            )
+    else:
+        raise TypeError(
+            f"Expected a 'str' or 'list' but received {type(task_name_list)}."
+        )
+
+    string_task_name_list = [task for task in task_name_list if isinstance(task, str)]
+    others_task_name_list = [task for task in task_name_list if ~isinstance(task, str)]
+    if len(string_task_name_list) > 0:
+        if task_manager is None:
+            task_manager = TaskManager()
+
+        task_name_from_string_dict = task_manager.load_task_or_group(
+            string_task_name_list
+        )
+
+    for task_element in others_task_name_list:
+        if isinstance(task_element, dict):
+            task_name_from_config_dict = {
+                **task_name_from_config_dict,
+                **task_manager.load_config(config=task_element),
+            }
+
+        elif isinstance(task_element, Task):
+            task_name_from_object_dict = {
+                **task_name_from_object_dict,
+                get_task_name_from_object(task_element): task_element,
+            }
+
+    if not set(task_name_from_string_dict.keys()).isdisjoint(
+        set(task_name_from_object_dict.keys())
+    ):
+        raise ValueError
+
+    return {
+        **task_name_from_string_dict,
+        **task_name_from_config_dict,
+        **task_name_from_object_dict,
     }
-    task_name_from_object_dict = {
-        get_task_name_from_object(task_object): task_object
-        for task_object in task_name_list
-        if not isinstance(task_object, str)
-    }
-    assert set(task_name_dict.keys()).isdisjoint(set(task_name_from_object_dict.keys()))
-    return {**task_name_dict, **task_name_from_object_dict}

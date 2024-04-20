@@ -1,318 +1,384 @@
-# `Task` Guide
+# Task Configuration
 
-The `Task` class is the foundation of all natural language tasks in the `lm-evaluation-harness` (harness). It encompasses everything you’d need to perform few-shot evaluation of an autoregressive language model. Here we’ll provide a step-by-step guide on how to subclass `Task` to create your very own task/s.
+The `lm-evaluation-harness` is meant to be an extensible and flexible framework within which many different evaluation tasks can be defined. All tasks in the new version of the harness are built around a YAML configuration file format.
 
-## Setup
+These YAML configuration files, along with the current codebase commit hash, are intended to be shareable such that providing the YAML config enables another researcher to precisely replicate the evaluation setup used by another, in the case that the prompt or setup differs from standard `lm-eval` task implementations.
 
-If you haven't already, go ahead and fork the main repo, clone it, create a branch with the name of your task, and install the project requirements in your environment:
+While adding a standard evaluation task on a new dataset can be occasionally as simple as swapping out a Hugging Face dataset path in an existing file, more specialized evaluation setups also exist. Here we'll provide a crash course on the more advanced logic implementable in YAML form available to users.
 
-```sh
-# After forking...
-git clone https://github.com/<YOUR-USERNAME>/lm-evaluation-harness.git
-cd lm-evaluation-harness
-git checkout -b <task-name>
-pip install -e ".[dev]"
+If your intended task relies on features beyond what are described in this guide, we'd love to hear about it! Feel free to open an issue describing the scenario on Github, create a PR to the project with a proposed implementation, or ask in the `#lm-thunderdome` channel on the EleutherAI discord.
+
+## Configurations
+
+Tasks are configured via the `TaskConfig` object. Below, we describe all fields usable within the object, and their role in defining a task.
+
+### Parameters
+
+Task naming + registration:
+- **task** (`str`, defaults to None) — name of the task.
+- **group** (`str`, *optional*) — name of the task group(s) a task belongs to. Enables one to run all tasks with a specified tag or group name at once.
+
+Dataset configuration options:
+- **dataset_path** (`str`) — The name of the dataset as listed by HF in the datasets Hub.
+- **dataset_name**  (`str`, *optional*, defaults to None) — The name of what HF calls a “data instance” or sub-task of the benchmark. If your task does not contain any data instances, just leave this to default to None. (If you're familiar with the HF `datasets.load_dataset` function, these are just the first 2 arguments to it.)
+- **dataset_kwargs** (`dict`, *optional*) — Auxiliary arguments that `datasets.load_dataset` accepts. This can be used to specify arguments such as `data_files` or `data_dir` if you want to use local datafiles such as json or csv.
+- **training_split** (`str`, *optional*) — Split in the dataset to use as the training split.
+- **validation_split** (`str`, *optional*) — Split in the dataset to use as the validation split.
+- **test_split** (`str`, *optional*) — Split in the dataset to use as the test split.
+- **fewshot_split** (`str`, *optional*) — Split in the dataset to draw few-shot exemplars from. assert that this not None if num_fewshot > 0.
+- **process_docs** (`Callable`, *optional*) — Optionally define a function to apply to each HF dataset split, to preprocess all documents before being fed into prompt template rendering or other evaluation steps. Can be used to rename dataset columns, or to process documents into a format closer to the expected format expected by a prompt template.
+
+Prompting / in-context formatting options:
+- **use_prompt** (`str`, *optional*) — Name of prompt in promptsource to use. if defined, will overwrite doc_to_text, doc_to_target, and doc_to_choice.
+- **description** (`str`, *optional*) — An optional prepended Jinja2 template or string which will be prepended to the few-shot examples passed into the model, often describing the task or providing instructions to a model, such as `"The following are questions (with answers) about {{subject}}.\n\n"`. No delimiters or spacing are inserted between the description and the first few-shot example.
+- **doc_to_text** (`Union[Callable, str]`, *optional*) — Jinja2 template, string, or function to process a sample into the appropriate input for the model
+- **doc_to_target** (`Union[Callable, str]`, *optional*) — Jinja2 template, string, or function to process a sample into the appropriate target output for the model. For multiple choice tasks, this should return an index into
+- **doc_to_choice** (`Union[Callable, str]`, *optional*) — Jinja2 template, string, or function to process a sample into a list of possible string choices for `multiple_choice` tasks. Left undefined for `generate_until` tasks.
+- **fewshot_delimiter** (`str`, *optional*, defaults to "\n\n") — String to insert between few-shot examples.
+- **target_delimiter** (`str`, *optional*, defaults to `" "`) — String to insert between input and target output for the datapoint being tested.
+
+Runtime configuration options:
+- **num_fewshot** (`int`, *optional*, defaults to 0) — Number of few-shot examples before the input.
+- **batch_size** (`int`, *optional*, defaults to 1) — Batch size.
+
+Scoring details:
+- **metric_list** (`str`, *optional*, defaults to None) — A list of metrics to use for evaluation. See docs for expected format.
+- **output_type** (`str`, *optional*, defaults to "generate_until") — Selects the type of model output for the given task. Options are `generate_until`, `loglikelihood`, `loglikelihood_rolling`, and `multiple_choice`.
+- **generation_kwargs** (`dict`, *optional*) — Auxiliary arguments for the `generate` function from HF transformers library. Advanced keyword arguments may not be supported for non-HF LM classes.
+- **repeats** (`int`, *optional*, defaults to 1) — Number of repeated runs through model for each sample. can be used for cases such as self-consistency.
+- **filter_list** (`Union[str, list]`, *optional*) — List of filters to postprocess model outputs. See below for further detail on the filter API.
+- **should_decontaminate** (`bool`, *optional*, defaults to False) - Whether to decontaminate or not.
+- **doc_to_decontamination_query** (`str`, *optional*) — Query for decontamination if `should_decontaminate` is True. If `should_decontaminate` is True but `doc_to_decontamination_query` is `None`, `doc_to_decontamination_query` will follow `doc_to_text`.
+
+Other:
+- **metadata** (`dict`, *optional*) — An optional field where arbitrary metadata can be passed. Most tasks should include a `version` key in this field that is used to denote the version of the yaml config. Other special metadata keys are: `num_fewshot`, to override the printed `n-shot` table column for a task.
+
+## Filters
+
+Explain: What are filters? What is their place in the pipeline?
+
+A key component of the `lm-evaluation-harness` library is the `Filter` object. In a typical evaluation run of the harness, we take the formatted inputs and run them through our LM, with the appropriate output type (greedy or free-form generation, or loglikelihood-based comparative scoring).
+
+After getting scores or output text from our LM on each `Instance` or document in the dataset, we then need to feed these responses into a metric or scoring function to return scores to a user.
+
+However, certain tasks may require more complex behavior than directly turning over model outputs to a metric function. For example, we may want to post-process our output text by truncating it or extracting a model's answer, we may want to ensemble over multiple "takes" on a different document, et cetera.
+
+**Detailed Aside**:
+We do such post-processing by operating on *responses*, which are stored after running an LM on an `Instance` from the task in `Instance.resps`.
+
+`resps` is a `List[str]` for each instance, and we pass a `List[List[<expected return type from model>]]` to our filters that is a list of `[instance.resps for instance in instances]`.
+
+Our filters, after completing a pipeline, must return a `List[<expected return type from model>]` which we then unpack and store each element of in `Instance.filtered_resps` for the corresponding instance. Thus, we take as input a list of returns from our model for each doc, and must return a return from our model *without it being wrapped in a list* for each doc.
+
+**End Aside**
+
+
+A full list of supported filter operations can be found in `lm_eval/filters/__init__.py`. Contributions of new filter types are welcome!
+
+### Multiple Filter Pipelines
+
+Tasks need not be limited to a single filter pipeline. We enable users to run multiple, distinct, filter pipelines on *the same model outputs* generated in one run on a task.
+
+As a case study, let's look at an implementation of solving the Gsm8k math word problem benchmark in `lm_eval/tasks/gsm8k/gsm8k-cot-self-consistency.yaml`. Here, we are emulating the setup used by [Self-Consistency Improves Chain of Thought Prompting](https://arxiv.org/abs/2203.11171), in which evaluation is performed by generating N chain-of-thought outputs from a model via temperature-based sampling, then selecting the answers output by the model at the end of the chains of thought, then majority voting across all those numeric answers.
+
+Within our YAML file:
+
+```yaml
+...
+repeats: 64
+filter_list:
+  - name: "score-first"
+    filter:
+      - function: "regex"
+        regex_pattern: "The answer is (\\-?[0-9\\.\\,]*[0-9]+)"
+      - function: "take_first"
+  - name: "maj@64"
+    filter:
+      - function: "regex"
+        regex_pattern: "The answer is (\\-?[0-9\\.\\,]*[0-9]+)"
+      - function: "majority_vote"
+      - function: "take_first"
+  - name: "maj@8"
+    filter:
+      - function: "take_first_k"
+        k: 8
+      - function: "regex"
+        regex_pattern: "The answer is (\\-?[0-9\\.\\,]*[0-9]+)"
+      - function: "majority_vote"
+      - function: "take_first"
 ```
 
-## Creating Your Task File
+We are able to provide multiple different filter pipelines, each with their own name and list of filters to apply in sequence.
 
-From the `lm-evaluation-harness` project root, copy over the `new_task.py` template to `lm_eval/datasets`.
+Our first filter pipeline implements
+- applying a regex to the model generations (extracting the number within the phrase "The answer is (number)")
+- selecting only the first out of the 64 model answers
 
-```sh
-cp templates/new_task.py lm_eval/tasks/<task-name>.py
+Then scoring this single answer.
+
+```yaml
+- name: "score-first"
+  filter:
+    - function: "regex"
+      regex_pattern: "The answer is (\\-?[0-9\\.\\,]*[0-9]+)"
+    - function: "take_first"
 ```
 
-or if your task is **multiple-choice**, the `new_multiple_choice_task.py`:
+Our second filter pipeline, "maj@64", does majority voting across all 64 answers via:
+- applying the same regex to all responses, to get the numerical answer from the model for each of the 64 responses per problem
+- applying majority voting to all responses, which then returns a length-1 `[<majority answer>]` list for each
+- taking the first element of this length-1 list, to then score the sole response `<majority answer>` for each document.
 
-```sh
-cp templates/new_multiple_choice_task.py lm_eval/tasks/<task-name>.py
+```yaml
+- name: "maj@64"
+  filter:
+    - function: "regex"
+      regex_pattern: "The answer is (\\-?[0-9\\.\\,]*[0-9]+)"
+    - function: "majority_vote"
+    - function: "take_first"
 ```
 
-This will set you up with a few `TODO`s to fill-in which we'll now go over in detail.
-
-## Task Heading
-
-Open the file you've just created and add a multiline docstring on the first line with the following contents:
-
-```python
-"""
-<Paper title>
-<Paper PDF URL>
-
-<Short description of task>
-
-Homepage: <URL to task's homepage>
-"""
+Our final filter pipeline, "maj@8", does majority voting across the first 8 of the model's responses per document via:
+- subsetting the len-64 list of responses `[answer1, answer2, ..., answer64]` to `[answer1, answer2, ..., answer8]` for each document
+- performing the same sequence of filters on these new sets of 8 responses, for each document.
+```yaml
+- name: "maj@8"
+  filter:
+    - function: "take_first_k"
+      k: 8
+    - function: "regex"
+      regex_pattern: "The answer is (\\-?[0-9\\.\\,]*[0-9]+)"
+    - function: "majority_vote"
+    - function: "take_first"
 ```
 
-For example, take the QuAC dataset. We have:
+Thus, given the 64 responses from our LM on each document, we can report metrics on these responses in these 3 different ways, as defined by our filter pipelines.
 
-```python
-"""
-QuAC: Question Answering in Context
-https://arxiv.org/abs/1808.07036
 
-Question Answering in Context (QuAC) is a dataset for modeling, understanding, and
-participating in information seeking dialog. Data instances consist of an interactive
-dialog between two crowd workers: (1) a student who poses a sequence of freeform
-questions to learn as much as possible about a hidden Wikipedia text, and (2)
-a teacher who answers the questions by providing short excerpts (spans) from the text.
+## Embedded Python Code
 
-Homepage: https://quac.ai/
-"""
+Use can use python functions for certain arguments by using the `!function` operator after the argument name followed by `<filename>.<pythonfunctionname>`. This feature can be used for the following arguments:
+1. `doc_to_text`
+2. `doc_to_target`
+3. `doc_to_choice`
+4. `aggregation` for a `metric` in `metric_list`
+
+## (No Longer Recommended) Direct `Task` Subclassing
+
+The prior implementation method of new tasks was to subclass `Task`. While we intend to migrate all tasks to the new YAML implementation option going forward, it remains possible to subclass the Task class and implement custom logic. For more information, see `docs/task_guide.md` in v0.3.0 of the `lm-evaluation-harness`.
+
+
+## Including a Base YAML
+
+You can base a YAML on another YAML file as a template. This can be handy when you need to just change the prompt for `doc_to_text` but keep the rest the same or change `filters` to compare which is better. Simply use `include` in the YAML file and write the name of the template you want to base from. This assumes that the base temeplate is in the same directory. Otherwise, You will need to define the full path.
+```
+include: <YAML filename or with full path>
+...
+```
+You can find an example of how to use this feature at [gsm8k-cot-self-consistency.yaml](https://github.com/EleutherAI/lm-evaluation-harness/blob/3c07cc04a92fc467d7c9a94894aeddd58c93a5da/lm_eval/tasks/gsm8k/gsm8k-cot-self-consistency.yaml) where it is based off [gsm8k-cot.yaml](https://github.com/EleutherAI/lm-evaluation-harness/blob/3c07cc04a92fc467d7c9a94894aeddd58c93a5da/lm_eval/tasks/gsm8k/gsm8k-cot.yaml)
+
+
+## Passing Arguments to Metrics
+
+Metrics can be defined in the `metric_list` argument when building the YAML config. Multiple metrics can be listed along with any auxiliary arguments. For example, setting the [`exact_match` metric](https://github.com/huggingface/evaluate/tree/main/metrics/exact_match), auxiliary arguments such as `ignore_case`, `ignore_punctuation`, `regexes_to_ignore` can be listed as well. They will be added to the metric function as `kwargs`. Some metrics have predefined values for `aggregation` and `higher_is_better` so listing the metric name only can be sufficient.
+
+```
+metric_list:
+  - metric: acc
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+    ignore_case: true
+    ignore_punctuation: false
+    regexes_to_ignore:
+      - ","
+      - "\\$"
 ```
 
-Next, at the module-level, create a constant variable named
-`_CITATION` that contains the citation information for your task in BibTeX format.
+### Natively Supported Metrics
 
-Now let's walk through the actual implementation - from data handling to evaluation.
+Here we list all metrics currently supported natively in `lm-eval`:
 
-## Data Handling
+Metrics:
+* `acc` (accuracy)
+* `acc_norm` (length-normalized accuracy)
+* `acc_mutual_info` (baseline loglikelihood - normalized accuracy)
+* `perplexity`
+* `word_perplexity` (perplexity per word)
+* `byte_perplexity` (perplexity per byte)
+* `bits_per_byte`
+* `matthews_corrcoef` (Matthews correlation coefficient)
+* `f1` (F1 score)
+* `bleu`
+* `chrf`
+* `ter`
 
-### Downloading your Data
+Aggregation functions:
+* `mean`
+* `median`
+* `perplexity`
+* `weighted_perplexity`
+* `bits_per_byte`
 
-All data downloading and management is handled through the HuggingFace (**HF**) [`datasets`](https://github.com/huggingface/datasets) API. So, the first thing you should do is check to see if your task's dataset is already provided in their catalog [here](https://huggingface.co/datasets). If it's not in there, please consider adding it to their Hub to make it accessible to a wider user base by following their [new dataset guide](https://github.com/huggingface/datasets/blob/master/ADD_NEW_DATASET.md)
-.
-Now, that you have your HF dataset, you need to assign its path and name to your `Task` in the following fields:
+### Adding a Multiple Choice Metric
 
-```python
-class TaskName(...):
-    DATASET_PATH = "..."
-    DATASET_NAME = "..."
+Adding a multiple choice metric has a few steps. To get it working you need to:
+
+1. register a metric function
+2. register an aggregation function
+3. update the `Task` definition to make sure the correct arguments are passed
+
+The default metric and aggregation functions are in `lm_eval/api/metrics.py`, and you can add a function there if it's for general use. The metrics are towards the bottom of the file and look like this:
+
+
+    @register_metric(
+        metric="mcc",
+        higher_is_better=True,
+        output_type="multiple_choice",
+        aggregation="matthews_corrcoef",
+    )
+    def mcc_fn(items):  # This is a passthrough function
+        return items
+
+Note that many of these are passthrough functions, and for multiple choice (at least) this function is never actually called.
+
+Aggregation functions are defined towards the top of the file, here's an example:
+
+    @register_aggregation("matthews_corrcoef")
+    def matthews_corrcoef(items):
+        unzipped_list = list(zip(*items))
+        golds = unzipped_list[0]
+        preds = unzipped_list[1]
+        return sklearn.metrics.matthews_corrcoef(golds, preds)
+
+This function returns a single numeric value. The input is defined in `Task.process_results` in `lm_eval/api/task.py`. There's a section that looks like this:
+
+
+    result_dict = {
+        **({"acc": acc} if "acc" in use_metric else {}),
+        **({"f1": (gold, pred)} if "f1" in use_metric else {}),
+        **({"mcc": (gold, pred)} if "mcc" in use_metric else {}),
+        **({"acc_norm": acc_norm} if "acc_norm" in use_metric else {}),
+        **({"exact_match": exact_match} if "exact_match" in use_metric else {}),
+    }
+
+The value here determines the input to the aggregation function, though the name used matches the metric function. These metrics all have simple needs and just need the accuracy or gold and predicted values, but immediately below this there are examples of metrics with more complicated needs you can use as reference.
+
+## Good Reference Tasks
+
+Contributing a new task can be daunting! Luckily, much of the work has often been done for you in a different, similarly evaluated task. Good examples of task implementations to study include:
+
+Multiple choice tasks:
+- SciQ (`lm_eval/tasks/sciq/sciq.yaml`)
+
+Corpus perplexity evaluations:
+- Wikitext (`lm_eval/tasks/wikitext/wikitext.yaml`)
+
+Generative tasks:
+- GSM8k (`lm_eval/tasks/gsm8k/gsm8k.yaml`)
+
+Tasks using complex filtering:
+- GSM8k with CoT (+ with Self-Consistency): (`lm_eval/tasks/gsm8k/gsm8k-cot.yaml` ; `lm_eval/tasks/gsm8k/gsm8k-cot-self-consistency.yaml`)
+
+
+## Benchmarks
+
+When evaluating a language model, it's is not unusual to test across a number of tasks that may not be related to one another in order to assess a variety of capabilities. To this end, it may be combursome to have to list the set of tasks or add a new group name to each yaml of each individual task.
+
+To solve this, we can create a benchmark yaml config. This is a config that contains the names of the tasks that should be included in a particular benchmark. The config consists of two main keys `group` which denotes the name of the benchmark and `task` which is where we can list the tasks. The tasks listed in `task` are the task names that have been registered. A good example would be the list of tasks used to evaluate the Pythia Suite.
+
+```yaml
+group: pythia
+task:
+  - lambada_openai
+  - wikitext
+  - piqa
+  - sciq
+  - wsc
+  - winogrande
+  - arc
+  - logiqa
+  - blimp
+  - hendrycksTest*
 ```
 
-where `DATASET_PATH` is the name of the dataset as listed by HF in the `datasets` Hub and `DATASET_NAME` is the name of, what HF calls, a “data instance” or sub-task of the benchmark. If your task does not contain any data instances, just set `DATASET_NAME = None`.
-(If you're familiar with the HF `datasets.load_dataset` function, these are just the first 2 arguments to it.)
+It is also possible to list an existing task in your benchmark configuration with some adjustments. For example, a few tasks from mmlu is included `multimedqa`. There, the `task_alias` and `group_alias` (See [here](https://github.com/EleutherAI/lm-evaluation-harness/blob/main/docs/new_task_guide.md#beautifying-table-display) for more details) are modified to suit the benchmark.
 
-Next up, we have to set some “flags”:
-
-```python
-    def has_training_docs(self):
-        return # True/False
-
-    def has_validation_docs(self):
-        return # True/False
-
-    def has_test_docs(self):
-        return # True/False
+```yaml
+group: multimedqa
+task:
+  - pubmedqa
+  - medmcqa
+  - medqa_4options
+  - task: mmlu_anatomy
+    task_alias: "anatomy (mmlu)"
+    group_alias: null
+  - task: mmlu_clinical_knowledge
+    task_alias: "clinical_knowledge (mmlu)"
+    group_alias: null
+  ...
 ```
 
-These methods return `True`/`False` whether or not your task dataset provides documents for each split type. __Note__: if the test set does not have publicly available answer labels, please do not put it down as having a test set - return False.
+Alternatively, benchmarks can have tasks that are customizable for each task. They can be defined like how a yaml task is usually set.
 
-Lastly, we need to load the documents. In our terminology, a document (`doc`) is a single natural language data example stored in a Python `dict`. E.g.: `{“question”: “What is the capital of France?”, “answer”: “Paris”}`. Override the following methods to load your data splits from their storage location in `DATASET_PATH`:
-
-```python
-    def training_docs(self):
-        return #...
-
-    def validation_docs(self):
-        return #...
-
-    def test_docs(self):
-        return #...
+```yaml
+group: t0_eval
+task:
+  # Coreference Resolution
+  - dataset_path: super_glue
+    dataset_name: wsc.fixed
+    use_prompt: promptsource:*
+    training_split: train
+    validation_split: validation
+    metric_list:
+      - metric: exact_match
+        aggregation: mean
+        higher_is_better: true
+        ignore_case: true
+        ignore_punctuation: true
+  # Coreference Resolution
+  - dataset_path: winogrande
+    dataset_name: winogrande_xl
+    use_prompt: promptsource:*
+    training_split: train
+    validation_split: validation
+    metric_list:
+      - metric: exact_match
+        aggregation: mean
+        higher_is_better: true
+        ignore_case: true
+        ignore_punctuation: true
+  ...
 ```
 
-These should return a Python iterable (`list` or `generator`) of `dict`s that can be queried for individual `doc` examples.
+If the benchmark contains the same dataset but with different configurations, use `task` to differentiate between them. For example, T0-Eval evaluates on 3 versions of ANLI but the huggingface dataset collects them in one dataset.
 
-#### Processing Documents
-
-At this point, you can also process each individual document to, for example, strip whitespace or "detokenize" its fields. Put the processing logic into `_process_doc` and map the functions across training/validation/test docs inside of the respective functions.
-🔠 If your task is **multiple-choice**, we require you to format your documents such that they contain `gold` and `choices` fields. They can also have other fields, but those will be ignored by `MultipleChoiceTask`. `choices` should be a list of possible continuations, and `gold` should be an integer specifying the index of the correct completion.
-See [this task](https://github.com/EleutherAI/lm-evaluation-harness/blob/6caa0afd96a7a7efb2ec4c1f24ad1756e48f3aa7/lm_eval/tasks/sat.py#L60) for an example. 🔠
-
-### Formatting your Few-Shot Examples
-
-The harness is designed to facilitate task evaluations under the few-shot setting. Here we’ll format such examples.
-
-Format your document into a single query prompt __without the answer__ here. This method takes a single `doc` example of type `dict` with `str` key-value members. You should concatenate these `doc` item values together into a neatly formatted prompt.
-
-```python
-def doc_to_text(self, doc):
-    return ""
+```YAML
+group: t0_eval
+task:
+  ...
+  - task: anli_r1
+    dataset_path: anli
+    use_prompt: promptsource:*
+    training_split: train_r1
+    validation_split: dev_r1
+    metric_list:
+      - metric: exact_match
+        aggregation: mean
+        higher_is_better: true
+        ignore_case: true
+        ignore_punctuation: true
+  - task: anli_r2
+    dataset_path: anli
+    use_prompt: promptsource:*
+    training_split: train_r2
+    validation_split: dev_r2
+    metric_list:
+      - metric: exact_match
+        aggregation: mean
+        higher_is_better: true
+        ignore_case: true
+        ignore_punctuation: true
 ```
 
-<br>
-
-️🔠 **Multiple-Choice Formatting**
-
-If your task is multiple-choice, you can now skip ahead to <a href="#Registering-Your-Task">registering your task</a>.
-
-️️🔠 **End Multiple-Choice Formatting**
-
-<br>
-
-Format the target answer from the contents of `doc`. Note that the prepended `" "` is required to space out the `doc_to_text` and `doc_to_target` strings.
-
-```python
-def doc_to_target(self, doc):
-    target = ""
-    return " " + target
-```
-
-Finally, be aware that the strings from `doc_to_text` and `doc_to_target` will be concatenated together to build up labeled examples in the k-shot setting where k > 0. Design with that in mind 👍.
-
-### Decontamination
-For background on decontamination please see [this](./decontamination.md).
-
-If you wish to support decontamination studies for your task simply override the "should_decontaminate" method and return true.
-
-You also need to override "doc_to_decontamination_query" and return the data you wish to compare against the training set. This doesn't necessarily need to be the full document or request, and we leave this up to the implementor. For a multi-choice evaluation you could for example just return the question.
-
-### Registering Your Task
-
-Now's a good time to register your task to expose it for usage. All you'll need to do is import your task module in `lm_eval/tasks/__init__.py` and provide an entry in the `TASK_REGISTRY`  dictionary with the key as the name of your benchmark task (in the form it'll be referred to in the command line) and the value as the task class. See how it's done for other tasks in the [file](https://github.com/EleutherAI/lm-evaluation-harness/blob/master/lm_eval/tasks/__init__.py).
-
-### Checking the Data
-
-After registering your task, you can now check on your data downloading and verify that the few-shot samples look as intended. Run the following command with your desired args:
-
-```bash
-python -m scripts.write_out \
-    --output_base_path <path> \
-    --tasks <your-task> \
-    --sets <train | val | test> \
-    --num_fewshot K \
-    --num_examples N \
-    --description_dict_path <path>
-```
-
-Open the file specified at the `--output_base_path <path>` and ensure it passes
-a simple eye test.
-
-## Evaluation
-
-**🛑**  If your task is a single-true multiple-choice task and you've correctly inherited from `MultipleChoiceTask` then your job here is done; <a href="#Checking-the-Task-Performance">go ‘head and check on the task performance!</a> 🛑
-
-Now comes evaluation. The methods you'll need to implement are:
-
-```python
-def construct_requests(self, doc, ctx):
-    """ Uses RequestFactory to construct Requests and returns an iterable of
-    Requests which will be sent to the LM.
-
-    :param doc:
-        The document as returned from training_docs, validation_docs, or test_docs.
-    :param ctx: str
-        The context string, generated by fewshot_context. This includes the natural
-        language description, as well as the few shot examples, and the question
-        part of the document for `doc`.
-    """
-    return ...
-```
-#### What's a `Request`? What's a `doc`?
-To reiterate, a `doc` is just a `Dict` object that contains information about a document from your corpus. It can contain things like a prompt, question type information, answers and anything else you think will be needed in order to assess your model for a given task. Keep in mind that the fields of this can be basically whatever you want (you can sort this out in `training_docs` \ `validation_docs` \ `test_docs` if you need to customise things - see above), just remember to be consistent with them throughout the rest of the `Task` you write up.
-A `Request` is an object that takes the text prompt you want to present to a model and computes one of a few different types of response. These are evaluated lazily (meaning, only when the result is actually needed). If your task requires generating text you'll need to return a `rf.greedy_until` request otherwise an `rf.loglikelihood` across all labels in a classification tasks will do.
-The function `construct_requests` returns a list or tuple of, or singular `Request`s. This is particularly handy if you are creating more than one request per `doc` (usually because you're up to something like multi-task learning). The objects this function returns then get consumed one by one and turned into result objects.
-
-
-```python
-def process_results(self, doc, results):
-    """Take a single document and the LM results and evaluates, returning a
-    dict where keys are the names of submetrics and values are the values of
-    the metric for that one document
-
-    :param doc:
-        The document as returned from training_docs, validation_docs, or test_docs.
-    :param results:
-        The results of the requests created in construct_requests.
-    """
-    return {}
-```
-This is the next step in the chain after `construct_requests`. In between this function and the one above, the request is evaluated. The results of that request are returned in the `results` arg to this function. By processing results, what is meant is calculating the metric or metrics of interest for your dataset using the result and associated ground truth given to this function. It's possible to calculate and return multiple metrics in this function and the logic for it can be whatever you want - as long as you've made sure the ground truth was included in the `doc` object. The dict returned from this function should be of the format `{'metric_name': value}`. It is not necessary to have the same keys for every doc processed using `process_results`; this sort of thing can be handled in the next function, `aggregation`.
-
-
-```python
-def aggregation(self):
-    """
-    :returns: {str: [float] -> float}
-        A dictionary where keys are the names of submetrics and values are
-        functions that aggregate a list of metrics
-    """
-    return {}
-```
-In `process_results`, model outputs are converted into metrics. These metrics are per document metrics, however; the `aggregation` function is used to work out what to do with them to create a corpus-level metric. Imagine you have a bunch of documents, for each of which you have calculated an F1 score. What should that mean overall? Should they be summed, averaged, the min/max found? This function handles that problem.
-
-The contents of the function itself are pretty straightforward; it should simply return a dict that maps from each metric label that could be returned by `process_results` to a function that can be used to aggregate that metric. That is to say, if the metrics that `process_results` could return are given by `{'a', 'b', 'c'}`, then all of these keys should be present in the dict returned by `aggregation`.
-__NOTE__: See `lm_eval/metrics.py` for a few "built-in" aggregate metrics you can easily import. The standard metrics available in this package are generally based on `sklearn` functions, so if you are in any doubt for how to set things up the documentation over there can be of assistance. If you need to write a custom metric for some reason, start by looking at the existing ones in `lm_eval/metrics.py` for an idea about what the function signature needs to be.
-
-```python
-def higher_is_better(self):
-    """
-    :returns: {str: bool}
-        A dictionary where keys are the names of submetrics and values are
-        whether a higher value of the submetric is better
-    """
-    return {}
-```
-Finally, this function returns a dict with the same keys as `aggregation` and as it says in the description, simply tells us whether higher scores are better.
-
-Some tasks that are good examples of various ways evaluation can be implemented can be found here: [LAMBADA](https://github.com/EleutherAI/lm-evaluation-harness/blob/master/lm_eval/tasks/lambada.py), [TriviaQA](https://github.com/EleutherAI/lm-evaluation-harness/blob/master/lm_eval/tasks/triviaqa.py), [SQuAD](https://github.com/EleutherAI/lm-evaluation-harness/blob/master/lm_eval/tasks/squad.py).
-
-Tip: Feel free to create your own helper-methods for your task!
-
-### Checking the Task Performance
-
-```sh
-python main.py \
-	--model gpt2 \
-	--model_args device=<device-name> \
-	--tasks <task-name> \
-	--num_fewshot K
-```
-
-Set the limit size, `N`, to a smallish number (e.g. 10) and try out the task under different `K`-shot settings. If you have an Nvidia GPU at your disposal, add the argument
-`--model_args device=cuda:0`. If you have access to an OpenAI API key, you can also evaluate GPT-3 on various tasks with the following command:
-
-```sh
-export OPENAI_API_SECRET_KEY=YOUR_KEY_HERE
-python main.py \
-	--model gpt3 \
-	--tasks <task-name> \
-	--num_fewshot K
-```
-
-### Checking the Model Outputs
-The `--write_out.py` script mentioned previously can be used to verify that the prompts look as intended. If you also want to save model outputs, you can use the `--write_out` parameter in `main.py` to dump JSON with prompts and completions. The output path can be chosen with `--output_base_path`. It is helpful for debugging and for exploring model outputs.
-
-```sh
-python main.py \
-	--model gpt2 \
-	--model_args device=<device-name> \
-	--tasks <task-name> \
-	--num_fewshot K \
-    --write_out \
-    --output_base_path <path>
-```
-
-### Running Unit Tests
-
-To run the entire test suite, use:
-
-```sh
-pytest
-```
-
-This is usually overkill; to run only the tests for your task, do:
-```sh
-pytest -k <task name>
-```
-
-## Versioning
-
-Lastly, we need to "version control". Tasks in the harness can always evolve. Metrics get updated, data sources change, etc. It’s important to mark each task with a version attribute so users can document which implementation version was used to obtain their results. Add a `VERSION` attribute to your task right below the class name and set it to `0` (this is the first version/implementation of your task):
-
-```python
-class TaskName(...):
-	VERSION = 0
-```
-
-## Submitting your Task
-
-You can format your changes and perform flake8 standard checks by running the following commands:
-
-```sh
-pre-commit install
-pre-commit run --all-files
-```
-
-Now push your work and make a pull request! Thanks for the contribution 👍. If there are any questions, leave a message in the `#lm-thunderdome` channel on the EAI discord.
+Calling the benchmark is done the same way we would call any task with `--tasks`. Benchmarks can be added in `lm_eval/tasks/benchmarks/`
