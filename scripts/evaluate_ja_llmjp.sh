@@ -32,3 +32,5 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   dataset_dir=$DATASET_DIR \
   log_dir=$JMMLU_OUTDIR \
   wandb.run_name=llm_jp_eval_jmmlu
+
+python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path $JMMLU_OUTDIR

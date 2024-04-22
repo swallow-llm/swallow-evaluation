@@ -112,7 +112,7 @@ The evaluation result score and output results are saved in `{log_dir}/{run_name
 The following script computes the accuracy of each task (category) of predicted results on JMMLU.
 
 ```bash
-python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path /path/to/pred_file
+python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path {log_dir}
 ```
 
 When the predicted results are stored in `{log_dir}/{run_name.replace('/', '--')}_{current_time}.json`, accuracies of each category will be stored in `{log_dir}/{run_name.replace('/', '--')}_{current_time}_per_task.json`.

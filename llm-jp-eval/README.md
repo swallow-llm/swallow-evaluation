@@ -114,7 +114,7 @@ CUDA_VISIBLE_DEVICES=0 poetry run python scripts/evaluate_llm.py -cn config.yaml
 以下のスクリプトを用いて，JMMLUでの評価結果のカテゴリ別の正解率を集計する．
 
 ```bash
-python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path /path/to/pred_file
+python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path {log_dir}
 ```
 
 評価の出力結果を保存するファイルが`{log_dir}/{run_name.replace('/', '--')}_{current_time}.json` の場合，カテゴリ別の正解率は`{log_dir}/{run_name.replace('/', '--')}_{current_time}_per_task.json` に保存される．
