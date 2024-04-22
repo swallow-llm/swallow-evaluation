@@ -109,6 +109,16 @@ CUDA_VISIBLE_DEVICES=0 poetry run python scripts/evaluate_llm.py -cn config.yaml
 
 評価結果のスコアと出力結果は `{log_dir}/{run_name.replace('/', '--')}_{current_time}.json` に保存される．
 
+### JMMLUの評価結果をカテゴリ別・全カテゴリで集計
+
+以下のスクリプトを用いて，JMMLUでの評価結果のカテゴリ別の正解率を集計する．
+
+```bash
+python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path {log_dir}
+```
+
+評価の出力結果を保存するファイルが`{log_dir}/{run_name.replace('/', '--')}_{current_time}.json` の場合，カテゴリ別の正解率は`{log_dir}/{run_name.replace('/', '--')}_{current_time}_per_task.json` に保存される．
+
 ### 評価結果をW&Bで管理
 
 評価結果と生成ログは，config ファイルに設定されている`wandb`の情報に基づいて，自動でW&Bと同期される．
