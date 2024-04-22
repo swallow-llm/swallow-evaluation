@@ -54,7 +54,7 @@ def display_result_single(args):
             df_3 = df_cat[["model", "score"]].groupby(["model"]).mean()
             print(df_3.sort_values(by="score", ascending=False))
             for model_id in args.model_list:
-                result[model_id][category]["average"] = float(df_3.loc[model_id]["score"].item())
+                result[model_id][category]["average"] = float(df_3.loc[model_id]["score"])
 
     for category in ["overall"] + CATEGORIES:
         score_category(category)
