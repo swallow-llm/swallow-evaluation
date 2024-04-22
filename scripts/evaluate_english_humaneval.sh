@@ -23,4 +23,5 @@ python bigcode-evaluation-harness/main.py \
   --save_generations_path ${OUTDIR}/generation.json \
   --use_auth_token \
   --max_memory_per_gpu auto \
-  --trust_remote_code
+  --trust_remote_code \
+  --max_length_generation 1024

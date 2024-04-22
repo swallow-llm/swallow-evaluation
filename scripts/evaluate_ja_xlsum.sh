@@ -8,12 +8,13 @@ MODEL_NAME_PATH=$1
 NUM_FEWSHOT=1
 NUM_TESTCASE="all"
 
-OUTDIR="results/${MODEL_NAME_PATH}/ja/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
     --model_args pretrained=$MODEL_NAME_PATH \
     --tasks "xlsum_ja" \
+    --limit $NUM_TESTCASE \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
     --verbose \

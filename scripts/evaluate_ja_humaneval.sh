@@ -2,7 +2,6 @@
 
 source .venv_bigcode/bin/activate
 
-
 MODEL_NAME_PATH=$1
 NUM_SAMPLES=10
 BATCH_SIZE=10
