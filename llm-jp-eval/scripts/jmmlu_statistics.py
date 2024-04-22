@@ -40,9 +40,15 @@ def get_statistics(pred_path: str, ques2task: dict):
     
     # compute exact match for each task
     results = {}
+    all_true = 0
+    all_false = 0
     for t in task_preds:
         results[f"jmmlu_{t}_exact_match"] = task_preds[t]["true"] / (task_preds[t]["true"] + task_preds[t]["false"])
+        all_true += task_preds[t]["true"]
+        all_false += task_preds[t]["false"]
         
+    results["jmmlu"] = all_true / (all_true + all_false)
+    
     return results
     
 

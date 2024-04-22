@@ -107,6 +107,16 @@ Others options in the configuration file:
 
 The evaluation result score and output results are saved in `{log_dir}/{run_name.replace('/', '--')}_{current_time}.json`.
 
+### Evaluation results on JMMLU for each task
+
+The following script computes the accuracy of each task (category) of predicted results on JMMLU.
+
+```bash
+python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path /path/to/pred_file
+```
+
+When the predicted results are stored in `{log_dir}/{run_name.replace('/', '--')}_{current_time}.json`, accuracies of each category will be stored in `{log_dir}/{run_name.replace('/', '--')}_{current_time}_per_task.json`.
+
 ### Manage evaluation results with W&B
 
 Evaluation results and generated logs are automatically synchronized with W&B based on the `wandb` information set in the config file.
