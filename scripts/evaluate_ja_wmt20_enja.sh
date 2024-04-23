@@ -14,7 +14,6 @@ python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
     --model_args pretrained=$MODEL_NAME_PATH \
     --tasks "wmt20-en-ja" \
-    --limit $NUM_TESTCASE \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
     --verbose \
