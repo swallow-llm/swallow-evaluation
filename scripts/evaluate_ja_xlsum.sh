@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# running lm-evaluation-harness-jp for mgsm task
+# running lm-evaluation-harness-jp for xlsum task
 source .venv_harness_jp/bin/activate
 export TOKENIZERS_PARALLELISM=false
 
@@ -17,5 +17,5 @@ python lm-evaluation-harness-jp/main.py \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
     --verbose \
-    --device cuda:0 \
+    --device cuda \
     --output_path ${OUTDIR}/score_xlsum.json
