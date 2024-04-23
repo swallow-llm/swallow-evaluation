@@ -2258,9 +2258,9 @@ class NekomataAdapter(BaseModelAdapter):
         return "nekomata" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(
-            model_path, **from_pretrained_kwargs,
+            model_path, **from_pretrained_kwargs, trust_remote_code=True
         )
         return model, tokenizer
 

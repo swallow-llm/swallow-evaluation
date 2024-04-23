@@ -1557,7 +1557,7 @@ register_conv_template(
         name="nekomata",
         system_template="{system_message}",
         system_message="以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。\n\n###指示:\n入力文に対して、適切な応答を生成してください。\n\n",
-        roles=("### 入力:", "### 応答:"),
+        roles=("### 入力:\n", "### 応答:\n"),
         sep_style=SeparatorStyle.CALM2,
         sep="\n\n",
     )
@@ -1641,7 +1641,7 @@ if __name__ == "__main__":
     print("\n")
 
     print("Japaneselm template:")
-    conv = get_conv_template("japanese-stablelm-instruct-gamma")
+    conv = get_conv_template("nekomata")
     conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
     conv.append_message(conv.roles[1], "元気です、ありがとう。")
     conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
