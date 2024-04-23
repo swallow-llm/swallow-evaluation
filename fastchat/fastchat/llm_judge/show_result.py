@@ -13,9 +13,11 @@ CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Rolepl
 
 
 def calculate_averages(scores):
-    # scores: [N, T], N: 設問数, T: ターン数(5)
+    # scores: [N, T], N: 設問数, T: 回答数(5)
     scores = np.array(list(scores))
-    question_mean = np.mean(scores, axis=0)
+    valid_scores = scores != -1
+    valid_count = valid_scores.sum(axis=0)
+    question_mean = np.where(valid_scores, scores, 0).sum(axis=0) / valid_count
     mu = np.mean(question_mean)
     sigma = np.std(question_mean, ddof=1)
     return mu, sigma
