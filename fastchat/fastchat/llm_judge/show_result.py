@@ -9,7 +9,7 @@ import json
 import numpy as np
 
 
-CATEGORIES = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
+CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
 
 
 def calculate_averages(scores):
