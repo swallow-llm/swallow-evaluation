@@ -66,7 +66,6 @@ def display_result_single(args):
                 result[model_id][category]["average"] = dict()
                 result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
                 result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
->>>>>>> 71b1611a1e5e0ef02bf847dc4ccddba172dbbef5
 
     for category in ["overall"] + CATEGORIES:
         score_category(category)
