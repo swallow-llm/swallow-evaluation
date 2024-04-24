@@ -10,6 +10,7 @@ import numpy as np
 
 
 CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
+CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
 
 
 def calculate_averages(scores):
@@ -69,17 +70,17 @@ def display_result_single(args):
                 result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
                 result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
 
-    for category in ["overall"] + CATEGORIES:
+    for category in ["overall"] + CATEGORIES_ordered:
         score_category(category)
 
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
         result[model_id]["result"] = dict()
         result[model_id]["result"]["score"] = ",".join(
-            [f"{(result[model_id][category]['average']['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES]
+            [f"{(result[model_id][category]['average']['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
         )
         result[model_id]["result"]["new_variance"] = ",".join(
-            [f"{result[model_id][category]['average']['new_variance']:.4f}" for category in ["overall"] + CATEGORIES]
+            [f"{result[model_id][category]['average']['new_variance']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
         )
 
     if args.output_file is not None:
