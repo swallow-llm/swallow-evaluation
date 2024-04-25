@@ -201,27 +201,28 @@ few-shot数: 4
 
 ## Humanevalのタスクで評価
 
-データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
+* データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
+* few-shot数: 10
+* 評価を行うにはdockerイメージのビルドが必要
 
-### 出力の生成
-
-```bash
-bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH
-```
-
-few-shot数: 10
-
-### 評価 (未整備)
-
-通常の環境でモデルが生成したコードを実行することは危険なので、docker環境下でコードを実行し、評価する。
+### 出力と評価を同時に行う場合
 
 ```bash
-cd bigcode-evaluation-harness
-bash eval_ja.sh $MODEL_PATH
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH true true
 ```
 
-* 結果の保存はされないので目視で確認してください（整備中です）
-* dockerコンテナ内での出力をコンテナ外に保存すれば良いのですが、まだ実装していません。（誰か時間があったらやってください）
+### 出力だけを行う場合
+
+```bash
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH true false
+```
+
+### 評価だけを行う場合
+
+```bash
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH false true
+```
+
 
 ## fastchat(mt_bench)の評価の実行
 
