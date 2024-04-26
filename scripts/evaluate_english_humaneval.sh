@@ -36,3 +36,6 @@ if [ ${DO_EVAL} = "true" ]; then
   touch $(pwd)/${OUTDIR}/metrics.json
   docker run -v $(pwd)/${OUTDIR}/generation_humaneval.json:/app/generations_py.json -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json -it evaluation-harness python3 main.py --model ${MODEL_NAME_PATH} --tasks humaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10 --metric_output_path /app/metrics.json
 fi
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH
