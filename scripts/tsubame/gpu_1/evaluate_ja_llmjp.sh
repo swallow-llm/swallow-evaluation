@@ -35,7 +35,7 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   model.pretrained_model_name_or_path=$MODEL_ID \
   tokenizer.pretrained_model_name_or_path=$MODEL_ID \
   metainfo.max_num_samples=$NUM_TESTCASE \
-  target_dataset="[\"jamp\", \"janli\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
+  target_dataset="[\"jamp\", \"janli\", \"jemhopqa\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
   metainfo.num_few_shots=$GENERAL_NUM_FEWSHOT \
   dataset_dir=$DATASET_DIR \
   log_dir=$GENERAL_OUTDIR \
@@ -43,10 +43,13 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
 
 python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   model.pretrained_model_name_or_path=$MODEL_ID \
-  tokenizer.pretrained_model_name_or_path=$TOKENIZER_ID \
+  tokenizer.pretrained_model_name_or_path=$MODEL_ID \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="jmmlu" \
   metainfo.num_few_shots=$JMMLU_NUM_FEWSHOT \
   dataset_dir=$DATASET_DIR \
   log_dir=$JMMLU_OUTDIR \
   wandb.run_name=llm_jp_eval_jmmlu
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_ID

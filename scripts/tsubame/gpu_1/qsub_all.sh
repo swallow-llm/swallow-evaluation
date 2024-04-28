@@ -1,6 +1,6 @@
 REPO_PATH="/gs/fs/tga-okazaki/tga-ohi/jalm-evaluation-private"
 GROUP_ID="tga-okazaki"
-HUGGINGFACE_CACHE="/gs/fs/tga-okazaki/tga-ohi/.cache"
+HUGGINGFACE_CACHE="/gs/bs/tga-okazaki/tga-ohi/.cache"
 
 MODEL_ID=$1
 

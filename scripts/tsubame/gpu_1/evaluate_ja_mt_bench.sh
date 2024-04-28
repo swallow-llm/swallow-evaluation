@@ -28,3 +28,7 @@ cd fastchat/fastchat/llm_judge
 python gen_model_answer.py --model-path ${MODEL_ID} --model-id ${MODEL_ID} --bench-name japanese_mt_bench --num-choices 5 --num-gpus-total $GPU_NUM --num-gpus-per-model $GPU_NUM
 python gen_judgment.py --model-list ${MODEL_ID} --bench-name japanese_mt_bench --parallel 4
 python show_result.py --model-list ${MODEL_ID} --bench-name japanese_mt_bench --output-file ${OUTDIR}/judge.json
+
+# aggregate results
+cd ../../../
+python scripts/aggregate_result.py --model $MODEL_ID

@@ -34,3 +34,6 @@ python lm-evaluation-harness-jp/main.py \
     --verbose \
     --device cuda \
     --output_path ${OUTDIR}/score_math.json
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_ID

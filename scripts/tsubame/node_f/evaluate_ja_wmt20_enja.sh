@@ -22,7 +22,7 @@ source .venv_harness_jp/bin/activate
 
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/wmt20_en_ja/wmt20_en_ja_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="${REPO_PATH}/results/${MODEL_ID}/ja/wmt20_en_ja/wmt20_en_ja_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 mkdir -p ${OUTDIR}
 
 python lm-evaluation-harness-jp/main.py \
@@ -34,3 +34,6 @@ python lm-evaluation-harness-jp/main.py \
     --verbose \
     --device cuda \
     --output_path ${OUTDIR}/score_wmt20_en_ja.json
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_ID
