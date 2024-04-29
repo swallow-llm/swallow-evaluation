@@ -44,6 +44,7 @@ pip install -e ".[ja]"
 pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
+pip install nagisa
 ```
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。

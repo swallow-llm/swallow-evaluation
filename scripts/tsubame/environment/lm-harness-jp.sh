@@ -21,6 +21,7 @@ source .venv_harness_jp/bin/activate
 cd lm-evaluation-harness-jp
 pip install --upgrade pip
 pip install -e ".[ja]"
+pip install nagisa
 pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
