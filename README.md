@@ -71,7 +71,7 @@ torchのバージョンがcudaに合わない場合は、torchを入れ直して
 ```bash
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
-# 環境にあったtorchをインストール
+pip install --upgrade pip
 pip install -e .
 # For Llama
 pip install sentencepiece
@@ -87,12 +87,13 @@ bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode
 ```bash
 source .venv_fastchat/bin/activate
 cd fastchat
-pip install -U pip
-# 環境にあったtorchをinstall
+pip install --upgrade pip
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
 `jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
 
