@@ -9,6 +9,7 @@ NUM_FEWSHOT=4
 NUM_TESTCASE="all"
 
 OUTDIR="results/${MODEL_NAME_PATH}/ja/wmt20_en_ja/wmt20_en_ja_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \

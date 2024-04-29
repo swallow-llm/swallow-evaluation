@@ -13,6 +13,9 @@ JMMLU_NUM_FEWSHOT=5
 GENERAL_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${GENERAL_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 JMMLU_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${JMMLU_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
+mkdir -p $GENERAL_OUTDIR
+mkdir -p $JMMLU_OUTDIR
+
 python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$TOKENIZER_NAME_PATH \

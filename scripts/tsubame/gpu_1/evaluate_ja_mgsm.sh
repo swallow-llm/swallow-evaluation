@@ -23,7 +23,7 @@ source .venv_harness_jp/bin/activate
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"
 OUTDIR="${REPO_PATH}/results/${MODEL_ID}/ja/mgsm/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
-mkdir -p ${OUTDIR}
+mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \

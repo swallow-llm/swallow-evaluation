@@ -21,7 +21,7 @@ cd $REPO_PATH
 source .venv_harness_en/bin/activate
 
 OUTDIR="${REPO_PATH}/results/${MODEL_ID}/en/harness_en"
-mkdir -p ${OUTDIR}
+mkdir -p $OUTDIR
 
 GENERAL_TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squadv2"
 GENERAL_NUM_FEWSHOT=4
