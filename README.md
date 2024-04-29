@@ -118,9 +118,15 @@ cd llm-jp-eval
 python scripts/preprocess_dataset.py  \
 --dataset-name all  \
 --output-dir ./dataset
+
+cd ../
 ```
 
-MEMO: `preprocess_dataset.py`を実行した際、データセットのダウンロード中にサーバーとの接続エラーでプログラムが落ちることがかなりある。現状では我慢して複数回プログラムを実行しているが、解決できそうなら誰かしてください。
+* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、configをコピーする
+
+```bash
+cp llm-jp-eval/configs/config_template.yaml llm-jp-eval/configs/config.yaml
+```
 
 ## llm-jp-eval 評価の実行
 
