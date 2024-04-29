@@ -19,5 +19,6 @@ python lm-evaluation-harness-jp/main.py \
     --verbose \
     --device cuda \
     --output_path ${OUTDIR}/score_xlsum.json
+    --use_cache ${OUTDIR}
 
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH

@@ -19,6 +19,7 @@ python lm-evaluation-harness-jp/main.py \
     --verbose \
     --device cuda \
     --output_path ${OUTDIR}/score_wmt20_en_ja.json
+    --use_cache ${OUTDIR}
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH
