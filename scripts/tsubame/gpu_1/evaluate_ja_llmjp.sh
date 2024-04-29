@@ -51,5 +51,7 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   log_dir=$JMMLU_OUTDIR \
   wandb.run_name=llm_jp_eval_jmmlu
 
+python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path $JMMLU_OUTDIR
+
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_ID
