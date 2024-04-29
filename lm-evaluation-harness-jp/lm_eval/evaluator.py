@@ -74,8 +74,8 @@ def simple_evaluate(
     if use_cache is not None:
         cache_path = Path(use_cache)
         cache_path.mkdir(parents=True, exist_ok=True)
-        print(f"Using cache at {use_cache + '_rank' + str(lm.rank) + '.db'}")
-        lm = lm_eval.base.CachingLM(lm, use_cache + "_rank" + str(lm.rank) + ".db")
+        print(f"Using cache at {use_cache + '.db'}")
+        lm = lm_eval.base.CachingLM(lm, use_cache + ".db")
 
     task_dict = lm_eval.tasks.get_task_dict(tasks)
 

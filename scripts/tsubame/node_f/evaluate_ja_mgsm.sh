@@ -33,7 +33,7 @@ python lm-evaluation-harness-jp/main.py \
     --batch_size 2 \
     --verbose \
     --device cuda \
-    --output_path ${OUTDIR}/score_math.json
+    --output_path ${OUTDIR}/score_math.json \
     --use_cache ${OUTDIR}
 
 # aggregate results

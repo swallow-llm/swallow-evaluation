@@ -33,7 +33,7 @@ python lm-evaluation-harness-jp/main.py \
     --batch_size 2 \
     --verbose \
     --device cuda \
-    --output_path ${OUTDIR}/score_wmt20_ja_en.json
+    --output_path ${OUTDIR}/score_wmt20_ja_en.json \
     --use_cache ${OUTDIR}
 
 # aggregate results
