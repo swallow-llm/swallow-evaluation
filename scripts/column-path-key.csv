@@ -14,7 +14,7 @@ RC,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,x,1
 jamp (NLI),ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jamp_exact_match,1
 janli (NLI),ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.janli_exact_match,1
 jcommonsenseqa,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jcommonsenseqa_exact_match,1
-jemhopqa,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jemhopqa_exact_match,1
+jemhopqa,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jemhopqa_char_f1,1
 jnli,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jnli_exact_match,1
 jsem,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jsem_exact_match,1
 jsick (NLI),ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jsick_exact_match,1
