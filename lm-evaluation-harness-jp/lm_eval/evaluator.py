@@ -2,6 +2,8 @@ import collections
 import itertools
 import numpy as np
 import random
+from pathlib import Path
+
 import lm_eval.metrics
 import lm_eval.models
 import lm_eval.tasks
@@ -17,7 +19,7 @@ def simple_evaluate(
     num_fewshot=0,
     batch_size=None,
     device=None,
-    no_cache=False,
+    use_cache=None,
     limit=None,
     bootstrap_iters=100000,
     description_dict=None,
@@ -41,8 +43,8 @@ def simple_evaluate(
         Batch size for model
     :param device: str, optional
         PyTorch device (e.g. "cpu" or "cuda:0") for running models
-    :param no_cache: bool
-        Whether or not to cache
+    :param use_cache: str
+        Path to cache file, or None to disable caching
     :param limit: int or list of int, optional
         Limit the number of examples per task (only use this for testing)
     :param bootstrap_iters:
@@ -69,15 +71,10 @@ def simple_evaluate(
         assert isinstance(model, lm_eval.base.LM)
         lm = model
 
-    if not no_cache:
-        lm = lm_eval.base.CachingLM(
-            lm,
-            "lm_cache/"
-            + model
-            + "_"
-            + model_args.replace("=", "-").replace(",", "_").replace("/", "-")
-            + ".db",
-        )
+    if use_cache is not None:
+        cache_path = Path(use_cache)
+        cache_path.mkdir(parents=True, exist_ok=True)
+        lm = lm_eval.base.CachingLM(lm, cache_path)
 
     task_dict = lm_eval.tasks.get_task_dict(tasks)
 
@@ -102,7 +99,7 @@ def simple_evaluate(
         "num_fewshot": num_fewshot,
         "batch_size": batch_size,
         "device": device,
-        "no_cache": no_cache,
+        "use_cache": use_cache,
         "limit": limit,
         "bootstrap_iters": bootstrap_iters,
         "description_dict": description_dict,
