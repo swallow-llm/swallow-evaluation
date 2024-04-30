@@ -2182,9 +2182,117 @@ class SwallowAdapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("swallow")
 
+
+class JapaneseStableLMBetaAdapter(BaseModelAdapter):
+    """The model adapter for japanese-stablelm-instruct-beta"""
+
+    def match(self, model_path: str):
+        return "japanese-stablelm-instruct-beta" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("japanese-stablelm-instruct-beta")
+
+
+class ELYZAJapaneseLlama2Adapter(BaseModelAdapter):
+    """The model adapter for ELYZA-japanese-Llama-2"""
+
+    def match(self, model_path: str):
+        return "elyza-japanese-llama-2" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("ELYZA-japanese-Llama-2")
+
+
+class Calm2Adapter(BaseModelAdapter):
+    """The model adapter for calm2"""
+
+    def match(self, model_path: str):
+        return "calm2" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("calm2")
+
+
+class RakutenAIAdapter(BaseModelAdapter):
+    """The model adapter for calm2"""
+
+    def match(self, model_path: str):
+        return "rakutenai" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("RakutenAI")
+
+
+class NekomataAdapter(BaseModelAdapter):
+    """The model adapter for calm2"""
+
+    def match(self, model_path: str):
+        return "nekomata" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs, trust_remote_code=True
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("nekomata")
+
+
+class JapaneseStableLMGammaAdapter(BaseModelAdapter):
+    """The model adapter for japanese-stablelm-instruct-gamma"""
+
+    def match(self, model_path: str):
+        return "japanese-stablelm-instruct-gamma" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("japanese-stablelm-instruct-gamma")
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(SwallowAdapter)
+register_model_adapter(JapaneseStableLMBetaAdapter)
+register_model_adapter(ELYZAJapaneseLlama2Adapter)
+register_model_adapter(Calm2Adapter)
+register_model_adapter(RakutenAIAdapter)
+register_model_adapter(NekomataAdapter)
+register_model_adapter(JapaneseStableLMGammaAdapter)
 register_model_adapter(PeftModelAdapter)
 register_model_adapter(StableVicunaAdapter)
 register_model_adapter(VicunaAdapter)

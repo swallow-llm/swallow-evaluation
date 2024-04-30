@@ -10,6 +10,7 @@ import os
 import re
 import time
 from typing import Optional
+import random
 
 import openai
 import anthropic
@@ -26,6 +27,7 @@ from fastchat.model.model_adapter import (
 # API setting constants
 API_MAX_RETRY = 16
 API_RETRY_SLEEP = 10
+MAX_API_RETRY_SLEEP = 600
 API_ERROR_OUTPUT = "$ERROR$"
 
 TIE_DELTA = 0.1
@@ -445,6 +447,8 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
         openai.api_base = api_dict["api_base"]
         openai.api_key = api_dict["api_key"]
     output = API_ERROR_OUTPUT
+    min_sleep_time = 1
+    max_sleep_time = API_RETRY_SLEEP
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
@@ -457,6 +461,13 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
             )
             output = response["choices"][0]["message"]["content"]
             break
+        except openai.error.RateLimitError as e:
+            print(type(e), e)
+            sleep_time = random.randint(min_sleep_time, max_sleep_time)
+            print(f"Sleeping for {sleep_time} seconds")
+            time.sleep(sleep_time)
+            max_sleep_time = min(MAX_API_RETRY_SLEEP, max_sleep_time * 2)
+            min_sleep_time = max_sleep_time // 2
         except openai.error.OpenAIError as e:
             print(type(e), e)
             time.sleep(API_RETRY_SLEEP)
@@ -478,6 +489,8 @@ def chat_completion_openai_azure(model, conv, temperature, max_tokens, api_dict=
         model = model[6:]
 
     output = API_ERROR_OUTPUT
+    min_sleep_time = 1
+    max_sleep_time = API_RETRY_SLEEP
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
@@ -490,6 +503,13 @@ def chat_completion_openai_azure(model, conv, temperature, max_tokens, api_dict=
             )
             output = response["choices"][0]["message"]["content"]
             break
+        except openai.error.RateLimitError as e:
+            print(type(e), e)
+            sleep_time = random.randint(min_sleep_time, max_sleep_time)
+            print(f"Sleeping for {sleep_time} seconds")
+            time.sleep(sleep_time)
+            max_sleep_time = min(MAX_API_RETRY_SLEEP, max_sleep_time * 2)
+            min_sleep_time = max_sleep_time // 2
         except openai.error.OpenAIError as e:
             print(type(e), e)
             time.sleep(API_RETRY_SLEEP)
