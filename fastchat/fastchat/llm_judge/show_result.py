@@ -76,12 +76,14 @@ def display_result_single(args):
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
         result[model_id]["result"] = dict()
-        result[model_id]["result"]["score"] = ",".join(
-            [f"{(result[model_id][category]['average']['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
-        )
-        result[model_id]["result"]["new_variance"] = ",".join(
-            [f"{result[model_id][category]['average']['new_variance']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
-        )
+        for turn in ["first_turn", "second_turn", "average"]:
+            result[model_id]["result"][turn] = dict()
+            result[model_id]["result"][turn]["score"] = ",".join(
+                [f"{(result[model_id][category][turn]['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            )
+            result[model_id]["result"][turn]["new_variance"] = ",".join(
+                [f"{result[model_id][category][turn]['new_variance']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            )
 
     if args.output_file is not None:
         with open(args.output_file, "w") as f:
