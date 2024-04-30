@@ -44,6 +44,7 @@ pip install -e ".[ja]"
 pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
+pip install nagisa
 ```
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
@@ -70,7 +71,7 @@ torchのバージョンがcudaに合わない場合は、torchを入れ直して
 ```bash
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
-# 環境にあったtorchをインストール
+pip install --upgrade pip
 pip install -e .
 # For Llama
 pip install sentencepiece
@@ -86,12 +87,13 @@ bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode
 ```bash
 source .venv_fastchat/bin/activate
 cd fastchat
-pip install -U pip
-# 環境にあったtorchをinstall
+pip install --upgrade pip
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
 `jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
 
@@ -116,9 +118,15 @@ cd llm-jp-eval
 python scripts/preprocess_dataset.py  \
 --dataset-name all  \
 --output-dir ./dataset
+
+cd ../
 ```
 
-MEMO: `preprocess_dataset.py`を実行した際、データセットのダウンロード中にサーバーとの接続エラーでプログラムが落ちることがかなりある。現状では我慢して複数回プログラムを実行しているが、解決できそうなら誰かしてください。
+* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、configをコピーする
+
+```bash
+cp llm-jp-eval/configs/config_template.yaml llm-jp-eval/configs/config.yaml
+```
 
 ## llm-jp-eval 評価の実行
 

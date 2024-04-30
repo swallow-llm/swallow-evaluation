@@ -65,3 +65,6 @@ accelerate launch -m lm_eval --model hf \
     --output_path "../$GENERAL_OUTDIR" \
     --use_cache "../$GENERAL_OUTDIR" \
     --seed 42 \
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

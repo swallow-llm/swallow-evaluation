@@ -21,7 +21,7 @@ cd $REPO_PATH
 source .venv_harness_en/bin/activate
 
 OUTDIR="${REPO_PATH}/results/${MODEL_ID}/en/harness_en"
-mkdir -p ${OUTDIR}
+mkdir -p $OUTDIR
 
 GENERAL_TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squadv2"
 GENERAL_NUM_FEWSHOT=4
@@ -80,3 +80,7 @@ accelerate launch --num_processes=1 --gpu_ids="0" -m lm_eval --model hf \
     --output_path "$GENERAL_OUTDIR" \
     --use_cache "$GENERAL_OUTDIR" \
     --seed 42 \
+
+# aggregate results
+cd ../
+python scripts/aggregate_result.py --model $MODEL_ID

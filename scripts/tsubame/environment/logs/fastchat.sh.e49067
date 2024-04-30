@@ -1,7 +1,0 @@
-please do: 
-
-eval "$(/apps/t4/rhel9/free/miniconda/24.1.2/bin/conda shell.YOUR_SHELL_NAME hook)"
-
-where YOUR_SHELL_NAME is your shell name.(ex: bash)
-WARNING: fschat 0.2.35 does not provide the extra 'llm-judge'
-WARNING: fschat 0.2.35 does not provide the extra 'model-worker'

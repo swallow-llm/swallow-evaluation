@@ -80,3 +80,7 @@ accelerate launch --num_processes=4 --gpu_ids="0,1,2,3" -m lm_eval --model hf \
     --output_path "$GENERAL_OUTDIR" \
     --use_cache "$GENERAL_OUTDIR" \
     --seed 42 \
+
+# aggregate results
+cd ../
+python scripts/aggregate_result.py --model $MODEL_ID

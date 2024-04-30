@@ -1,4 +1,4 @@
-REPO_PATH="/gs/fs/tga-okazaki/tga-ohi/jalm-evaluation-private"
+REPO_PATH="/gs/bs/tga-okazaki/tga-ohi/jalm-evaluation-private"
 GROUP_ID="tga-okazaki"
 mkdir -p logs
 

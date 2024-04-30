@@ -41,3 +41,6 @@ python bigcode-evaluation-harness/main.py \
   --max_memory_per_gpu auto \
   --trust_remote_code \
   --max_length_generation 1024
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_ID  

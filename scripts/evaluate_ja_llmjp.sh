@@ -13,11 +13,14 @@ JMMLU_NUM_FEWSHOT=5
 GENERAL_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${GENERAL_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 JMMLU_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${JMMLU_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
+mkdir -p $GENERAL_OUTDIR
+mkdir -p $JMMLU_OUTDIR
+
 python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$TOKENIZER_NAME_PATH \
   metainfo.max_num_samples=$NUM_TESTCASE \
-  target_dataset="[\"jamp\", \"janli\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
+  target_dataset="[\"jamp\", \"janli\", \"jemhopqa\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
   metainfo.num_few_shots=$GENERAL_NUM_FEWSHOT \
   dataset_dir=$DATASET_DIR \
   log_dir=$GENERAL_OUTDIR \
@@ -34,3 +37,6 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   wandb.run_name=llm_jp_eval_jmmlu
 
 python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path $JMMLU_OUTDIR
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

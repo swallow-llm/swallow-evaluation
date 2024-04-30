@@ -9,7 +9,9 @@ NUM_FEWSHOT=1
 NUM_TESTCASE="all"
 
 OUTDIR="results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+mkdir -p $OUTDIR
 
+echo ${OUTDIR}
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
     --model_args pretrained=$MODEL_NAME_PATH \
@@ -18,4 +20,7 @@ python lm-evaluation-harness-jp/main.py \
     --batch_size 2 \
     --verbose \
     --device cuda \
-    --output_path ${OUTDIR}/score_xlsum.json
+    --output_path ${OUTDIR}/score_xlsum.json \
+    --use_cache ${OUTDIR}
+
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH
