@@ -4,5 +4,5 @@ GPU_NUM=$3
 
 export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
 
-bash evaluate_english_humaneval.sh $MODEL_NAME_PATH true true
-bash evaluate_english.sh $MODEL_NAME_PATH
+bash scripts/evaluate_english_humaneval.sh $MODEL_NAME_PATH true true
+bash scripts/evaluate_english.sh $MODEL_NAME_PATH
