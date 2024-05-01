@@ -67,4 +67,5 @@ accelerate launch -m lm_eval --model hf \
     --seed 42 \
 
 # aggregate results
+cd ../
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH
