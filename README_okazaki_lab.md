@@ -8,6 +8,11 @@
 ## 準備
 
 [readme](README.md)にしたがって環境構築・llm-jp-eval データセットの前処理を行ってください。
+ただし、torchは以下のコマンドを使ってインストールし直すことを推奨します。
+
+```bash
+pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+```
 
 ## 評価
 
