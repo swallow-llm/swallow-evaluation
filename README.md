@@ -44,6 +44,7 @@ pip install -e ".[ja]"
 pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
+pip install nagisa
 ```
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
@@ -70,13 +71,14 @@ torchのバージョンがcudaに合わない場合は、torchを入れ直して
 ```bash
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
-# 環境にあったtorchをインストール
-pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install --upgrade pip
 pip install -e .
 # For Llama
 pip install sentencepiece
 pip install protobuf
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
 bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
@@ -85,12 +87,13 @@ bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode
 ```bash
 source .venv_fastchat/bin/activate
 cd fastchat
-pip install -U pip
-# 環境にあったtorchをinstall
+pip install --upgrade pip
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 ```
+
+torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
 `jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
 
@@ -115,9 +118,15 @@ cd llm-jp-eval
 python scripts/preprocess_dataset.py  \
 --dataset-name all  \
 --output-dir ./dataset
+
+cd ../
 ```
 
-MEMO: `preprocess_dataset.py`を実行した際、データセットのダウンロード中にサーバーとの接続エラーでプログラムが落ちることがかなりある。現状では我慢して複数回プログラムを実行しているが、解決できそうなら誰かしてください。
+* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、configをコピーする
+
+```bash
+cp llm-jp-eval/configs/config_template.yaml llm-jp-eval/configs/config.yaml
+```
 
 ## llm-jp-eval 評価の実行
 
@@ -200,27 +209,28 @@ few-shot数: 4
 
 ## Humanevalのタスクで評価
 
-データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
+* データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
+* few-shot数: 10
+* 評価を行うにはdockerイメージのビルドが必要
 
-### 出力の生成
-
-```bash
-bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH
-```
-
-few-shot数: 10
-
-### 評価 (未整備)
-
-通常の環境でモデルが生成したコードを実行することは危険なので、docker環境下でコードを実行し、評価する。
+### 出力と評価を同時に行う場合
 
 ```bash
-cd bigcode-evaluation-harness
-bash eval_ja.sh $MODEL_PATH
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH true true
 ```
 
-* 結果の保存はされないので目視で確認してください（整備中です）
-* dockerコンテナ内での出力をコンテナ外に保存すれば良いのですが、まだ実装していません。（誰か時間があったらやってください）
+### 出力だけを行う場合
+
+```bash
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH true false
+```
+
+### 評価だけを行う場合
+
+```bash
+bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH false true
+```
+
 
 ## fastchat(mt_bench)の評価の実行
 

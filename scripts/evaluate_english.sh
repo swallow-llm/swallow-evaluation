@@ -11,17 +11,17 @@ MODEL_NAME_PATH=$1
 GENERAL_TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squadv2"
 GENERAL_NUM_FEWSHOT=4
 GENERAL_NUM_TESTCASE="all"
-GENERAL_OUTDIR="results/${MODEL_NAME_PATH}/en/alltasks_${GENERAL_NUM_FEWSHOT}shot_${GENERAL_NUM_TESTCASE}cases/general"
+GENERAL_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${GENERAL_NUM_FEWSHOT}shot_${GENERAL_NUM_TESTCASE}cases/general"
 
 MMLU_TASK_NAME="mmlu"
 MMLU_NUM_FEWSHOT=5
 MMLU_NUM_TESTCASE="all"
-MMLU_OUTDIR="results/${MODEL_NAME_PATH}/en/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
+MMLU_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
 
 BBH_TASK_NAME="bbh_fewshot"
 BBH_NUM_FEWSHOT=3
 BBH_NUM_TESTCASE="all"
-BBH_OUTDIR="results/${MODEL_NAME_PATH}/en/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh"
+BBH_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh"
 
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $MMLU_OUTDIR
@@ -65,3 +65,7 @@ accelerate launch -m lm_eval --model hf \
     --output_path "../$GENERAL_OUTDIR" \
     --use_cache "../$GENERAL_OUTDIR" \
     --seed 42 \
+
+# aggregate results
+cd ../
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

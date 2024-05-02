@@ -8,7 +8,8 @@ MODEL_NAME_PATH=$1
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"
 
-OUTDIR="results/${MODEL_NAME_PATH}/ja/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/mgsm/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
@@ -18,4 +19,8 @@ python lm-evaluation-harness-jp/main.py \
     --batch_size 2 \
     --verbose \
     --device cuda \
-    --output_path ${OUTDIR}/score_math.json
+    --output_path ${OUTDIR}/score_math.json \
+    --use_cache ${OUTDIR}
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

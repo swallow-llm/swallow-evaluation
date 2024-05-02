@@ -405,7 +405,7 @@ def main():
     # Save all args to config
     results["config"] = vars(args)
     if not args.generation_only:
-        dumped = json.dumps(results, indent=2)
+        dumped = json.dumps(results, indent=2, ensure_ascii=False)
         if accelerator.is_main_process:
             print(dumped)
 
