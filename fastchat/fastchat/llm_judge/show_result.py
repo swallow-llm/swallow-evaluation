@@ -9,13 +9,16 @@ import json
 import numpy as np
 
 
-CATEGORIES = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
+CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
+CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
 
 
 def calculate_averages(scores):
-    # scores: [N, T], N: 設問数, T: ターン数(5)
+    # scores: [N, T], N: 設問数, T: 回答数(5)
     scores = np.array(list(scores))
-    question_mean = np.mean(scores, axis=0)
+    valid_scores = scores != -1
+    valid_count = valid_scores.sum(axis=0)
+    question_mean = np.where(valid_scores, scores, 0).sum(axis=0) / valid_count
     mu = np.mean(question_mean)
     sigma = np.std(question_mean, ddof=1)
     return mu, sigma
@@ -67,18 +70,20 @@ def display_result_single(args):
                 result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
                 result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
 
-    for category in ["overall"] + CATEGORIES:
+    for category in ["overall"] + CATEGORIES_ordered:
         score_category(category)
 
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
         result[model_id]["result"] = dict()
-        result[model_id]["result"]["score"] = ",".join(
-            [f"{(result[model_id][category]['average']['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES]
-        )
-        result[model_id]["result"]["new_variance"] = ",".join(
-            [f"{result[model_id][category]['average']['new_variance']:.4f}" for category in ["overall"] + CATEGORIES]
-        )
+        for turn in ["first_turn", "second_turn", "average"]:
+            result[model_id]["result"][turn] = dict()
+            result[model_id]["result"][turn]["score"] = ",".join(
+                [f"{(result[model_id][category][turn]['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            )
+            result[model_id]["result"][turn]["new_variance"] = ",".join(
+                [f"{result[model_id][category][turn]['new_variance']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            )
 
     if args.output_file is not None:
         with open(args.output_file, "w") as f:
