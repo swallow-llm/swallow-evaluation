@@ -72,7 +72,6 @@ def aggregate_results(model: str) -> Dict[str, float]:
 
         # defalut value if the column is empty
         metric = -1.0
-
         # error handling if the file is not found
         if not os.path.exists(input_path):
             print(f"Column: {column} is empty")
@@ -86,7 +85,11 @@ def aggregate_results(model: str) -> Dict[str, float]:
             keys_subtasks = [task_keys_map[subtask] for subtask in subtasks]
             metric = get_average_score(input_path, keys_subtasks)
         else:
-            metric = get_nested_dict_value(input_path, keys)
+            try:
+                metric = get_nested_dict_value(input_path, keys)
+            except:
+                print("Unfound path:", input_path)
+                print("Unfound keys:", keys)
 
         # Normalize the score using predefined max_score
         metric = metric / max_score
