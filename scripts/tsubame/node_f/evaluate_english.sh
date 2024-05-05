@@ -55,6 +55,7 @@ lm_eval --model hf \
     --write_out \
     --output_path "$MMLU_OUTDIR" \
     --use_cache "$MMLU_OUTDIR" \
+    --log_samples \
     --seed 42 \
 
 lm_eval --model hf \
@@ -67,6 +68,7 @@ lm_eval --model hf \
     --write_out \
     --output_path "$BBH_OUTDIR" \
     --use_cache "$BBH_OUTDIR" \
+    --log_samples \
     --seed 42 \
 
 lm_eval --model hf \
@@ -79,6 +81,7 @@ lm_eval --model hf \
     --write_out \
     --output_path "$GENERAL_OUTDIR" \
     --use_cache "$GENERAL_OUTDIR" \
+    --log_samples \
     --seed 42 \
 
 # aggregate results
