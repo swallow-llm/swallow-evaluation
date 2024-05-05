@@ -30,8 +30,8 @@ mkdir -p $BBH_OUTDIR
 cd lm-evaluation-harness-en
 
 echo $MMLU_TASK_NAME
-accelerate launch -m lm_eval --model hf \
-    --model_args pretrained=$MODEL_NAME_PATH \
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
     --batch_size auto \
@@ -40,10 +40,11 @@ accelerate launch -m lm_eval --model hf \
     --write_out \
     --output_path "../$MMLU_OUTDIR" \
     --use_cache "../$MMLU_OUTDIR" \
+≈
     --seed 42 \
 
-accelerate launch -m lm_eval --model hf \
-    --model_args pretrained=$MODEL_NAME_PATH \
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
     --batch_size auto \
@@ -52,10 +53,11 @@ accelerate launch -m lm_eval --model hf \
     --write_out \
     --output_path "../$BBH_OUTDIR" \
     --use_cache "../$BBH_OUTDIR" \
+    --log_samples \
     --seed 42 \
 
-accelerate launch -m lm_eval --model hf \
-    --model_args pretrained=$MODEL_NAME_PATH \
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
     --batch_size auto \
@@ -64,6 +66,7 @@ accelerate launch -m lm_eval --model hf \
     --write_out \
     --output_path "../$GENERAL_OUTDIR" \
     --use_cache "../$GENERAL_OUTDIR" \
+    --log_samples \
     --seed 42 \
 
 # aggregate results

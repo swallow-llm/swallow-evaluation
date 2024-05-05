@@ -58,10 +58,6 @@ pip install --upgrade pip
 pip install -e .
 pip install sentencepiece
 pip install protobuf
-
-# accelerateの設定を行う。
-# Multi-GPUを行う場合は、基本的にNoを答え、最後にGPU数とdevice idを選択すれば良い。
-accelerate config
 ```
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。

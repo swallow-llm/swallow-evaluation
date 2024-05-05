@@ -16,7 +16,7 @@ module load cudnn/9.0/9.0.0
 
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
-MODEL_ID=$3
+MODEL_NAME_PATH=$3
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
@@ -27,13 +27,13 @@ source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
 BATCH_SIZE=10
-OUTDIR="${REPO_PATH}/results/${MODEL_ID}/en/humaneval"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/humaneval"
 
 mkdir -p $OUTDIR
 
 #accelerate launch bigcode-evaluation-harness/main.py \
 python bigcode-evaluation-harness/main.py \
-  --model ${MODEL_ID} \
+  --model ${MODEL_NAME_PATH} \
   --tasks humaneval \
   --do_sample True \
   --n_samples ${NUM_SAMPLES} \
@@ -48,4 +48,4 @@ python bigcode-evaluation-harness/main.py \
   --max_length_generation 1024
 
 # aggregate results
-python scripts/aggregate_result.py --model $MODEL_ID
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

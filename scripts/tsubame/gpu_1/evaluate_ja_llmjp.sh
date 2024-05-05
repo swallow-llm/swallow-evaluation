@@ -11,7 +11,7 @@ module load cudnn/9.0.0
 
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
-MODEL_ID=$3
+MODEL_NAME_PATH=$3
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
@@ -20,7 +20,7 @@ cd $REPO_PATH
 
 source .venv_llm_jp_eval/bin/activate
 
-OUTDIR="${REPO_PATH}/results/${MODEL_ID}/ja/llmjp"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/llmjp"
 mkdir -p ${OUTDIR}
 
 DATASET_DIR="llm-jp-eval/dataset/1.3.0/evaluation/test"
@@ -35,8 +35,8 @@ mkdir -p $GENERAL_OUTDIR
 mkdir -p $JMMLU_OUTDIR
 
 python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
-  model.pretrained_model_name_or_path=$MODEL_ID \
-  tokenizer.pretrained_model_name_or_path=$MODEL_ID \
+  model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
+  tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="[\"jamp\", \"janli\", \"jemhopqa\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
   metainfo.num_few_shots=$GENERAL_NUM_FEWSHOT \
@@ -45,8 +45,8 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   wandb.run_name=llm_jp_eval_general
 
 python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
-  model.pretrained_model_name_or_path=$MODEL_ID \
-  tokenizer.pretrained_model_name_or_path=$MODEL_ID \
+  model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
+  tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="jmmlu" \
   metainfo.num_few_shots=$JMMLU_NUM_FEWSHOT \
@@ -57,4 +57,4 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
 python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path $JMMLU_OUTDIR
 
 # aggregate results
-python scripts/aggregate_result.py --model $MODEL_ID
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

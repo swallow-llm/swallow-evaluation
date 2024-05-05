@@ -11,7 +11,7 @@ module load cudnn/9.0.0
 
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
-MODEL_ID=$3
+MODEL_NAME_PATH=$3
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
@@ -22,12 +22,12 @@ source .venv_harness_jp/bin/activate
 
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"
-OUTDIR="${REPO_PATH}/results/${MODEL_ID}/ja/mgsm/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mgsm/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args pretrained=$MODEL_ID \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \
     --tasks "mgsm" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
@@ -37,4 +37,4 @@ python lm-evaluation-harness-jp/main.py \
     --use_cache ${OUTDIR}
 
 # aggregate results
-python scripts/aggregate_result.py --model $MODEL_ID
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH
