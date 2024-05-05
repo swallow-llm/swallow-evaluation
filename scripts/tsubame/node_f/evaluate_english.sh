@@ -45,8 +45,8 @@ mkdir -p $BBH_OUTDIR
 cd lm-evaluation-harness-en
 
 echo $MMLU_TASK_NAME
-accelerate launch --num_processes=4 --gpu_ids="0,1,2,3" -m lm_eval --model hf \
-    --model_args pretrained=$MODEL_ID \
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
     --batch_size auto \
@@ -57,8 +57,8 @@ accelerate launch --num_processes=4 --gpu_ids="0,1,2,3" -m lm_eval --model hf \
     --use_cache "$MMLU_OUTDIR" \
     --seed 42 \
 
-accelerate launch --num_processes=4 --gpu_ids="0,1,2,3" -m lm_eval --model hf \
-    --model_args pretrained=$MODEL_ID \
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
     --batch_size auto \
@@ -69,8 +69,8 @@ accelerate launch --num_processes=4 --gpu_ids="0,1,2,3" -m lm_eval --model hf \
     --use_cache "$BBH_OUTDIR" \
     --seed 42 \
 
-accelerate launch --num_processes=4 --gpu_ids="0,1,2,3" -m lm_eval --model hf \
-    --model_args pretrained=$MODEL_ID \
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
     --batch_size auto \
