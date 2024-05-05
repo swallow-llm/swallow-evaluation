@@ -24,8 +24,8 @@ mkdir -p "$REPO_PATH/results/$MODEL_ID/ja/mgsm/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_ID/ja/mgsm/" -e "$REPO_PATH/results/$MODEL_ID/ja/mgsm/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mgsm.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_ID
 
 ## mt_bench
-#mkdir -p "$REPO_PATH/results/$MODEL_ID/ja/ja_mt_bench/"
-#qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_ID/ja/ja_mt_bench/" -e "$REPO_PATH/results/$MODEL_ID/ja/ja_mt_bench/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mt_bench.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_ID 4
+mkdir -p "$REPO_PATH/results/$MODEL_ID/ja/ja_mt_bench/"
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_ID/ja/ja_mt_bench/" -e "$REPO_PATH/results/$MODEL_ID/ja/ja_mt_bench/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mt_bench.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_ID 4
 
 ## jhumaneval
 mkdir -p "$REPO_PATH/results/$MODEL_ID/ja/humaneval/"
