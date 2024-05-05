@@ -13,7 +13,7 @@ mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args pretrained=$MODEL_NAME_PATH \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \
     --tasks "mgsm" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \

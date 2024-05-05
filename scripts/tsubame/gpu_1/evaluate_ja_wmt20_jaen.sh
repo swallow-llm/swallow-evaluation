@@ -27,7 +27,7 @@ mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args pretrained=$MODEL_ID \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \
     --tasks "wmt20-ja-en" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
