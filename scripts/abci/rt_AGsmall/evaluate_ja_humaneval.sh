@@ -5,8 +5,6 @@
 #$ -j y
 #$ -cwd
 
-repo_path=$1
-
 source ~/.bashrc
 source /etc/profile.d/modules.sh
 conda deactivate
@@ -17,6 +15,7 @@ module load cudnn/9.0/9.0.0
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
 MODEL_NAME_PATH=$3
+LOCAL_PATH=$4
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
@@ -31,7 +30,8 @@ OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/humaneval"
 
 mkdir -p $OUTDIR
 
-#accelerate launch bigcode-evaluation-harness/main.py \
+# generate
+
 python bigcode-evaluation-harness/main.py \
   --model ${MODEL_NAME_PATH} \
   --tasks jhumaneval \
@@ -47,5 +47,11 @@ python bigcode-evaluation-harness/main.py \
   --trust_remote_code \
   --max_length_generation 1024
 
+# evaluate
+
+ssh hestia "mkdir -p ${LOCAL_PATH}"
+scp ${OUTDIR}/generation_jhumaneval.json hestia:${LOCAL_PATH}
+ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_jhumaneval.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
+
 # aggregate results
-python scripts/aggregate_result.py --model $MODEL_NAME_PATH  
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH
