@@ -38,10 +38,10 @@ MMLU_NUM_FEWSHOT=5
 MMLU_NUM_TESTCASE="all"
 MMLU_OUTDIR="${OUTDIR}/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
 
-BBH_TASK_NAME="bbh_fewshot"
+BBH_TASK_NAME="bbh_cot_fewshot"
 BBH_NUM_FEWSHOT=3
 BBH_NUM_TESTCASE="all"
-BBH_OUTDIR="${OUTDIR}/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh"
+BBH_OUTDIR="${OUTDIR}/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh_cot"
 
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $MMLU_OUTDIR

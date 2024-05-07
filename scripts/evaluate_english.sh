@@ -18,10 +18,10 @@ MMLU_NUM_FEWSHOT=5
 MMLU_NUM_TESTCASE="all"
 MMLU_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
 
-BBH_TASK_NAME="bbh_fewshot"
+BBH_TASK_NAME="bbh_cot_fewshot"
 BBH_NUM_FEWSHOT=3
 BBH_NUM_TESTCASE="all"
-BBH_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh"
+BBH_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh_cot"
 
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $MMLU_OUTDIR
@@ -39,7 +39,6 @@ lm_eval --model hf \
     --write_out \
     --output_path "../$MMLU_OUTDIR" \
     --use_cache "../$MMLU_OUTDIR" \
-≈
     --seed 42 \
 
 lm_eval --model hf \
