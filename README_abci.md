@@ -26,7 +26,7 @@
 
 - `REPO_PATH`: ABCIの`jalm-evaluation-private`の絶対パス
 - `GROUP_ID`: ABCIのグループのID (産総研のグループIDを指定してください。間違えて岡崎研のIDにすると岡崎研のお金を使ってしまいます。)
-- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。岡崎研の人は `/groups/gcb50243`以下に自分のフォルダを作ってcacheを指定するのが良いと思います
+- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。岡崎研の人は容量削減のために `/groups/gcb50243/share/.cache`を使ってください。
 - `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
 ### llm-jp-eval データセットの前処理
