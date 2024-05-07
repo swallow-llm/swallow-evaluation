@@ -35,7 +35,7 @@ python lm-evaluation-harness-jp/main.py \
     --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \
     --tasks "xlsum_ja" \
     --num_fewshot $NUM_FEWSHOT \
-    --batch_size 2 \
+    --batch_size 1 \
     --verbose \
     --device cuda \
     --output_path ${OUTDIR}/score_xlsum.json \
