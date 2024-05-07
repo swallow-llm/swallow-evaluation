@@ -51,7 +51,7 @@ python bigcode-evaluation-harness/main.py \
 
 ssh hestia "mkdir -p ${LOCAL_PATH}"
 scp ${OUTDIR}/generation_humaneval.json hestia:${LOCAL_PATH}
-ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_jhumaneval.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
+ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_humaneval.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH
