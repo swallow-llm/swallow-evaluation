@@ -1,6 +1,6 @@
 # 概要
 
-- TSUBAME4.0で評価を回す方法
+- ABCIで評価を回す方法
 - 内部資料なので公開する予定はない
 - 基本的なことは [readme](README.md)に書いてあるのでそちらを参照して下さい
 - 改良待ってます
@@ -24,10 +24,10 @@
 
 にハードコードされている以下の変数を自分の環境に合わせて編集する
 
-- `REPO_PATH`: `jalm-evaluation-private`の絶対パス
-- `GROUP_ID`: TSUBAME4.0のグループのID (岡崎研の人はそのままでOKのはず)
-- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。岡崎研の人は `/gs/bs/tga-okazaki/`以下に自分のフォルダを作ってcacheを指定してください
-- `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですが消さないでください。
+- `REPO_PATH`: ABCIの`jalm-evaluation-private`の絶対パス
+- `GROUP_ID`: ABCIのグループのID (産総研のグループIDを指定してください。間違えて岡崎研のIDにすると岡崎研のお金を使ってしまいます。)
+- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。岡崎研の人は `/groups/gcb50243`以下に自分のフォルダを作ってcacheを指定するのが良いと思います
+- `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
 ### llm-jp-eval データセットの前処理
 
@@ -38,7 +38,7 @@
 ログインノードで以下のコマンドを実行
 
 ```bash
-bash scripts/tsubame/environment/qsub_create_environment.sh
+bash scripts/abci/environment/qsub_create_environment.sh
 ```
 
 それぞれの環境を構築するためのジョブが投げられる。
@@ -51,18 +51,18 @@ bash scripts/tsubame/environment/qsub_create_environment.sh
 
 ログインノードで以下のコマンドを実行
 
-H100一枚で動くモデル（だいたい13B以下）の場合は
+H100一枚で動くモデル（だいたい10B以下）の場合は
 
 ```bash
 MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/Swallow-7b-instruct-v0.1)
-bash scripts/tsubame/gpu_1/qsub_all.sh $MODEL_NAME
+bash scripts/abci/rt_AGsmall/qsub_all.sh $MODEL_NAME
 ```
 
 それ以上のモデルの場合は
 
 ```bash
-MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/Swallow-7b-instruct-v0.1)
-bash scripts/tsubame/node_f/qsub_all.sh $MODEL_NAME
+MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/Swallow-70b-hf)
+bash scripts/abci/rt_AF/qsub_all.sh $MODEL_NAME
 ```
 
 ### 結果の確認
