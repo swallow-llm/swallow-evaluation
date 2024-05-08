@@ -25,7 +25,7 @@ cd $REPO_PATH
 source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
-BATCH_SIZE=10
+BATCH_SIZE=5
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/humaneval"
 
 mkdir -p $OUTDIR

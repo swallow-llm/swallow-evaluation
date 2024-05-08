@@ -66,7 +66,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
-    --batch_size 8 \
+    --batch_size 4 \
     --device cuda \
     --write_out \
     --output_path "$BBH_OUTDIR" \
@@ -78,7 +78,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
-    --batch_size 8 \
+    --batch_size 4 \
     --device cuda \
     --write_out \
     --output_path "$GENERAL_OUTDIR" \
