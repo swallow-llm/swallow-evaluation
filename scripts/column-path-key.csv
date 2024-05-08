@@ -40,7 +40,7 @@ triviaqa,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.tri
 hellaswag,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.hellaswag.acc,none",1
 openbookqa,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.openbookqa.acc,none",1
 xwinograd_en,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.xwinograd_en.acc,none",1
-bbh_cot,en/harness_en/alltasks_3short_allcases/bbh_cot_fewshot/results.json,results.bbh_cot_fewshot,1
+bbh_cot,en/harness_en/alltasks_3shot_allcases/bbh_cot/results.json,"results.bbh_cot_fewshot.exact_match,get-answer",1
 mmlu,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu.acc,none",1
 mmlu_social_sciences,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_social_sciences.acc,none",1
 mmlu_humanities,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_humanities.acc,none",1
