@@ -26,7 +26,7 @@
 
 - `REPO_PATH`: ABCIの`jalm-evaluation-private`の絶対パス
 - `GROUP_ID`: ABCIのグループのID (産総研のグループIDを指定してください。間違えて岡崎研のIDにすると岡崎研のお金を使ってしまいます。)
-- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。 `/groups/gag51395/eval-checkpoints/`を使ってください。
+- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。 `/groups/gag51395/share/{your_name}/.cache`というディレクトリを作り、それを使ってください。
 - `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
 ### llm-jp-eval データセットの前処理
@@ -46,6 +46,14 @@ bash scripts/abci/environment/qsub_create_environment.sh
 `qstat`でジョブの状況が確認できる。投げられたジョブが全て完了したら環境構築完了。
 
 ## 評価
+
+### huggingface認証
+
+huggingface hubにアップロードされたモデルを使って評価を実行するために、huggingfaceにログインする必要がある。
+以下の手順で認証を行ってください。
+- huggingfaceのllmグループに参加していることを確認
+- [huggingface](https://huggingface.co/settings/tokens) でaccess tokenを生成
+- ABCI側で`vim ~/.bashrc`し、末尾に`huggingface-cli login --token XXXXXX`を追記（XXXXXXは前のステップで生成されたaccess token）
 
 ### 実行
 
