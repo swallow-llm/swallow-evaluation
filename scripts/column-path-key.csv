@@ -18,7 +18,7 @@ jsquad,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jsquad_char_f1,1
 jsts_pearson,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jsts_pearson,1
 jsts_spearman,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.jsts_spearman,1
 niilc,ja/llmjp/4shot_-1cases/llm_jp_eval_general.json,scores.niilc_char_f1,1
-jmmlu,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu,10
+jmmlu,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu,1
 jmmlu_social_sciences,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu_social_sciences,1
 jmmlu_humanities,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu_humanities,1
 jmmlu_stem,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu_stem,1
