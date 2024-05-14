@@ -24,4 +24,4 @@ pip install --upgrade pip
 pip install -e .
 pip install sentencepiece
 pip install protobuf
-pip install transformers_stream_generator einops
+pip install transformers_stream_generator einops tiktoken

@@ -23,4 +23,4 @@ cd fastchat
 pip install --upgrade pip
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
-pip install transformers_stream_generator einops
+pip install transformers_stream_generator einops tiktoken
