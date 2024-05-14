@@ -32,7 +32,7 @@ mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True" \
     --tasks "xlsum_ja" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 1 \
