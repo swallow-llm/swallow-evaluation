@@ -24,5 +24,6 @@ pip install --upgrade pip
 pip install -e .
 pip install sentencepiece
 pip install protobuf
+pip install transformers_stream_generator einops
 
 python scripts/preprocess_dataset.py --dataset-name all --output-dir dataset

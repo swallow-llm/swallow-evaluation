@@ -26,3 +26,4 @@ pip install nagisa
 pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
+pip install transformers_stream_generator einops
