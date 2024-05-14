@@ -31,7 +31,7 @@ cd lm-evaluation-harness-en
 
 echo $MMLU_TASK_NAME
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
     --batch_size 16 \
@@ -42,7 +42,7 @@ lm_eval --model hf \
     --seed 42 \
 
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
     --batch_size 16 \
@@ -54,7 +54,7 @@ lm_eval --model hf \
     --seed 42 \
 
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
     --batch_size 16 \
