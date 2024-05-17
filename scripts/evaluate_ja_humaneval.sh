@@ -34,6 +34,7 @@ if [ ${DO_EVAL} = "true" ]; then
   echo "Generated codes should be place at $(pwd)/${OUTDIR}/generation_jhumaneval.json ."
   touch $(pwd)/${OUTDIR}/metrics.json
   docker run -v $(pwd)/${OUTDIR}/generation_jhumaneval.json:/app/generations_py.json -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json -it evaluation-harness python3 main.py --model ${MODEL_NAME_PATH} --tasks humaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10 --metric_output_path /app/metrics.json
+  python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path $(pwd)/${OUTDIR}/generation_jhumaneval.json --metrics_path $(pwd)/${OUTDIR}/metrics.json
 fi
 
 # aggregate results

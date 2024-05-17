@@ -1499,7 +1499,7 @@ class Llama2Adapter(BaseModelAdapter):
     """The model adapter for Llama-2 (e.g., meta-llama/Llama-2-7b-hf)"""
 
     def match(self, model_path: str):
-        return "llama-2" in model_path.lower()
+        return "llama-2" in model_path.lower() or "llama-ct" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
@@ -2286,7 +2286,6 @@ class JapaneseStableLMGammaAdapter(BaseModelAdapter):
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
-register_model_adapter(SwallowAdapter)
 register_model_adapter(JapaneseStableLMBetaAdapter)
 register_model_adapter(ELYZAJapaneseLlama2Adapter)
 register_model_adapter(Calm2Adapter)
@@ -2340,6 +2339,7 @@ register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
 register_model_adapter(Llama2Adapter)
+register_model_adapter(SwallowAdapter)
 register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
 register_model_adapter(DolphinAdapter)

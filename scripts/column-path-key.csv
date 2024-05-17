@@ -25,6 +25,7 @@ jmmlu_stem,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu_
 jmmlu_other,ja/llmjp/5shot_-1cases/llm_jp_eval_jmmlu_per_task.json,results.jmmlu_other,1
 jhumaneval@1,ja/humaneval/metrics.json,humaneval.pass@1,1
 jhumaneval@10,ja/humaneval/metrics.json,humaneval.pass@10,1
+jhumaneval_answer@10,ja/humaneval/metrics.json,humaneval.answer@10,1
 MT-Bench (ALL),ja/ja_mt_bench/judge.json,MODEL_NAME.overall.average.score,10
 writing,ja/ja_mt_bench/judge.json,MODEL_NAME.Writing.average.score,10
 roleplay,ja/ja_mt_bench/judge.json,MODEL_NAME.Roleplay.average.score,10
@@ -48,3 +49,4 @@ mmlu_stem,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_s
 mmlu_other,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_other.acc,none",1
 humaneval@1,en/humaneval/metrics.json,humaneval.pass@1,1
 humaneval@10,en/humaneval/metrics.json,humaneval.pass@10,1
+humaneval_answer@10,en/humaneval/metrics.json,humaneval.answer@10,1
