@@ -118,12 +118,6 @@ python scripts/preprocess_dataset.py  \
 cd ../
 ```
 
-* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、configをコピーする
-
-```bash
-cp llm-jp-eval/configs/config_template.yaml llm-jp-eval/configs/config.yaml
-```
-
 ## llm-jp-eval 評価の実行
 
 `jalm-evaluation-private/`にて
