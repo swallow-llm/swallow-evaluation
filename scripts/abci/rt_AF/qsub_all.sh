@@ -1,7 +1,7 @@
-REPO_PATH="/home/acb11709gz/jalm-evaluation-private"
+REPO_PATH="/home/acf15321wt/jalm-evaluation-private_update-2404"
 GROUP_ID="gag51395"
-HUGGINGFACE_CACHE="/groups/gag51395/eval-checkpoints/"
-LOCAL_PATH="/home/ma.y/jalm-evaluation-private/abci_humaneval_result/"
+HUGGINGFACE_CACHE="/groups/gag51395/share/ohi/.cache"
+LOCAL_PATH="/home/ohi-m/jalm-evaluation-private-2404_update/abci_humaneval_result"
 
 MODEL_NAME_PATH=$1
 
@@ -38,4 +38,4 @@ qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$R
 
 # # ## humaneval
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval/"
-qsub -g $GROUP_ID -o "$REPO_PATH/resulqts/$MODEL_NAME_PATH/en/humaneval/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval" "$REPO_PATH/scripts/abci/rt_AF/evaluate_english_humaneval.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/en/humaneval"
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval" "$REPO_PATH/scripts/abci/rt_AF/evaluate_english_humaneval.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/en/humaneval"
