@@ -59,7 +59,7 @@ huggingface hubにアップロードされたモデルを使って評価を実�
 
 ログインノードで以下のコマンドを実行
 
-H100一枚で動くモデル（だいたい10B以下）の場合は
+A100一枚で動くモデル（だいたい7B以下）の場合は
 
 ```bash
 MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/Swallow-7b-instruct-v0.1)
