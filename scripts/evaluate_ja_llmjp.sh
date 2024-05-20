@@ -16,7 +16,7 @@ JMMLU_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${JMMLU_NUM_FEWSHOT}shot_${NUM
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $JMMLU_OUTDIR
 
-python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
+python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$TOKENIZER_NAME_PATH \
   metainfo.max_num_samples=$NUM_TESTCASE \
@@ -26,7 +26,7 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
   log_dir=$GENERAL_OUTDIR \
   wandb.run_name=llm_jp_eval_general
 
-python llm-jp-eval/scripts/evaluate_llm.py -cn config.yaml \
+python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$TOKENIZER_NAME_PATH \
   metainfo.max_num_samples=$NUM_TESTCASE \
