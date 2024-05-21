@@ -2,7 +2,7 @@
 
 - ABCIで評価を回す方法
 - 内部資料なので公開する予定はない
-- 基本的なことは [readme](README.md)に書いてあるのでそちらを参照して下さい
+- 評価タスクの詳細などは [readme](README.md)に書いてあるのでそちらを参照して下さい
 - 改良待ってます
 - 質問があれば大井までお願いします
 
@@ -29,10 +29,6 @@
 - `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。 `/groups/gag51395/share/{your_name}/.cache`というディレクトリを作り、それを使ってください。
 - `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
-### llm-jp-eval データセットの前処理
-
-[readme](README.md)にしたがって同じことをする
-
 ### 環境構築
 
 ログインノードで以下のコマンドを実行
@@ -44,6 +40,10 @@ bash scripts/abci/environment/qsub_create_environment.sh
 それぞれの環境を構築するためのジョブが投げられる。
 
 `qstat`でジョブの状況が確認できる。投げられたジョブが全て完了したら環境構築完了。
+
+### llm-jp-eval データセットの前処理
+
+`.venv_llm_jp_eval`の環境をactivateして、[readme](README.md)にしたがって同じことをする。
 
 ## 評価
 
