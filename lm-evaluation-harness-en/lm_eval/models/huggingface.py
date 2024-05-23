@@ -603,6 +603,13 @@ class HFLM(TemplateLM):
                 trust_remote_code=trust_remote_code,
                 use_fast=use_fast_tokenizer,
             )
+
+        # https://github.com/EleutherAI/lm-evaluation-harness/pull/1146/
+        # Temporary measures for evaluation of Qwen model
+        if "Qwen" in pretrained:
+            # Qwen's trust_remote_code tokenizer does not allow for adding special tokens
+            self.tokenizer.pad_token = "<|endoftext|>"
+            self.tokenizer.eos_token = "<|endoftext|>"
         return None
 
     def _detect_batch_size(self, requests=None, pos: int = 0):

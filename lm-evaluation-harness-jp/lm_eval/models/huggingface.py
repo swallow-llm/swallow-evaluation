@@ -490,6 +490,13 @@ class AutoCausalLM(HuggingFaceAutoLM):
             use_fast=use_fast,
             trust_remote_code=trust_remote_code,
         )
+        # https://github.com/EleutherAI/lm-evaluation-harness/pull/1146/
+        # Temporary measures for evaluation of Qwen model type
+        if "Qwen" in pretrained or "nekomata" in pretrained:
+            # Qwen's trust_remote_code tokenizer does not allow for adding special tokens
+            tokenizer.eos_token = "<|endoftext|>"
+            tokenizer.pad_token = "<|endoftext|>"
+
         tokenizer.padding_side = "left"
         return tokenizer
 
