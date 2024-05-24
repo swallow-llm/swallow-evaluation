@@ -12,7 +12,7 @@
 
 **ABCIで**公開鍵を生成し、hestiaに自分のアカウントでsshできるようにする。
 
-公開鍵のhestiaへの登録はサーバー係に依頼してください。
+公開鍵のhestiaへの登録は、**hestiaで**`vim ~/.ssh/authorized_keys`して、末尾に先ほど生成した公開鍵を追記する。
 
 (j)humanevalではssh接続を用いてhestiaで評価の実行を行うようになっている。
 
@@ -27,6 +27,7 @@
 - `REPO_PATH`: ABCIの`jalm-evaluation-private`の絶対パス
 - `GROUP_ID`: ABCIのグループのID (産総研のグループIDを指定してください。間違えて岡崎研のIDにすると岡崎研のお金を使ってしまいます。)
 - `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。 `/groups/gag51395/share/{your_name}/.cache`というディレクトリを作り、それを使ってください。
+  - gag51395への書き込み権限がない場合、産総研のグループにアカウントが追加されていないので追加してもらってください。
 - `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
 ### 環境構築
@@ -42,8 +43,13 @@ bash scripts/abci/environment/qsub_create_environment.sh
 `qstat`でジョブの状況が確認できる。投げられたジョブが全て完了したら環境構築完了。
 
 ### llm-jp-eval データセットの前処理
-
-`.venv_llm_jp_eval`の環境をactivateして、[readme](README.md)にしたがって同じことをする。
+`.venv_llm_jp_eval`の環境をactivateして、
+```bash
+module load python/3.10/3.10.14
+module load cuda/12.1/12.1.1
+module load cudnn/9.0/9.0.0
+```
+を実行後、[readme](README.md)にしたがって同じことをする。
 
 ## 評価
 
