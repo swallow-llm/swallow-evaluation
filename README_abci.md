@@ -42,15 +42,6 @@ bash scripts/abci/environment/qsub_create_environment.sh
 
 `qstat`でジョブの状況が確認できる。投げられたジョブが全て完了したら環境構築完了。
 
-### llm-jp-eval データセットの前処理
-`.venv_llm_jp_eval`の環境をactivateして、
-```bash
-module load python/3.10/3.10.14
-module load cuda/12.1/12.1.1
-module load cudnn/9.0/9.0.0
-```
-を実行後、[readme](README.md)にしたがって同じことをする。
-
 ## 評価
 
 ### huggingface認証
