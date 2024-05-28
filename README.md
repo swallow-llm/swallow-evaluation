@@ -206,6 +206,18 @@ bash eval_ja.sh $MODEL_PATH
 
 * 結果の保存はされないので目視で確認してください（整備中です）
 
+#### Singularityを使う場合
+```
+cd bigcode-evaluation-harness
+singularity pull docker://ghcr.io/bigcode-project/evaluation-harness:latest
+```
+でimageをpullしてください。
+その後
+```
+singularity exec --bind jalm-evaluation-private/results/MODELPATH/ja/humaneval_10NUM_SAMPLES_1BATCH_SIZE/generation_jhumaneval.json:/app/generations_py.json evaluation-harness_latest.sif python3 main.py --model $MODELPATH --tasks jhumaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10
+```
+で実行してください。
+
 ## fastchat(mt_bench)の評価の実行
 ```bash
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
@@ -250,6 +262,18 @@ bash scripts/evaluate_en_humaneval.sh $MODEL_PATH
 cd bigcode-evaluation-harness
 bash eval_en.sh $MODEL_PATH
 ```
+
+#### Singularityを使う場合
+```
+cd bigcode-evaluation-harness
+singularity pull docker://ghcr.io/bigcode-project/evaluation-harness:latest
+```
+でimageをpullしてください。
+その後
+```
+singularity exec --bind jalm-evaluation-private/results/MODELPATH/en/humaneval_10NUM_SAMPLES_1BATCH_SIZE/generation_humaneval.json:/app/generations_py.json evaluation-harness_latest.sif python3 main.py --model $MODELPATH --tasks humaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10
+```
+で実行してください。
 
 * 結果の保存はされないので目視で確認してください（整備中です）
 
