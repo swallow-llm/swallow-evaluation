@@ -2,21 +2,47 @@
 
 - ABCIで評価を回す方法
 - 内部資料なので公開する予定はない
-- 基本的なことは [readme](README.md)に書いてあるのでそちらを参照して下さい
 - 改良待ってます
 - 質問があれば大井までお願いします
+- 最終更新 (2024/05/28. 齋藤.)
 
-## 準備
 
-### hestiaへの公開鍵の登録
+# 初回だけやらなきゃいけない事
 
-**ABCIで**公開鍵を生成し、hestiaに自分のアカウントでsshできるようにする。
+## 1. ABCIアカウントの発行
+ABCIのアカウントを発行してもらい、グループ(`gag51395`)に入れてもらう。
+> グループへの追加が上手くできていないと書き込み権限が付与されない
 
-公開鍵のhestiaへの登録はサーバー係に依頼してください。
+## 2. Web上での操作
+### 2.1 ABCIへのログイン
+[ABCI利用者ポータル](https://portal.abci.ai/user/)からログインをする。 \
+ログインが成功するとログインURLが記載されたメールが送信されるので、そのリンクからページにアクセスする。 (*1, *2)
+> *1: 迷惑メールに振り分けられることが多い \
+> *2: 初回はパスワードの設定も行うことになる
 
-(j)humanevalではssh接続を用いてhestiaで評価の実行を行うようになっている。
+### 2.2 公開鍵の登録
+Hestia上でSSH鍵を作成し、そのうちの公開鍵を登録する。 \
+登録はログイン後のページのサイドバーにある「公開鍵の登録」からできる。
+> (j)humanevalではssh接続を用いてhestiaで評価の実行を行うようになっている
 
-### パスの編集
+##　3. ローカルからABCIに接続するための準備
+[ABCI 2.0 User Guide](https://docs.abci.ai/ja/getting-started/)の "Proxy Jumpの使用" を参考するなどして、ローカルからABCIにsshで繋げるようにする。 \
+正しく設定できると、 `ssh abci` で接続できる。
+
+## 4. ABCI上での操作
+### 4.1 ローカルからABCIに接続する
+`3._ローカルからABCIに接続するための準備`で設定したのを用いて `ssh abci` でABCIに接続する。
+
+### 4.2 cacheディレクトリの作成
+ログインノードで `mkdir -P /groups/gag51395/share/{your_name}/.cache` を実行し、自分用の cache ディレクトリを作成する。 (*3)
+> *3: ここで Permission Denide になってしまう場合、`1. ABCIアカウントの発行`でグループに正しく追加されていない可能性がある
+
+### 4.3 環境構築
+ログインノードで `bash scripts/abci/environment/qsub_create_environment.sh` を実行し、環境構築を行う。 \
+`qstat`でジョブの状況が確認できる。投げられたジョブが全て完了したら環境構築完了。
+
+### 4.4 パスの設定
+`4.3 環境構築`で作成された
 
 - `scripts/abci/environment/qsub_create_environment.sh`
 - `scripts/abci/rt_AF/qsub_all.sh`
@@ -29,33 +55,23 @@
 - `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。 `/groups/gag51395/share/{your_name}/.cache`というディレクトリを作り、それを使ってください。
 - `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
-### llm-jp-eval データセットの前処理
+### 4.5 tokyotech-llmへの参加
+Hugging Face にある東工大のllmグループ [tokyotech-llm](https://huggingface.co/tokyotech-llm) に参加申請を行い、参加する。
 
-[readme](README.md)にしたがって同じことをする
+### 4.6 Hugging Face の access token 発行
+[huggingface](https://huggingface.co/settings/tokens) で access token (*4)を生成する。
+> *4: Readのトークンで良い
 
-### 環境構築
+### 4.7 Hugging Face トークンの追加
+ログインノードで `vim /groups/gag51395/share/{your_name}/.cache/token` を実行し、自身の access token を書いておく。 \
+`cat /groups/gag51395/share/{your_name}/.cache/token` で `hf_XXXXXXXXXX` のように出力されればOK。
 
-ログインノードで以下のコマンドを実行
 
-```bash
-bash scripts/abci/environment/qsub_create_environment.sh
-```
 
-それぞれの環境を構築するためのジョブが投げられる。
 
-`qstat`でジョブの状況が確認できる。投げられたジョブが全て完了したら環境構築完了。
+# 評価の手順
 
-## 評価
-
-### huggingface認証
-
-huggingface hubにアップロードされたモデルを使って評価を実行するために、huggingfaceにログインする必要がある。
-以下の手順で認証を行ってください。
-- huggingfaceのllmグループに参加していることを確認
-- [huggingface](https://huggingface.co/settings/tokens) でaccess tokenを生成
-- ABCI側で`vim ~/.bashrc`し、末尾に`huggingface-cli login --token XXXXXX`を追記（XXXXXXは前のステップで生成されたaccess token）
-
-### 実行
+## 実行
 
 ログインノードで以下のコマンドを実行
 
@@ -73,7 +89,7 @@ MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/S
 bash scripts/abci/rt_AF/qsub_all.sh $MODEL_NAME
 ```
 
-### 結果の確認
+## 結果の確認
 
 - 全体の結果は`results/$MODEL_NAME/aggregated_result.json`に書き込まれる
   - `overall`に載っているスコア（文字列）を評価結果を記入するスプレッドシートにコピペすればOKなはず
