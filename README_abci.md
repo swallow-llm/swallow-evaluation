@@ -53,6 +53,7 @@ Hestia上でSSH鍵を作成し、そのうちの公開鍵を登録する。 \
 - `REPO_PATH`: ABCIの`jalm-evaluation-private`の絶対パス
 - `GROUP_ID`: ABCIのグループのID (産総研のグループIDを指定してください。間違えて岡崎研のIDにすると岡崎研のお金を使ってしまいます。)
 - `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所。 `/groups/gag51395/share/{your_name}/.cache`というディレクトリを作り、それを使ってください。
+  - gag51395への書き込み権限がない場合、産総研のグループにアカウントが追加されていないので追加してもらってください。
 - `LOCAL_PATH`: (j)humanevalの生成結果を置く**hestiaの**絶対パス。好きなところで良いですがディレクトリを消さないでください。
 
 ### 4.5 tokyotech-llmへの参加
@@ -65,9 +66,6 @@ Hugging Face にある東工大のllmグループ [tokyotech-llm](https://huggin
 ### 4.7 Hugging Face トークンの追加
 ログインノードで `vim /groups/gag51395/share/{your_name}/.cache/token` を実行し、自身の access token を書いておく。 \
 `cat /groups/gag51395/share/{your_name}/.cache/token` で `hf_XXXXXXXXXX` のように出力されればOK。
-
-
-
 
 # 評価の手順
 
