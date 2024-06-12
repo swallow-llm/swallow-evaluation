@@ -29,7 +29,7 @@ def create_all_tasks():
     :return: {task_name: task}
         e.g. {multiple-py: Task, multiple-java: Task}
     """
-    return {"humaneval": create_task(True), "humaneval-unstripped": create_task(False), "jhumaneval": create_task(True, ja=True)}
+    return {"humaneval": create_task(True), "humaneval-unstripped": create_task(False), "jhumaneval": create_task(True, ja=True), "jhumaneval-unstripped": create_task(False, ja=True)}
 
 
 def create_task(strip_prompt, ja=False):
