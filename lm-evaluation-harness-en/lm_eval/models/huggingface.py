@@ -603,6 +603,7 @@ class HFLM(TemplateLM):
                 trust_remote_code=trust_remote_code,
                 use_fast=use_fast_tokenizer,
             )
+
         return None
 
     def _detect_batch_size(self, requests=None, pos: int = 0):
