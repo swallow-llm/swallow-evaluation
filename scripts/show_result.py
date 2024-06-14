@@ -3,12 +3,8 @@ import json
 import argparse
 from unittest import result
 
-def _show_tasks(format, result_path_sample):
+def _show_tasks(format, tasks):
     # load result_json
-    with open(result_path_sample, 'r') as f:
-        result_json = json.load(f)
-    tasks = result_json['tasks']
-    
     if format == 'csv':
         print('model,' + ','.join(tasks))
     elif format == 'markdown':
@@ -19,7 +15,7 @@ def _show_tasks(format, result_path_sample):
         # raise unimplemented error
         raise NotImplementedError('format is not implemented')
         
-def _show_results(args, result_paths):
+def _show_results(args, result_paths, tasks):
     format, digit = args.format, args.digits
     # print model_name and result of each task in a single line
     for result_path in result_paths:
@@ -30,12 +26,12 @@ def _show_results(args, result_paths):
         
         # 小数第digit位まで表示
         if digit != -1:
-            results = {task: round(result, digit) for task, result in results.items()}
+            results = {task: round(results[task], digit) for task in tasks}
         
         if format == 'csv':
-            print(model + ',' + ','.join([str(results[task]) for task in results]))
+            print(model + ',' + ','.join([str(results[task]) for task in tasks]))
         elif format == 'markdown':
-            print(f'|{model}|' + '|'.join([str(results[task]) for task in results]) + '|')
+            print(f'|{model}|' + '|'.join([str(results[task]) for task in tasks]) + '|')
         else:
             # raise unimplemented error
             raise NotImplementedError('format is not implemented')
@@ -48,10 +44,18 @@ def show_result(args):
     root_dir = os.getcwd()
     search_dir = os.path.join(root_dir, 'results')
     result_paths = [os.path.join(search_dir, model, 'aggregated_result.json') for model in model_list]
-    
+
+    # load tasks
+    if args.tasks is None:
+        with open(result_paths[0], 'r') as f:
+            result_json = json.load(f)
+        tasks = result_json['tasks']
+    else:
+        tasks = args.tasks.split(',')
+
     # show results
-    _show_tasks(args.format, result_paths[0])
-    _show_results(args, result_paths)
+    _show_tasks(args.format, tasks)
+    _show_results(args, result_paths, tasks)
     
 
 def parse_args():
@@ -59,6 +63,7 @@ def parse_args():
     parser.add_argument('--model-list', type=str, default='tmp/model_list', help='Text file of model list. A single model name per a line.')
     parser.add_argument('--format', type=str, choices=['csv', 'markdown'], default='csv')
     parser.add_argument('--digits', type=int, default=-1)
+    parser.add_argument('--tasks', type=str, default=None)
     return parser.parse_args()
 
 def main():
