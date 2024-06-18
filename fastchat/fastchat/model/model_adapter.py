@@ -1708,6 +1708,16 @@ class QwenChatAdapter(BaseModelAdapter):
         return get_conv_template("qwen-7b-chat")
 
 
+class Qwen2ChatAdapter(BaseModelAdapter):
+    """The model adapter for Qwen/Qwen2-7B-Instruct"""
+
+    def match(self, model_path: str):
+        return "qwen2" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("qwen-7b-chat")
+
+
 class BGEAdapter(BaseModelAdapter):
     """The model adapter for BGE (e.g., BAAI/bge-large-en-v1.5)"""
 
@@ -2348,6 +2358,7 @@ register_model_adapter(NousHermes2MixtralAdapter)
 register_model_adapter(NousHermesAdapter)
 register_model_adapter(MistralAdapter)
 register_model_adapter(WizardCoderAdapter)
+register_model_adapter(Qwen2ChatAdapter)
 register_model_adapter(QwenChatAdapter)
 register_model_adapter(AquilaChatAdapter)
 register_model_adapter(BGEAdapter)

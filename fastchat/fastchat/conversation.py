@@ -34,6 +34,7 @@ class SeparatorStyle(IntEnum):
     SWALLOW = auto()
     CALM2 = auto()
     STABLELM_GAMMA = auto()
+    KARAKURI = auto()
 
 
 @dataclasses.dataclass
@@ -140,6 +141,19 @@ class Conversation:
                         ret += message + " "
                     else:
                         ret += tag + " " + message + seps[i % 2]
+                else:
+                    ret += tag
+            return ret
+        elif self.sep_style == SeparatorStyle.KARAKURI:
+            seps = [self.sep, self.sep2]
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
+                if message:
+                    if i == 0:
+                        ret += message + " " + seps[i % 2]
+                    else:
+                        ret += tag + message + " " + seps[i % 2]
                 else:
                     ret += tag
             return ret
@@ -1577,6 +1591,20 @@ register_conv_template(
     )
 )
 
+# karakuri-ai/karakuri-lm-70b-chat-v0.1 template
+# reference: https://huggingface.co/karakuri-ai/karakuri-lm-70b-chat-v0.1
+register_conv_template(
+    Conversation(
+        name="karakuri-lm-70b-chat",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+        roles=("[INST] ", "[/INST] "),
+        sep="[ATTR] helpfulness: 4 correctness: 4 coherence: 4 complexity: 4 verbosity: 4 quality: 4 toxicity: 0 humor: 0 creativity: 0 [/ATTR] ",
+        sep2="</s><s>",
+        sep_style=SeparatorStyle.KARAKURI,
+    )
+)
+
 # 以前のSwallowテンプレート(もう使わない)
 """
 # Swallow default template
@@ -1641,7 +1669,7 @@ if __name__ == "__main__":
     print("\n")
 
     print("Japaneselm template:")
-    conv = get_conv_template("nekomata")
+    conv = get_conv_template("karakuri-lm-70b-chat")
     conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
     conv.append_message(conv.roles[1], "元気です、ありがとう。")
     conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
