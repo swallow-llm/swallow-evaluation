@@ -14,9 +14,9 @@ from operator import getitem
 
 # TODO: Hardcorded subtasks columns map for averaging the scores
 SUBTASKS_COLUMNS_MAP = {
-    "MC": ["jemhopqa"],
+    "MC": ["jcommonsenseqa"],
     "NLI": ["jamp (NLI)", "janli (NLI)", "jnli", "jsem", "jsick (NLI)"],
-    "QA": ["jcommonsenseqa", "niilc"],
+    "QA": ["jemhopqa", "niilc"],
     "RC": ["jsquad"],
 }
 

@@ -1,4 +1,4 @@
-REPO_PATH="/home/acf15321wt/jalm-evaluation-private_update-2404"
+REPO_PATH="/groups/gcb50243/maeda/jalm-evaluation-private"
 GROUP_ID="gag51395"
 HUGGINGFACE_CACHE="/groups/gag51395/share/ohi/.cache"
 LOCAL_PATH="/home/ohi-m/jalm-evaluation-private-2404_update/abci_humaneval_result"
@@ -20,22 +20,22 @@ qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_ja_en/" -e "$
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_xlsum.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-# ## mgsm
+## mgsm
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mgsm.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-# ## mt_bench
+## mt_bench
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/"
-qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mt_bench.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH 4
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mt_bench.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH 8
 
-# jhumaneval
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval/"
-qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_humaneval.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/ja/humaneval"
+# jhumaneval-unstripped
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/ja/humaneval-unstripped"
 
 # English
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/abci/rt_AF/evaluate_english.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-# # ## humaneval
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval/"
-qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval" "$REPO_PATH/scripts/abci/rt_AF/evaluate_english_humaneval.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/en/humaneval"
+# humaneval-unstripped
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped" "$REPO_PATH/scripts/abci/rt_AF/evaluate_english_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/en/humaneval-unstripped"
