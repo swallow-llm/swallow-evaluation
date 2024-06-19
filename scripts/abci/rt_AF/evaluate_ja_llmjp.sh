@@ -36,12 +36,20 @@ JMMLU_NUM_FEWSHOT=5
 GENERAL_OUTDIR="${OUTDIR}/${GENERAL_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 JMMLU_OUTDIR="${OUTDIR}/${JMMLU_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=False
+else
+    USE_FAST_TOKENIZER=True
+fi
+
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $JMMLU_OUTDIR
 
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
+  tokenizer.use_fast=$USE_FAST_TOKENIZER \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="[\"jamp\", \"janli\", \"jemhopqa\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
   metainfo.num_few_shots=$GENERAL_NUM_FEWSHOT \
@@ -52,6 +60,7 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
+  tokenizer.use_fast=$USE_FAST_TOKENIZER \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="jmmlu" \
   metainfo.num_few_shots=$JMMLU_NUM_FEWSHOT \
