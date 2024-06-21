@@ -99,7 +99,10 @@ bash scripts/abci/rt_AF/qsub_all.sh $MODEL_NAME
 > python scripts/show_result.py --model model_list.txt
 
 model,XLSUM_ja_1shot,MATH (mgsm_ja),wmt20_en_ja_bleu,wmt20_ja_en_bleu,MC,NLI,QA,RC,jamp (NLI),janli (NLI),jcommonsenseqa,jemhopqa,jnli,jsem,jsick (NLI),jsquad,jsts_pearson,jsts_spearman,niilc,jmmlu,jmmlu_social_sciences,jmmlu_humanities,jmmlu_stem,jmmlu_other,jhumaneval@1,jhumaneval@10,jhumaneval_answer@10,MT-Bench (ALL),writing,roleplay,reasoning,math,coding,extraction,stem,humanities,gsm8k,squad2,triviaqa,hellaswag,openbookqa,xwinograd_en,bbh_cot,mmlu,mmlu_social_sciences,mmlu_humanities,mmlu_stem,mmlu_other,humaneval@1,humaneval@10,humaneval_answer@10
-tokyotech-llm/Llama-3-70b-exp6-LR1.0e-5-MINLR1.0E-6-WD0.1-iter0002500,0.2340341110903234,0.656,0.2923692644226212,0.2515897494904012,0.9589,0.71104,0.64045,0.9196,0.6092,0.7847,0.9589,0.6316,0.5998,0.8024,0.7591,0.9196,0.8798,0.8504,0.6493,0.694719005930528,0.7407407407407407,0.7730220492866408,0.6056338028169014,0.7119628339140535,0.1652439024390244,0.2682926829268293,0.3780487804878049,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,0.7983320697498104,0.40394171649962096,0.8264600980829246,0.6851224855606453,0.43,0.9234408602150538,0.722162494240516,0.776
+tokyotech-llm/Llama-3-70b-exp6-LR1.0e-5-MINLR1.0E-6-WD0.1-iter0002500,0.2340341110903234,0.656,0.2923692644226212,0.2515897494904012,0.9589,0.71104,0.64045,0.9196,0.6092,0.7847,0.9589,0.6316,0.5998,0.8024,0.7591,0.9196,0.8798,0.8504,0.6493,0.694719005930528,0.7407407407407407,0.7730220492866408,0.6056338028169014,0.7119628339140535,0.1652439024390244,0.2682926829268293,0.3780487804878049,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,0.7983320697498104,0.40394171649962096,0.8264600980829246,0.6851224855606453,0.43,0.9234408602150538,0.722162494240516,0.776 
+ 
+# 特定のタスクだけ出力させたいときは、タスク名をコンマ区切りで指定する 
+> python scripts/show_result.py --model model_list.txt --tasks "jhumaneval-unstripped@1,jhumaneval-unstripped@10,jhumaneval-unstripped_answer@10,humaneval-unstripped@1,humaneval-unstripped@10,humaneval-unstripped_answer@10"
 ```
 
 これをコピーしてスプレッドシートに shift + cmd + V でペースト -> 「テキストを列に分割」 で簡単に結果の記入ができる
