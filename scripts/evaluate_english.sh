@@ -23,6 +23,13 @@ BBH_NUM_FEWSHOT=3
 BBH_NUM_TESTCASE="all"
 BBH_OUTDIR="results/${MODEL_NAME_PATH}/en/harness_en/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh_cot"
 
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=False
+else
+    USE_FAST_TOKENIZER=True
+fi
+
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $MMLU_OUTDIR
 mkdir -p $BBH_OUTDIR
@@ -31,7 +38,7 @@ cd lm-evaluation-harness-en
 
 echo $MMLU_TASK_NAME
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
     --batch_size 16 \
@@ -42,7 +49,7 @@ lm_eval --model hf \
     --seed 42 \
 
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
     --batch_size 16 \
@@ -54,7 +61,7 @@ lm_eval --model hf \
     --seed 42 \
 
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
     --batch_size 16 \
