@@ -30,9 +30,9 @@ OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/humaneval-unstripped"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
-    USE_FAST_TOKENIZER=False
+    USE_FAST_TOKENIZER=''
 else
-    USE_FAST_TOKENIZER=True
+    USE_FAST_TOKENIZER='--use_fast_tokenizer'
 fi
 
 mkdir -p $OUTDIR
@@ -53,7 +53,7 @@ python bigcode-evaluation-harness/main.py \
   --max_memory_per_gpu auto \
   --trust_remote_code \
   --max_length_generation 1024 \
-  --use_fast_tokenizer ${USE_FAST_TOKENIZER}
+  ${USE_FAST_TOKENIZER}
 
 # evaluate
 
