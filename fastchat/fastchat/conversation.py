@@ -1616,6 +1616,7 @@ register_conv_template(
         roles=("<|start_header_id|>user<|end_header_id|>\n\n", "<|start_header_id|>assistant<|end_header_id|>\n\n"),
         sep="<|eot_id|>",
         sep_style=SeparatorStyle.CALM2,
+        stop_token_ids=[128009], #"<|eot_id|>"
     )
 )
 
