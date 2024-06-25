@@ -38,8 +38,9 @@ while read -r job_id state; do
 done <<< "$current_jobs"
 
 # 出力のヘッダー
-echo -e "job-ID\tstate\ttask\t\tnode\tmodel name "
-echo -e "----------------------------------------------------------------------------------------------------------------------------"
+# echo -e "job-ID\tstate\ttask\t\tnode\tmodel name "
+printf "%-10s %-8s %-50s %-10s %-100s\n" "job_ID" "state" "task" "node" "model name"
+echo -e "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 # 前回のジョブの状態を読み込む
 if [ -f qstat_history.out ]; then
@@ -48,7 +49,8 @@ if [ -f qstat_history.out ]; then
   # 前回のジョブIDが現在のジョブIDにない場合は終了したとみなす
   echo "$old_jobs" | while read -r old_job_id old_state old_task_kind old_node_kind old_model_name; do
     if [[ -z "${current_job_map[$old_job_id]}" ]]; then
-      echo -e "$old_job_id done\t$old_task_kind\t$old_node_kind\t$old_model_name"
+      # echo -e "$old_job_id done\t$old_task_kind\t$old_node_kind\t$old_model_name"
+      printf "%-10s %-8s %-50s %-10s %-100s\n" "$old_job_id" "done" "$old_task_kind" "$old_node_kind" "$old_model_name"
     fi
   done
 fi
@@ -56,7 +58,8 @@ fi
 # 現在のジョブ情報を表示
 echo -e "$results" | while read -r job_id state task_kind node_kind model_name; do
   if [[ -n "$job_id" ]]; then
-    echo -e "$job_id $state\t$task_kind\t$node_kind\t$model_name"
+    # echo -e "$job_id $state\t$task_kind\t$node_kind\t$model_name"
+    printf "%-10s %-8s %-50s %-10s %-100s\n" "$job_id" "$state" "$task_kind" "$node_kind" "$model_name"
   fi
 done
 
