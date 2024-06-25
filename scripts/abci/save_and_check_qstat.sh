@@ -4,7 +4,15 @@
 cd "$(dirname "$0")"
 
 # 現在のジョブの状態を取得して一時ファイルに保存
-qstat -u $USER > current_qstat.out
+qstat_output=$(qstat -u $USER)
+
+# qstatの返り値が空文字、すなわちキューが何もない時は終了
+if [ -z "$qstat_output" ]; then
+  exit 0
+fi
+
+# qstatの返り値を一時ファイルに保存
+echo "$qstat_output" > current_qstat.out
 
 # 一時ファイルを解析してジョブIDと状態を取得
 current_jobs=$(awk 'NR>2 {print $1, $5}' current_qstat.out)
@@ -30,7 +38,7 @@ while read -r job_id state; do
 done <<< "$current_jobs"
 
 # 出力のヘッダー
-echo -e "job_ID\tstate\ttask\t\tnode\tmodel name "
+echo -e "job-ID\tstate\ttask\t\tnode\tmodel name "
 echo -e "----------------------------------------------------------------------------------------------------------------------------"
 
 # 前回のジョブの状態を読み込む
