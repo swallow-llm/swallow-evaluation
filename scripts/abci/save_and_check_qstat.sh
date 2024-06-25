@@ -26,7 +26,7 @@ while read -r job_id state; do
   job_info=$(qstat -j "$job_id")
   task_kind=$(echo "$job_info" | grep job_name | awk '{print $2}' | sed -e 's:evaluate_::' -e 's:.sh::')
   model_name=$(echo "$job_info" | grep job_args | sed 's:.*/::' | sed 's/,.*//')
-  node_kind=$(echo "$job_info" | grep ar_ids | awk '{print $2}')
+  node_kind=$(echo "$job_info" | grep ar_id | awk '{print $2}')
   slots=$(echo "$job_info" | grep parallel | awk '{print $5}')
   
   if [ -z "$node_kind" ]; then
