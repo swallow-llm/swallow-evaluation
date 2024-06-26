@@ -24,8 +24,8 @@ declare -A current_job_map
 # 各ジョブについて情報を取得
 while read -r job_id state; do
   job_info=$(qstat -j "$job_id")
-  task_kind=$(echo "$job_info" | grep job_name | awk '{print $2}' | sed -e 's:evaluate_::' -e 's:.sh::')
-  model_name=$(echo "$job_info" | grep job_args | sed 's:.*/::' | sed 's/,.*//')
+  task_kind=$(echo "$job_info" | grep job_name | awk '{print $2}' | sed -e 's:evaluate_::' -e 's:\.sh::')
+  model_name=$(echo "$job_info" |grep stderr_path_list | sed 's|.*results/\([^/]*\)/\([^/]*\).*|\1/\2|')
   node_kind=$(echo "$job_info" | grep ar_id | awk '{print $2}')
   slots=$(echo "$job_info" | grep parallel | awk '{print $5}')
   
@@ -41,7 +41,7 @@ while read -r job_id state; do
 done <<< "$current_jobs"
 
 # 出力のヘッダー
-printf "%-10s %-8s %-10s %-8s %-50s %-100s\n" "job_ID" "state" "node" "slots" "task" "model name"
+printf "%-10s %-8s %-10s %-8s %-35s %-100s\n" "job_ID" "state" "node" "slots" "task" "model name"
 echo -e "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 # 前回のジョブの状態を読み込む
@@ -51,7 +51,7 @@ if [ -f qstat_history.out ]; then
   # 前回のジョブIDが現在のジョブIDにない場合は終了したとみなす
   echo "$old_jobs" | while read -r old_job_id old_state old_node_kind old_slots old_task_kind old_model_name; do
     if [[ -z "${current_job_map[$old_job_id]}" ]]; then
-      printf "%-10s %-8s %-10s %-8s %-50s %-100s\n" "$old_job_id" "done" "$old_node_kind" "$old_slots" "$old_task_kind" "$old_model_name"
+      printf "%-10s %-8s %-10s %-8s %-35s %-100s\n" "$old_job_id" "done" "$old_node_kind" "$old_slots" "$old_task_kind" "$old_model_name"
     fi
   done
 fi
@@ -59,7 +59,7 @@ fi
 # 現在のジョブ情報を表示
 echo -e "$results" | while read -r job_id state node_kind slots task_kind model_name; do
   if [[ -n "$job_id" ]]; then
-    printf "%-10s %-8s %-10s %-8s %-50s %-100s\n" "$job_id" "$state" "$node_kind" "$slots" "$task_kind" "$model_name"
+    printf "%-10s %-8s %-10s %-8s %-35s %-100s\n" "$job_id" "$state" "$node_kind" "$slots" "$task_kind" "$model_name"
   fi
 done
 
