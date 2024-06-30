@@ -186,6 +186,10 @@ AZURE_OPENAI_ENDPOINT=...
 
 ## 日本語の評価
 
+結果は
+`results/${MODEL_PATH}/ja/`
+以下に保存されます。
+
 * `llm-jp-eval` , `bigcode-evaluation-harness`, `lm-sys/FastChat`, および `JP LM Evaluation Harness` の一部を採用
   * 多肢選択・自然言語推論・質問応答・文書読解・数学
   * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
@@ -245,10 +249,6 @@ bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 
 few-shot数: 4
 
-結果は
-`results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
-に保存される。
-
 ### JHumanevalのタスクで評価
 
 * few-shot数: 0 (zero-shot)
@@ -268,6 +268,10 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 * **GPT-4を呼び出すためAPI料金がかかるので注意が必要。**
 
 ## 英語の評価
+
+結果は
+`results/${MODEL_PATH}/en/`
+以下に保存されます。
 
 ### lm-evaluation-harness のタスクで評価
 
