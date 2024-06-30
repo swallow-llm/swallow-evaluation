@@ -251,25 +251,11 @@ few-shot数: 4
 
 ### JHumanevalのタスクで評価
 
-* few-shot数: 0
+* few-shot数: 0 (zero-shot)
 * 評価を行うにはdockerイメージのビルドが必要
-
-#### 応答生成と評価を同時に行う場合
 
 ```bash
 bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH true true
-```
-
-#### 応答生成だけを行う場合
-
-```bash
-bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH true false
-```
-
-#### 評価だけを行う場合
-
-```bash
-bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH false true
 ```
 
 ### MTBenchの評価
@@ -278,13 +264,8 @@ bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH false true
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
-few-shot数: 0 (zero-shot)
-
-結果は
-`results/${MODEL_PATH}/ja/ja_mt_bench/`
-に保存される。
-
-**GPT-4を呼び出すためAPI料金がかかるので注意が必要。**
+* few-shot数: 0 (zero-shot)
+* **GPT-4を呼び出すためAPI料金がかかるので注意が必要。**
 
 ## 英語の評価
 
@@ -296,6 +277,13 @@ few-shot数: 0 (zero-shot)
   * 文書読解: SQuAD
   * 数学: GSM8K
   * 一般教養・学術知識: MMLU
+  * LLMにとって難しいタスクのコレクション: BBH (BIG-Bench-Hard)
+
+fewshot数は
+
+* MMLU: 5
+* BBH: 3
+* その他(HellaSwag, WinoGrande, OpenBookQA, TriviaQA, SQuAD, GSM8K): 4
 
 `jalm-evaluation-private/`にて
 
@@ -305,7 +293,7 @@ bash scripts/evaluate_english.sh $MODEL_PATH
 
 ### Humanevalのタスクで評価
 
-* few-shot数: 0
+* few-shot数: 0 (zero-shot)
 * 評価を行うにはdockerイメージのビルドが必要
 
 ```bash
