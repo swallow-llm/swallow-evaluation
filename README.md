@@ -160,10 +160,6 @@ AZURE_OPENAI_ENDPOINT=...
 `results/${MODEL_PATH}/ja/`
 以下に保存されます。
 
-* `llm-jp-eval` , `bigcode-evaluation-harness`, `lm-sys/FastChat`, および `JP LM Evaluation Harness` の一部を採用
-  * 多肢選択・自然言語推論・質問応答・文書読解・数学
-  * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
-
 ### llm-jp-eval データセットの前処理
 
 * [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする
@@ -182,18 +178,14 @@ cd ../
 
 `swallow-evaluation/`にて
 
-llm-jp-evalのタスクで評価
-
 ```bash
 bash scripts/evaluate_ja_llmjp.sh \
 $MODEL_PATH \
 $TOKENIZER_PATH \
 ```
 
-fewshot数は
+jamp, janli, jemhopqa, jcommonsenseqa, jnli, jsem, jsick, jsquad, jsts, niilc, jmmluの評価が実行されます。
 
-* jmmlu: 5
-* その他(jamp, janli, jcommonsenseqa, jnli, jsem, jsick, jsquad, jsts, niilc): 4
 
 ### xlsum（自動要約）のタスクで評価
 
@@ -201,15 +193,11 @@ fewshot数は
 bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
 ```
 
-few-shot数: 1
-
 ### mgsm（数学）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_mgsm.sh $MODEL_PATH
 ```
-
-few-shot数: 4
 
 ### WMT20（機械翻訳）のタスクで評価
 
@@ -217,25 +205,21 @@ few-shot数: 4
 bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 ```
 
-few-shot数: 4
-
 ### JHumanevalのタスクで評価
 
-* few-shot数: 0 (zero-shot)
 * 評価を行うにはdockerイメージのビルドが必要
 
 ```bash
 bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH true true
 ```
 
-### MTBenchの評価
+### 日本語MTBenchの評価
+
+* Azure OpenAI APIを用いてGPT-4を呼び出すためAPI料金がかかる
 
 ```bash
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
-
-* few-shot数: 0 (zero-shot)
-* Azure OpenAI APIを用いてGPT-4を呼び出すためAPI料金がかかる
 
 ## 英語の評価
 
@@ -245,29 +229,16 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 
 ### lm-evaluation-harness のタスクで評価
 
-* `lm-evaluation-harness` を採用
-  * 常識推論: HellaSwag, WinoGrande, OpenBookQA
-  * 世界知識: TriviaQA
-  * 文書読解: SQuAD
-  * 数学: GSM8K
-  * 一般教養・学術知識: MMLU
-  * LLMにとって難しいタスクのコレクション: BBH (BIG-Bench-Hard)
-
-fewshot数は
-
-* MMLU: 5
-* BBH: 3
-* その他(HellaSwag, WinoGrande, OpenBookQA, TriviaQA, SQuAD, GSM8K): 4
-
 `swallow-evaluation/`にて
 
 ```bash
 bash scripts/evaluate_english.sh $MODEL_PATH
 ```
 
+triviaqa, gsm8k, openbookqa, hellaswag, xwinograd_en, squadv2, mmlu, bbh_cot_fewshotの評価が実行されます。
+
 ### Humanevalのタスクで評価
 
-* few-shot数: 0 (zero-shot)
 * 評価を行うにはdockerイメージのビルドが必要
 
 ```bash
