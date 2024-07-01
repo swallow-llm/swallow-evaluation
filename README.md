@@ -1,46 +1,15 @@
-# TokyoTech-LLM 大規模言語モデル 評価スクリプト Ver. 202407
-* TODO: 適切に変更
-* このリポジトリでは[TokyoTech-LLM](https://tokyotech-llm.github.io/)による大規模言語モデル；Swallowシリーズのリリースおよび論文発表に用いた評価スクリプトを公開しています。
+# Swallowプロジェクト 大規模言語モデル 評価スクリプト Ver. 202407
+
+* このリポジトリでは[Swallowプロジェクト](https://swallow-llm.github.io/index.ja.html)による大規模言語モデル；Swallowシリーズのリリースに用いた評価スクリプトを公開しています。
   再現実験などにご利用ください。
-* 本文書では評価スクリプトの実行方法のみを説明します。評価方法や結果はSwallowシリーズのリリースや論文発表を参照ください。
+* 本文書では評価スクリプトの実行方法のみを説明します。評価方法や結果はSwallowプロジェクトの[評価ページ](https://swallow-llm.github.io/evaluation/about.ja.html)や論文発表を参照ください。
 * 評価スクリプトは，基本的には [llm-jp-eval](https://github.com/llm-jp/llm-jp-eval) などの既存のLLM評価フレームワークを使用しています。
   この場をお借りしてフレームワーク開発者の皆様にお礼申し上げます。
 
 ## 注意事項
+
 * **実行環境の違いにより、異なる評価結果になる場合があります。**
-
-## 評価スクリプトが適用されたモデルリリースおよび論文発表
-
-### モデルリリース
-* TODO: 書く
-
-### 論文発表
-
-```
-@inproceedings{mizuki-iida-etal-2024-efficient-cpt,
-  author = {水木 栄 and 飯田 大貴 and 藤井 一喜 and 中村 泰士 and Mengsay Loem and 大井 聖也 and 服部 翔 and 平井 翔太 and 横田 理央 and 岡崎 直観},
-  title = {大規模言語モデルの日本語能力の効率的な強化: 継続事前学習における語彙拡張と対訳コーパスの活用},
-  booktitle = {言語処理学会第30回年次大会 (NLP2024)},
-  month = mar,
-  year = {2024},
-}
-
-@inproceedings{okazaki-etal-2024-swallow-corpus,
-  author = {岡崎 直観 and 服部 翔 and 平井 翔太 and 飯田 大貴 and 大井 聖也 and 藤井 一喜 and 中村 泰士 and Mengsay Loem and 横田 理央 and 水木 栄},
-  title = {Swallowコーパス: 日本語大規模ウェブコーパス},
-  booktitle = {言語処理学会第30回年次大会 (NLP2024)},
-  month = mar,
-  year = {2024},
-}
-
-@inproceedings{fuji-nakamura-etal-2024-swallow-llm,
-  author = {藤井 一喜 and 中村 泰士 and Mengsay Loem and 飯田 大貴 and 大井 聖也 and 服部 翔 and 平井 翔太 and 水木 栄 and 横田 理央 and 岡崎 直観},
-  title = {継続事前学習による日本語に強い大規模言語モデルの構築},
-  booktitle = {言語処理学会第30回年次大会 (NLP2024)},
-  month = mar,
-  year = {2024},
-}
-```
+* 評価がうまくいかないなど問題があればIssueまでお願いします。
 
 ## 評価スクリプトが使用するLLM評価フレームワークおよびそれらのライセンス・変更点
 
@@ -48,22 +17,21 @@
 
 * バージョン: [llm-jp-eval v1.3.0](https://github.com/llm-jp/llm-jp-eval/releases/tag/v1.3.0) [Han+, ANLP24]
 * ライセンス: Copyright 2023 LLM-jp,  Apache License Version 2.0 ([LICENSE](llm-jp-eval/LICENSE))
-* 大きな変更点:
+* 主な変更点:
   * モデルの応答を生成する際に貪欲デコーディングを強制するようにconfigを追加しました（[リンク](./llm-jp-eval/configs/config_no-sample.yaml))。
   * JMMLUの結果をカテゴリごとに算出するスクリプトを追加しました ([リンク](./llm-jp-eval/scripts/jmmlu_statistics.py))。
-  * 結果が保存されるファイル名に時刻が含まれないようにしました。
 
 ### Language Model Evaluation Harness
 
 * バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
-* 大きな変更点: なし
+* 主な変更点: なし
 
 ### JP Language Model Evaluation Harness
 
 * バージョン: [Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41) [Gao+, 22]
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-jp/LICENSE.md))
-* 大きな変更点:
+* 主な変更点:
   * TER (Translation Error Rate) をブートストラップ統計量から除外しました。
   * 評価結果のキャッシュの保存先を指定できるようにしました。
   * huggingface tokenizerを読み込む際に`trust_remote_code`に渡す値を指定できるようにしました。
@@ -72,7 +40,7 @@
 
 * バージョン: [FastChat](https://github.com/lm-sys/FastChat) (commit #e86e70d0)
 * ライセンス: Apache License Version 2.0 ([LICENSE](fastchat/LICENSE))
-* 大きな変更点:
+* 主な変更点:
   * 新しいモデルに対応するために、それぞれのモデルに対応するChatTemplateの追加をしました ([リンク](./fastchat/fastchat/conversation.py))。
   * 一つの事例に対して複数回の応答文の生成と評価を行えるようにしました。
   * OpenAIのAPIを呼び出す際のretryの処理を改善しました。
@@ -81,21 +49,23 @@
 
 * バージョン: [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) (commit #0261c52)
 * ライセンス: Apache License Version 2.0 ([LICENSE](bigcode-evaluation-harness/LICENSE))
-* 大きな変更点:
+* 主な変更点:
   * JHumanEvalの評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/humaneval.py))。
+  * HumanEval / JHumanEval タスクにおける、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
 
 #### JHumanEval (Code Generation LM Evaluation Harnessで使用)
 
 * バージョン: [jhuman-eval](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
 * ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
-* 大きな変更点: なし
+* 主な変更点: なし
+
 ----
 
-# 評価スクリプトの実行方法
+## 評価スクリプトの実行方法
 
 ## 準備：環境構築
 
-各フレームワークに対し、別々の仮想環境を用意することを推奨します。
+各フレームワークに対し、別々の仮想環境を用意します。
 
 Pythonのバージョンは3.9を使ってください。
 
@@ -107,7 +77,7 @@ python -m venv .venv_bigcode
 python -m venv .venv_fastchat
 ```
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 ```bash
 source .venv_llm_jp_eval/bin/activate
@@ -120,7 +90,7 @@ pip install sentencepiece
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 ```bash
 source .venv_harness_jp/bin/activate
@@ -135,7 +105,7 @@ pip install nagisa
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 ```bash
 source .venv_harness_en/bin/activate
@@ -148,7 +118,7 @@ pip install protobuf
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 ```bash
 source .venv_bigcode/bin/activate
@@ -164,7 +134,7 @@ torchのバージョンがcudaに合わない場合は、torchを入れ直して
 
 bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 ```bash
 source .venv_fastchat/bin/activate
@@ -177,7 +147,7 @@ pip install -e ".[model_worker,llm_judge]"
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
-`jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
+`swallow-evaluation/.env`ファイルを作成し、AzureのAPIキーを入力する。
 
 ```txt
 AZURE_OPENAI_KEY=...
@@ -210,7 +180,7 @@ cd ../
 
 ### llm-jp-evalのタスクで評価
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 llm-jp-evalのタスクで評価
 
@@ -265,7 +235,7 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
 * few-shot数: 0 (zero-shot)
-* **GPT-4を呼び出すためAPI料金がかかるので注意が必要。**
+* Azure OpenAI APIを用いてGPT-4を呼び出すためAPI料金がかかる
 
 ## 英語の評価
 
@@ -289,7 +259,7 @@ fewshot数は
 * BBH: 3
 * その他(HellaSwag, WinoGrande, OpenBookQA, TriviaQA, SQuAD, GSM8K): 4
 
-`jalm-evaluation-private/`にて
+`swallow-evaluation/`にて
 
 ```bash
 bash scripts/evaluate_english.sh $MODEL_PATH
