@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source .venv_fastchat/bin/activate
-GPU_NUM=1
 MODEL_NAME_PATH=$1
 GPU_NUM=$2
 
