@@ -91,11 +91,10 @@ pip install -e ".[model_worker,llm_judge]"
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
-`jalm-evaluation-private/.env`ファイルを作成し、AzureのAPIキーを入力する。
+`jalm-evaluation-private/.env`ファイルを作成し、OpenAIのAPIキーを入力する。
 
 ```txt
-AZURE_OPENAI_KEY=...
-AZURE_OPENAI_ENDPOINT=...
+OPENAI_API_KEY=...
 ```
 
 # 日本語の評価
@@ -266,39 +265,37 @@ bash scripts/evaluate_english.sh $MODEL_PATH
 
 ## Humanevalのタスクで評価
 
-### 出力の生成
+
+### 出力と評価を同時に行う場合
 
 ```bash
-bash scripts/evaluate_en_humaneval.sh $MODEL_PATH
+bash scripts/evaluate_english_humaneval.sh $MODEL_PATH true true
 ```
 
-### 評価 (未整備)
-
-通常の環境でモデルが生成したコードを実行することは危険なので、docker環境下でコードを実行し、評価する。
+### 出力だけを行う場合
 
 ```bash
-cd bigcode-evaluation-harness
-bash eval_en.sh $MODEL_PATH
+bash scripts/evaluate_english_humaneval.sh $MODEL_PATH true false
 ```
 
-* 結果の保存はされないので目視で確認してください（整備中です）
-  
+### 評価だけを行う場合
+
+```bash
+bash scripts/evaluate_english_humaneval.sh $MODEL_PATH false true
+```
+
 #### Singularityを使う場合
+
 ```
 cd bigcode-evaluation-harness
 singularity pull docker://ghcr.io/bigcode-project/evaluation-harness:latest
 ```
+
 でimageをpullしてください。
 その後
+
 ```
 singularity exec --bind jalm-evaluation-private/results/MODELPATH/en/humaneval_10NUM_SAMPLES_1BATCH_SIZE/generation_humaneval.json:/app/generations_py.json evaluation-harness_latest.sif python3 main.py --model $MODELPATH --tasks humaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10
 ```
+
 で実行してください。
-
-# ABCI上
-
-整備中です。
-
-# TSUBAME4.0上
-
-整備中です。
