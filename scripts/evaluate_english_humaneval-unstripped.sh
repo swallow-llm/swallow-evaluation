@@ -6,9 +6,19 @@ source .venv_bigcode/bin/activate
 MODEL_NAME_PATH=$1
 DO_GENERATION=$2
 DO_EVAL=$3
+CUDA_BLOCKING=${4:-}
 NUM_SAMPLES=10
 BATCH_SIZE=10
 OUTDIR="results/${MODEL_NAME_PATH}/en/humaneval-unstripped"
+
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 mkdir -p $OUTDIR
 

@@ -7,6 +7,16 @@ source .venv_harness_en/bin/activate
 # to evaluate with all testcases, set NUM_TESTCASE=None
 
 MODEL_NAME_PATH=$1
+CUDA_BLOCKING=${2:-}
+
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 GENERAL_TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squadv2"
 GENERAL_NUM_FEWSHOT=4
