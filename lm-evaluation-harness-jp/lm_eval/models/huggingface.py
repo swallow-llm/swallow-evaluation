@@ -452,7 +452,7 @@ class HuggingFaceAutoLM(BaseLM):
                 stop=until,
             )
             responses = self.tok_decode(responses.tolist())
-            
+
             for response in responses:
                 # Ensure the generated responses do not contain the stop sequences.
                 for term in until:
