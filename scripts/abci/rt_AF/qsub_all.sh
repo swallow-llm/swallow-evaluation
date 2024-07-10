@@ -1,7 +1,7 @@
-REPO_PATH="/home/acg16653re/github/jalm-evaluation-private"
+REPO_PATH="/groups/gcb50243/maeda/jalm-evaluation-private"
 GROUP_ID="gag51395"
-HUGGINGFACE_CACHE="/groups/gag51395/share/saito-k/.cache"
-LOCAL_PATH="/home/saito-k/eval_swallow/jhumaneval_results"
+HUGGINGFACE_CACHE="/groups/gag51395/share/ohi/.cache"
+LOCAL_PATH="/home/ohi-m/jalm-evaluation-private-2404_update/abci_humaneval_result"
 
 MODEL_NAME_PATH=$1
 
@@ -24,9 +24,9 @@ qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" -e "$REPO_P
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mgsm.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-# ## mt_bench
-# mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/"
-# qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mt_bench.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH 8
+## mt_bench
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/"
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" "$REPO_PATH/scripts/abci/rt_AF/evaluate_ja_mt_bench.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH 8
 
 # jhumaneval-unstripped
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
