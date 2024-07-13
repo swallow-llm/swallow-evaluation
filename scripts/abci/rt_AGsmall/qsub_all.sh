@@ -1,4 +1,4 @@
-REPO_PATH="/home/acf15321wt/jalm-evaluation-private_update-2404"
+REPO_PATH="/groups/gcb50243/maeda/jalm-evaluation-private"
 GROUP_ID="gag51395"
 HUGGINGFACE_CACHE="/groups/gag51395/share/ohi/.cache"
 LOCAL_PATH="/home/ohi-m/jalm-evaluation-private-2404_update/abci_humaneval_result"
@@ -16,11 +16,11 @@ qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_en_ja/" -e "$
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_ja_en/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_ja_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_ja_en/" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_wmt20_jaen.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-## xlsum
+# xlsum
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/"
-qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_xlsum.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_xlsum.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH 1
 
-## mgsm
+# mgsm
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_mgsm.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
