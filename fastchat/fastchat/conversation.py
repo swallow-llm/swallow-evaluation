@@ -1605,6 +1605,20 @@ register_conv_template(
     )
 )
 
+# meta-llama/Meta-Llama-3-8B-Instruct template
+# reference: https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct
+register_conv_template(
+    Conversation(
+        name="llama-3",
+        system_template="<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_message}<|eot_id|>",
+        system_message="あなたは誠実で優秀な日本人のアシスタントです。",
+        roles=("<|start_header_id|>user<|end_header_id|>\n\n", "<|start_header_id|>assistant<|end_header_id|>\n\n"),
+        sep="<|eot_id|>",
+        sep_style=SeparatorStyle.CALM2,
+        stop_token_ids=[128009], #"<|eot_id|>"
+    )
+)
+
 # 以前のSwallowテンプレート(もう使わない)
 """
 # Swallow default template
@@ -1643,6 +1657,16 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
+    print("\n")
+
+    print("-- Llama-3 template --")
+    conv = get_conv_template("llama-3")
+    conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
+    conv.append_message(conv.roles[1], "元気です、ありがとう。")
+    conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
 

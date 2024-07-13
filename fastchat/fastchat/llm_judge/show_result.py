@@ -171,7 +171,7 @@ if __name__ == "__main__":
         "--azure",
         action="store_true",
         help="Did you use Azure API instead of openai when generating the judgment?",
-        default=True,
+        default=False,
     )
     args = parser.parse_args()
 

@@ -5,8 +5,18 @@ source .venv_harness_jp/bin/activate
 export TOKENIZERS_PARALLELISM=false
 
 MODEL_NAME_PATH=$1
+CUDA_BLOCKING=${2:-}
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"
+
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 OUTDIR="results/${MODEL_NAME_PATH}/ja/wmt20_ja_en/wmt20_ja_en_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 

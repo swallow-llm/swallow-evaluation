@@ -5,10 +5,20 @@ source .venv_llm_jp_eval/bin/activate
 
 MODEL_NAME_PATH=$1
 TOKENIZER_NAME_PATH=$2
+CUDA_BLOCKING=${3:-}
 DATASET_DIR="llm-jp-eval/dataset/1.3.0/evaluation/test"
 NUM_TESTCASE=-1
 GENERAL_NUM_FEWSHOT=4
 JMMLU_NUM_FEWSHOT=5
+
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 GENERAL_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${GENERAL_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 JMMLU_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${JMMLU_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
