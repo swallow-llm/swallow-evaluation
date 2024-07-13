@@ -63,7 +63,7 @@
 
 ## 評価スクリプトの実行方法
 
-## 準備：環境構築
+### 準備：環境構築
 
 各フレームワークに対し、別々の仮想環境を用意します。
 
@@ -154,13 +154,14 @@ AZURE_OPENAI_KEY=...
 AZURE_OPENAI_ENDPOINT=...
 ```
 
-## 日本語の評価
+### 日本語の評価
 
 結果は
 `results/${MODEL_PATH}/ja/`
 以下に保存されます。
 
-### llm-jp-eval データセットの前処理
+#### llm-jp-eval データセットの前処理
+
 
 * [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする
 
@@ -174,7 +175,7 @@ python scripts/preprocess_dataset.py  \
 cd ../
 ```
 
-### llm-jp-evalのタスクで評価
+#### llm-jp-evalのタスクで評価
 
 `swallow-evaluation/`にて
 
@@ -187,25 +188,25 @@ $TOKENIZER_PATH \
 jamp, janli, jemhopqa, jcommonsenseqa, jnli, jsem, jsick, jsquad, jsts, niilc, jmmluの評価が実行されます。
 
 
-### xlsum（自動要約）のタスクで評価
+#### xlsum（自動要約）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
 ```
 
-### mgsm（数学）のタスクで評価
+#### mgsm（数学）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_mgsm.sh $MODEL_PATH
 ```
 
-### WMT20（機械翻訳）のタスクで評価
+#### WMT20（機械翻訳）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 ```
 
-### JHumanevalのタスクで評価
+#### JHumanevalのタスクで評価
 
 * 評価を行うにはdockerイメージのビルドが必要
 
@@ -213,7 +214,7 @@ bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH true true
 ```
 
-### 日本語MTBenchの評価
+#### 日本語MTBenchの評価
 
 * Azure OpenAI APIを用いてGPT-4を呼び出すためAPI料金がかかる
 
@@ -221,13 +222,14 @@ bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH true true
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
-## 英語の評価
+### 英語の評価
+
 
 結果は
 `results/${MODEL_PATH}/en/`
 以下に保存されます。
 
-### lm-evaluation-harness のタスクで評価
+#### lm-evaluation-harness のタスクで評価
 
 `swallow-evaluation/`にて
 
@@ -235,12 +237,20 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 bash scripts/evaluate_english.sh $MODEL_PATH
 ```
 
+#### Humanevalのタスクで評価
 triviaqa, gsm8k, openbookqa, hellaswag, xwinograd_en, squadv2, mmlu, bbh_cot_fewshotの評価が実行されます。
-
-### Humanevalのタスクで評価
 
 * 評価を行うにはdockerイメージのビルドが必要
 
 ```bash
 bash scripts/evaluate_english_humaneval-unstripped.sh $MODEL_PATH true true
+```
+
+### 結果の集計
+
+モデル名を指定して`scripts/aggregate_result.py`を実行することで、モデルの評価結果を集計することができます。
+ただし、各評価スクリプトの最後に自動的に結果が集計されるようになっているので、通常は実行する必要はありません。
+
+```python
+python scripts/aggregate_result.py --model $MODEL_NAME
 ```
