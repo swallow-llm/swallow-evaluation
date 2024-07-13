@@ -63,7 +63,7 @@
 
 ## 評価スクリプトの実行方法
 
-## 準備：環境構築
+### 準備：環境構築
 
 各フレームワークに対し、別々の仮想環境を用意します。
 
@@ -154,7 +154,7 @@ AZURE_OPENAI_KEY=...
 AZURE_OPENAI_ENDPOINT=...
 ```
 
-## 日本語の評価
+### 日本語の評価
 
 結果は
 `results/${MODEL_PATH}/ja/`
@@ -164,7 +164,7 @@ AZURE_OPENAI_ENDPOINT=...
   * 多肢選択・自然言語推論・質問応答・文書読解・数学
   * 生成タスク: 対話生成(mt_bench), XLSum, WMT20-en-ja, WMT20-ja-en, humaneval
 
-### llm-jp-eval データセットの前処理
+#### llm-jp-eval データセットの前処理
 
 * [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする
 
@@ -178,7 +178,7 @@ python scripts/preprocess_dataset.py  \
 cd ../
 ```
 
-### llm-jp-evalのタスクで評価
+#### llm-jp-evalのタスクで評価
 
 `swallow-evaluation/`にて
 
@@ -195,7 +195,7 @@ fewshot数は
 * jmmlu: 5
 * その他(jamp, janli, jcommonsenseqa, jnli, jsem, jsick, jsquad, jsts, niilc): 4
 
-### xlsum（自動要約）のタスクで評価
+#### xlsum（自動要約）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
@@ -203,7 +203,7 @@ bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
 
 few-shot数: 1
 
-### mgsm（数学）のタスクで評価
+#### mgsm（数学）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_mgsm.sh $MODEL_PATH
@@ -211,7 +211,7 @@ bash scripts/evaluate_ja_mgsm.sh $MODEL_PATH
 
 few-shot数: 4
 
-### WMT20（機械翻訳）のタスクで評価
+#### WMT20（機械翻訳）のタスクで評価
 
 ```bash
 bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
@@ -219,7 +219,7 @@ bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 
 few-shot数: 4
 
-### JHumanevalのタスクで評価
+#### JHumanevalのタスクで評価
 
 * few-shot数: 0 (zero-shot)
 * 評価を行うにはdockerイメージのビルドが必要
@@ -228,7 +228,7 @@ few-shot数: 4
 bash scripts/evaluate_ja_humaneval-unstripped.sh $MODEL_PATH true true
 ```
 
-### MTBenchの評価
+#### MTBenchの評価
 
 ```bash
 bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
@@ -237,13 +237,13 @@ bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 * few-shot数: 0 (zero-shot)
 * Azure OpenAI APIを用いてGPT-4を呼び出すためAPI料金がかかる
 
-## 英語の評価
+### 英語の評価
 
 結果は
 `results/${MODEL_PATH}/en/`
 以下に保存されます。
 
-### lm-evaluation-harness のタスクで評価
+#### lm-evaluation-harness のタスクで評価
 
 * `lm-evaluation-harness` を採用
   * 常識推論: HellaSwag, WinoGrande, OpenBookQA
@@ -265,11 +265,20 @@ fewshot数は
 bash scripts/evaluate_english.sh $MODEL_PATH
 ```
 
-### Humanevalのタスクで評価
+#### Humanevalのタスクで評価
 
 * few-shot数: 0 (zero-shot)
 * 評価を行うにはdockerイメージのビルドが必要
 
 ```bash
 bash scripts/evaluate_english_humaneval-unstripped.sh $MODEL_PATH true true
+```
+
+### 結果の集計
+
+モデル名を指定して`scripts/aggregate_result.py`を実行することで、モデルの評価結果を集計することができます。
+ただし、各評価スクリプトの最後に自動的に結果が集計されるようになっているので、通常は実行する必要はありません。
+
+```python
+python scripts/aggregate_result.py --model $MODEL_NAME
 ```
