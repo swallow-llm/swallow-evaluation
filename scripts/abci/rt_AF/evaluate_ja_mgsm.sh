@@ -1,39 +1,62 @@
 #!/bin/bash
+
 #$ -l rt_AF=1
-#$ -l h_rt=6:00:00
+#$ -l h_rt=48:00:00
 #$ -j y
-#$ -o outputs-full/
 #$ -cwd
 
-# module load
+repo_path=$1
+
+source ~/.bashrc
 source /etc/profile.d/modules.sh
-module load python/3.10/3.10.10
-module load cuda/11.8/11.8.0
-module load cudnn/8.9/8.9.2
-module load nccl/2.16/2.16.2-1
-module load hpcx/2.12
+conda deactivate
+module load python/3.10/3.10.14
+module load cuda/12.1/12.1.1
+module load cudnn/9.0/9.0.0
 
-export HF_HOME=/bb/llm/gaf51275/jalm/.cache
-export HF_DATASETS_CACHE=/bb/llm/gaf51275/jalm/.cache
-export TRANSFORMERS_CACHE=/bb/llm/gaf51275/jalm/.cache
+REPO_PATH=$1
+HUGGINGFACE_CACHE=$2
+MODEL_NAME_PATH=$3
+CUDA_BLOCKING=${4:-}
 
+export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
+export HF_HOME=$HUGGINGFACE_CACHE
 
-# running lm-evaluation-harness-jp for mgsm task
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+
+cd $REPO_PATH
+
 source .venv_harness_jp/bin/activate
-export TOKENIZERS_PARALLELISM=false
 
-MODEL_NAME_PATH=$1
-NUM_FEWSHOT=$2
-NUM_TESTCASE=all
+NUM_FEWSHOT=4
+NUM_TESTCASE="all"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mgsm/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=False
+else
+    USE_FAST_TOKENIZER=True
+fi
 
-OUTDIR="results/${MODEL_NAME_PATH}/ja/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args pretrained=$MODEL_NAME_PATH,use_accelerate=True,dtype="bfloat16"\
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
     --tasks "mgsm" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
     --verbose \
     --device cuda \
-    --output_path ${OUTDIR}/score_math.json
+    --output_path ${OUTDIR}/score_math.json \
+    --use_cache ${OUTDIR}
+
+# aggregate results
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH

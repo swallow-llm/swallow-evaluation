@@ -60,13 +60,15 @@ ANTHROPIC_MODEL_LIST = (
 
 OPENAI_MODEL_LIST = (
     "gpt-3.5-turbo",
-    "gpt-3.5-turbo-0301",
     "gpt-3.5-turbo-0613",
     "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0125",
     "gpt-4",
     "gpt-4-0314",
     "gpt-4-0613",
+    "gpt-4-1106-preview",
     "gpt-4-turbo",
+    "gpt-4o-2024-05-13",
 )
 
 
@@ -1499,7 +1501,7 @@ class Llama2Adapter(BaseModelAdapter):
     """The model adapter for Llama-2 (e.g., meta-llama/Llama-2-7b-hf)"""
 
     def match(self, model_path: str):
-        return "llama-2" in model_path.lower()
+        return "llama-2" in model_path.lower() or "llama-ct" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
@@ -1509,6 +1511,22 @@ class Llama2Adapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("llama-2")
+
+
+class Llama3Adapter(BaseModelAdapter):
+    """The model adapter for Llama-3 (e.g., meta-llama/Llama-3-7b-hf)"""
+
+    def match(self, model_path: str):
+        return "llama-3" in model_path.lower() or "llama3" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
+        model.config.eos_token_id = tokenizer.eos_token_id
+        model.config.pad_token_id = tokenizer.pad_token_id
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("llama-3")
 
 
 class CuteGPTAdapter(BaseModelAdapter):
@@ -1703,6 +1721,16 @@ class QwenChatAdapter(BaseModelAdapter):
         model.config.pad_token_id = tokenizer.pad_token_id
 
         return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("qwen-7b-chat")
+
+
+class Qwen2ChatAdapter(BaseModelAdapter):
+    """The model adapter for Qwen/Qwen2-7B-Instruct"""
+
+    def match(self, model_path: str):
+        return "qwen2" in model_path.lower()
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("qwen-7b-chat")
@@ -2286,7 +2314,6 @@ class JapaneseStableLMGammaAdapter(BaseModelAdapter):
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
-register_model_adapter(SwallowAdapter)
 register_model_adapter(JapaneseStableLMBetaAdapter)
 register_model_adapter(ELYZAJapaneseLlama2Adapter)
 register_model_adapter(Calm2Adapter)
@@ -2339,7 +2366,9 @@ register_model_adapter(XGenAdapter)
 register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
+register_model_adapter(Llama3Adapter)
 register_model_adapter(Llama2Adapter)
+register_model_adapter(SwallowAdapter)
 register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
 register_model_adapter(DolphinAdapter)
@@ -2348,6 +2377,7 @@ register_model_adapter(NousHermes2MixtralAdapter)
 register_model_adapter(NousHermesAdapter)
 register_model_adapter(MistralAdapter)
 register_model_adapter(WizardCoderAdapter)
+register_model_adapter(Qwen2ChatAdapter)
 register_model_adapter(QwenChatAdapter)
 register_model_adapter(AquilaChatAdapter)
 register_model_adapter(BGEAdapter)

@@ -210,6 +210,11 @@ def parse_args():
         action="store_true",
         help="Don't run generation but benchmark groundtruth (useful for debugging)",
     )
+    parser.add_argument(
+        "--use_fast_tokenizer",
+        action="store_true",
+        help="Configure using fast tokenizer. (Mainly for sarashina2)",
+    )
     return parser.parse_args()
 
 
@@ -324,6 +329,7 @@ def main():
                 trust_remote_code=args.trust_remote_code,
                 use_auth_token=args.use_auth_token,
                 padding_side="left",
+                use_fast=args.use_fast_tokenizer,
             )
         else:
             # used by default for most models
@@ -334,6 +340,7 @@ def main():
                 use_auth_token=args.use_auth_token,
                 truncation_side="left",
                 padding_side="right",
+                use_fast=args.use_fast_tokenizer,
             )
         if not tokenizer.eos_token:
             if tokenizer.bos_token:
@@ -405,7 +412,7 @@ def main():
     # Save all args to config
     results["config"] = vars(args)
     if not args.generation_only:
-        dumped = json.dumps(results, indent=2)
+        dumped = json.dumps(results, indent=2, ensure_ascii=False)
         if accelerator.is_main_process:
             print(dumped)
 

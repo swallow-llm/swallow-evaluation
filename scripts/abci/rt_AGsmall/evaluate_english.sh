@@ -1,43 +1,108 @@
 #!/bin/bash
+
 #$ -l rt_AG.small=1
-#$ -l h_rt=12:00:00
+#$ -l h_rt=24:00:00
 #$ -j y
-#$ -o outputs-full/
 #$ -cwd
 
-# module load
-source /etc/profile.d/modules.sh
-module load python/3.10/3.10.10
-module load cuda/11.8/11.8.0
-module load cudnn/8.9/8.9.2
-module load nccl/2.16/2.16.2-1
-module load hpcx/2.12
+repo_path=$1
 
-export HF_HOME=/bb/llm/gaf51275/jalm/.cache
-export HF_DATASETS_CACHE=/bb/llm/gaf51275/jalm/.cache
-export TRANSFORMERS_CACHE=/bb/llm/gaf51275/jalm/.cache
+source ~/.bashrc
+source /etc/profile.d/modules.sh
+conda deactivate
+module load python/3.10/3.10.14
+module load cuda/12.1/12.1.1
+module load cudnn/9.0/9.0.0
+
+REPO_PATH=$1
+HUGGINGFACE_CACHE=$2
+MODEL_NAME_PATH=$3
+CUDA_BLOCKING=${4:-}
+
+export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
+export HF_HOME=$HUGGINGFACE_CACHE
+
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+
+cd $REPO_PATH
 
 source .venv_harness_en/bin/activate
 
-# This script is used to evaluate
-# triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squad2
-# to evaluate with all testcases, set NUM_TESTCASE=None
-
-MODEL_NAME_PATH=$1
-TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squad2"
-NUM_FEWSHOT=$2
-NUM_TESTCASE=all
-OUTDIR="results/${MODEL_NAME_PATH}/en/alltasks_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
-
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/harness_en"
 mkdir -p $OUTDIR
 
-python lm-evaluation-harness-en/main.py \
-    --model hf-causal-experimental \
-    --model_args pretrained=$MODEL_NAME_PATH,use_accelerate=True,dtype="bfloat16" \
-    --tasks $TASK_NAME \
-    --num_fewshot $NUM_FEWSHOT \
-    --max_batch_size 32 \
-    --write_out \
+GENERAL_TASK_NAME="triviaqa,gsm8k,openbookqa,hellaswag,xwinograd_en,squadv2"
+GENERAL_NUM_FEWSHOT=4
+GENERAL_NUM_TESTCASE="all"
+GENERAL_OUTDIR="${OUTDIR}/alltasks_${GENERAL_NUM_FEWSHOT}shot_${GENERAL_NUM_TESTCASE}cases/general"
+
+MMLU_TASK_NAME="mmlu"
+MMLU_NUM_FEWSHOT=5
+MMLU_NUM_TESTCASE="all"
+MMLU_OUTDIR="${OUTDIR}/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
+
+BBH_TASK_NAME="bbh_cot_fewshot"
+BBH_NUM_FEWSHOT=3
+BBH_NUM_TESTCASE="all"
+BBH_OUTDIR="${OUTDIR}/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh_cot"
+
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=False
+else
+    USE_FAST_TOKENIZER=True
+fi
+
+mkdir -p $GENERAL_OUTDIR
+mkdir -p $MMLU_OUTDIR
+mkdir -p $BBH_OUTDIR
+
+cd lm-evaluation-harness-en
+
+echo $MMLU_TASK_NAME
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
+    --tasks $MMLU_TASK_NAME \
+    --num_fewshot $MMLU_NUM_FEWSHOT \
+    --batch_size 4 \
     --device cuda \
-    --output_base_path $OUTDIR \
-    --output_path ${OUTDIR}/score.json
+    --write_out \
+    --output_path "$MMLU_OUTDIR" \
+    --use_cache "$MMLU_OUTDIR" \
+    --log_samples \
+    --seed 42 \
+
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
+    --tasks $BBH_TASK_NAME \
+    --num_fewshot $BBH_NUM_FEWSHOT \
+    --batch_size 4 \
+    --device cuda \
+    --write_out \
+    --output_path "$BBH_OUTDIR" \
+    --use_cache "$BBH_OUTDIR" \
+    --log_samples \
+    --seed 42 \
+
+lm_eval --model hf \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
+    --tasks $GENERAL_TASK_NAME \
+    --num_fewshot $GENERAL_NUM_FEWSHOT \
+    --batch_size 4 \
+    --device cuda \
+    --write_out \
+    --output_path "$GENERAL_OUTDIR" \
+    --use_cache "$GENERAL_OUTDIR" \
+    --log_samples \
+    --seed 42 \
+
+# aggregate results
+cd ../
+python scripts/aggregate_result.py --model $MODEL_NAME_PATH
