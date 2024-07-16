@@ -4,31 +4,24 @@ from typing import List, Dict, Any
 from collections import defaultdict
 
 
+CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
+CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
+
 # question_id を category に変換する関数
 def map_question_to_category(question_id: int) -> str:
     # IDが1以上であることを確認
     if question_id < 1:
         raise ValueError("質問IDは1以上でなければなりません。")
 
-    category_map = [
-        "coding",
-        "extraction",
-        "humanities",
-        "math",
-        "reasoning",
-        "roleplay",
-        "stem",
-        "writing",
-    ]
     # カテゴリの数
-    num_categories = len(category_map)
+    num_categories = len(CATEGORIES)
     # カテゴリ別設問数
     questions_per_category = 10
 
     # カテゴリインデックスを計算
     category_index = (question_id - 1) // questions_per_category % num_categories
 
-    return category_map[category_index]
+    return CATEGORIES[category_index]
 
 
 # 日本語文字か否かを判定する関数
@@ -101,12 +94,10 @@ def calculate_japanese_character_ratio(lst_mtbench_model_answers: List[Dict[str,
     # 次にひらがな・カタカナ・漢字の文字数の割合のマイクロ平均を計算する
     results = {}
     for category_name, dict_char_counts in category_counts.items():
-        key_name = f"ja_char_ratio-{category_name}"
-        print(key_name)
         num = dict_char_counts["japanese_chars"]
         denom = dict_char_counts["total_chars"]
-        results[key_name] = safe_divide(numerator=num, denominator=denom)
-    results["ja_char_ratio-ALL"] = safe_divide(numerator=total_japanese_chars, denominator=total_chars)
+        results[category_name] = safe_divide(numerator=num, denominator=denom)
+    results["overall"] = safe_divide(numerator=total_japanese_chars, denominator=total_chars)
 
     return results
 

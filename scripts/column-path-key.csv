@@ -35,6 +35,15 @@ coding,ja/ja_mt_bench/judge.json,MODEL_NAME.Coding.average.score,10
 extraction,ja/ja_mt_bench/judge.json,MODEL_NAME.Extraction.average.score,10
 stem,ja/ja_mt_bench/judge.json,MODEL_NAME.STEM.average.score,10
 humanities,ja/ja_mt_bench/judge.json,MODEL_NAME.Humanities.average.score,10
+MT-Bench (ALL)_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.overall.average.japanese_char_ratio,1
+writing_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Writing.average.japanese_char_ratio,1
+roleplay_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Roleplay.average.japanese_char_ratio,1
+reasoning_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Reasoning.average.japanese_char_ratio,1
+math_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Math.average.japanese_char_ratio,1
+coding_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Coding.average.japanese_char_ratio,1
+extraction_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Extraction.average.japanese_char_ratio,1
+stem_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.STEM.average.japanese_char_ratio,1
+humanities_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Humanities.average.japanese_char_ratio,1
 gsm8k,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.gsm8k.exact_match,strict-match",1
 squad2,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.squadv2.exact,none",100
 triviaqa,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.triviaqa.exact_match,remove_whitespace",1
