@@ -8,9 +8,7 @@ import pandas as pd
 import json
 import numpy as np
 
-
-CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
-CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
+from fastchat.llm_judge.custom_utils import CATEGORIES, CATEGORIES_ordered, calculate_japanese_character_ratio
 
 
 def calculate_averages(scores):
@@ -70,8 +68,20 @@ def display_result_single(args):
                 result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
                 result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
 
+    # スコアの集計
     for category in ["overall"] + CATEGORIES_ordered:
         score_category(category)
+
+    # 応答文における日本語の割合の集計
+    for model_id in args.model_list:
+        output_path = f"data/{args.bench_name}/model_answer/{model_id}.jsonl"
+        model_output = []
+        with open(output_path, "r") as f:
+            for line in f:
+                model_output.append(json.loads(line))
+        char_rate_info = calculate_japanese_character_ratio(model_output)
+        for category_name, char_ratio in char_rate_info.items():
+            result[model_id][category_name]["average"]["japanese_char_ratio"] = char_ratio
 
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
