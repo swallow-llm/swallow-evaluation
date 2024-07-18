@@ -1,4 +1,4 @@
-REPO_PATH="/home/acg16653re/github/jalm-evaluation-private"
+REPO_PATH="/home/acb11709gz/jalm-evaluation-private"
 GROUP_ID="gag51395"
 mkdir -p logs
 

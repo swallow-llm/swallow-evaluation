@@ -5,9 +5,26 @@ source .venv_bigcode/bin/activate
 MODEL_NAME_PATH=$1
 DO_GENERATION=$2
 DO_EVAL=$3
+CUDA_BLOCKING=${4:-}
 NUM_SAMPLES=10
 BATCH_SIZE=10
 OUTDIR="results/${MODEL_NAME_PATH}/ja/humaneval"
+
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=''
+else
+    USE_FAST_TOKENIZER='--use_fast_tokenizer'
+fi
+
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 mkdir -p $OUTDIR
 
@@ -26,7 +43,8 @@ if [ ${DO_GENERATION} = "true" ]; then
     --use_auth_token \
     --max_memory_per_gpu auto \
     --trust_remote_code \
-    --max_length_generation 1024
+    --max_length_generation 1024 \
+    ${USE_FAST_TOKENIZER}
 fi
 
 if [ ${DO_EVAL} = "true" ]; then
