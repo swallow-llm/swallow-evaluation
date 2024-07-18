@@ -56,3 +56,12 @@ jhumaneval-unstripped_answer@10,ja/humaneval-unstripped/metrics.json,humaneval.a
 humaneval-unstripped@1,en/humaneval-unstripped/metrics.json,humaneval.pass@1,1
 humaneval-unstripped@10,en/humaneval-unstripped/metrics.json,humaneval.pass@10,1
 humaneval-unstripped_answer@10,en/humaneval-unstripped/metrics.json,humaneval.answer@10,1
+MT-Bench (ALL)_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.overall.average.japanese_char_ratio,1
+writing_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Writing.average.japanese_char_ratio,1
+roleplay_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Roleplay.average.japanese_char_ratio,1
+reasoning_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Reasoning.average.japanese_char_ratio,1
+math_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Math.average.japanese_char_ratio,1
+coding_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Coding.average.japanese_char_ratio,1
+extraction_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Extraction.average.japanese_char_ratio,1
+stem_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.STEM.average.japanese_char_ratio,1
+humanities_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Humanities.average.japanese_char_ratio,1

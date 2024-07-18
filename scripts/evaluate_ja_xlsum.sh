@@ -19,6 +19,14 @@ fi
 echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 OUTDIR="results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=False
+else
+    USE_FAST_TOKENIZER=True
+fi
+
 mkdir -p $OUTDIR
 
 echo ${OUTDIR}
@@ -27,7 +35,7 @@ echo "CUDA_LAUNCH_BLOCKING: $CUDA_LAUNCH_BLOCKING" >&2
 start_time=$(date +%s)
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
     --tasks "xlsum_ja" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \

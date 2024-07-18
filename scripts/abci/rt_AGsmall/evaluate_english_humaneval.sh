@@ -38,6 +38,13 @@ NUM_SAMPLES=10
 BATCH_SIZE=5
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/humaneval"
 
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=''
+else
+    USE_FAST_TOKENIZER='--use_fast_tokenizer'
+fi
+
 mkdir -p $OUTDIR
 
 # generate
@@ -55,7 +62,8 @@ python bigcode-evaluation-harness/main.py \
   --use_auth_token \
   --max_memory_per_gpu auto \
   --trust_remote_code \
-  --max_length_generation 1024
+  --max_length_generation 1024 \
+  ${USE_FAST_TOKENIZER}
 
 # evaluate
 
