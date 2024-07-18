@@ -68,7 +68,7 @@ cd lm-evaluation-harness-en
 
 echo $MMLU_TASK_NAME
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
     --batch_size 4 \
@@ -80,7 +80,7 @@ lm_eval --model hf \
     --seed 42 \
 
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,,use_fast=$USE_FAST_TOKENIZER" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
     --batch_size 8 \
@@ -92,7 +92,7 @@ lm_eval --model hf \
     --seed 42 \
 
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
     --batch_size 8 \
