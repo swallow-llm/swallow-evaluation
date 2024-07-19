@@ -33,8 +33,10 @@ class SeparatorStyle(IntEnum):
     METAMATH = auto()
     SWALLOW = auto()
     CALM2 = auto()
+    CALM3 = auto()
     STABLELM_GAMMA = auto()
     KARAKURI = auto()
+    GEMMA = auto()
 
 
 @dataclasses.dataclass
@@ -286,6 +288,14 @@ class Conversation:
                 else:
                     ret += role
             return ret
+        elif self.sep_style == SeparatorStyle.CALM3:
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += self.sep + role + '\n' + message + self.sep2 + '\n'
+                else:
+                    ret += self.sep + role + '\n'
+            return ret
         elif self.sep_style == SeparatorStyle.STABLELM_GAMMA:
             ret = system_prompt
             for role, message in self.messages:
@@ -293,6 +303,14 @@ class Conversation:
                     ret += self.sep + role + self.sep2 + message
                 else:
                     ret += self.sep + role + self.sep2
+            return ret
+        elif self.sep_style == SeparatorStyle.GEMMA:
+            ret = "<bos>"
+            for role, message in self.messages:
+                if message:
+                    ret += "<start_of_turn>" + role + "\n" + message + self.sep
+                else:
+                    ret += "<start_of_turn>" + role + "\n"
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
@@ -1551,6 +1569,20 @@ register_conv_template(
     )
 )
 
+# calm3 template
+# reference: https://huggingface.co/cyberagent/calm3-22b-chat
+register_conv_template(
+    Conversation(
+        name="calm3",
+        system_template="<|im_start|>system\n{system_message}<|im_end|>\n",
+        system_message="あなたは親切なAIアシスタントです。",
+        roles=("user", "assistant"),
+        sep_style=SeparatorStyle.CALM3,
+        sep="<|im_start|>",
+        sep2="<|im_end|>",
+    )
+)
+
 # RakutenAI template
 # reference: https://huggingface.co/Rakuten/RakutenAI-7B-instruct
 register_conv_template(
@@ -1616,6 +1648,18 @@ register_conv_template(
         sep="<|eot_id|>",
         sep_style=SeparatorStyle.CALM2,
         stop_token_ids=[128009], #"<|eot_id|>"
+    )
+)
+
+# Gemma / Gemma2
+# reference: https://huggingface.co/google/gemma-7b-it?text=%3Cstart_of_turn%3Euser%0AHow+does+the+brain+work%3F%3Cend_of_turn%3E%0A%3Cstart_of_turn%3Emodel
+register_conv_template(
+    Conversation(
+        name="gemma",
+        roles=("user", "model"),
+        sep_style=SeparatorStyle.GEMMA,
+        sep="<end_of_turn>\n",
+        stop_str="<end_of_turn>",
     )
 )
 
@@ -1692,10 +1736,10 @@ if __name__ == "__main__":
 
     print("\n")
 
-    print("Japaneselm template:")
-    conv = get_conv_template("karakuri-lm-70b-chat")
-    conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
-    conv.append_message(conv.roles[1], "元気です、ありがとう。")
-    conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
+    print("Calm3 template:")
+    conv = get_conv_template("calm3")
+    conv.append_message(conv.roles[0], "AIによって私たちの暮らしはどのように変わりますか？")
+    conv.append_message(conv.roles[1], "より一層効率的な暮らしとなるでしょう。")
+    conv.append_message(conv.roles[0], "どのように効率的になるのでしょうか？")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
