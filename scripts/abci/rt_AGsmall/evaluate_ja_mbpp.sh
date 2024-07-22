@@ -36,7 +36,7 @@ source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
 BATCH_SIZE=5
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/mbpp"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mbpp"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
@@ -51,7 +51,7 @@ mkdir -p $OUTDIR
 
 python bigcode-evaluation-harness/main.py \
   --model ${MODEL_NAME_PATH} \
-  --tasks mbpp \
+  --tasks mbpp-ja \
   --do_sample True \
   --n_samples ${NUM_SAMPLES} \
   --batch_size ${BATCH_SIZE} \
@@ -67,9 +67,9 @@ python bigcode-evaluation-harness/main.py \
 
 # evaluate
 ssh hestia "mkdir -p ${LOCAL_PATH}"
-scp ${OUTDIR}/generation_mbpp.json hestia:${LOCAL_PATH}
-ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
-python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp.json --metrics_path ${OUTDIR}/metrics.json
+scp ${OUTDIR}/generation_mbpp-ja.json hestia:${LOCAL_PATH}
+ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp-ja.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
+python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp-ja.json --metrics_path ${OUTDIR}/metrics.json
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH
