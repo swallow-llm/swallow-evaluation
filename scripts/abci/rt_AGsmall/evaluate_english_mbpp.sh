@@ -58,11 +58,11 @@ python bigcode-evaluation-harness/main.py \
   --allow_code_execution \
   --save_generations \
   --generation_only \
-  --save_generations_path ${OUTDIR}/generation_mbpp.json \
+  --save_generations_path ${OUTDIR}/generation.json \
   --use_auth_token \
   --max_memory_per_gpu auto \
   --trust_remote_code \
-  --max_length_generation 1024 \
+  --max_length_generation 2048 \
   ${USE_FAST_TOKENIZER}
 
 # # evaluate
