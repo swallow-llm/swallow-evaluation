@@ -51,7 +51,7 @@ mkdir -p $OUTDIR
 
 python bigcode-evaluation-harness/main.py \
   --model ${MODEL_NAME_PATH} \
-  --tasks mbpp-ja \
+  --tasks mbpp_ja \
   --do_sample True \
   --n_samples ${NUM_SAMPLES} \
   --batch_size ${BATCH_SIZE} \
@@ -67,9 +67,9 @@ python bigcode-evaluation-harness/main.py \
 
 # evaluate
 ssh hestia "mkdir -p ${LOCAL_PATH}"
-scp ${OUTDIR}/generation_mbpp-ja.json hestia:${LOCAL_PATH}
-ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp-ja.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
-python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp-ja.json --metrics_path ${OUTDIR}/metrics.json
+scp ${OUTDIR}/generation_mbpp_ja.json hestia:${LOCAL_PATH}
+ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp_ja.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
+python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp_ja.json --metrics_path ${OUTDIR}/metrics.json
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH
