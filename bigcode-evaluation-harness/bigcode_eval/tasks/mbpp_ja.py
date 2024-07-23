@@ -21,11 +21,16 @@ class MBPPJa(Task):
 
     def get_dataset(self):
         """Returns dataset for the task or an iterable of any object, that get_prompt can handle"""
-        dataset = self.dataset["test"]
-        # the wrong split of mbpp can be loaded with old datasets cache
-        assert (
-            len(dataset) == 500
-        ), "please ensure you have the latest version of MBPP dataset, try deleting its old cache"
+        # INFO: While google-research-datasets/mbpp employs test split, 'train' split of llm-jp/mbpp-ja plays the role of the test split.
+        dataset = self.dataset["train"]
+        
+        # INFO: we sliced the dataset to validate only id: 11 ~ 510
+        dataset = dataset.filter(lambda example: 11 <= example["task_id"] <= 510)
+
+        assert len(dataset) == 500
+        assert min(example["task_id"] for example in dataset) == 11
+        assert max(example["task_id"] for example in dataset) == 510
+        
         return dataset
 
     def get_prompt(self, doc):
@@ -50,7 +55,7 @@ class MBPPJa(Task):
         :param idx: int
             index of doc in the dataset to which the generation belongs
         """
-        prompt = self.get_prompt(self.dataset["test"][idx])
+        prompt = self.get_prompt(self.dataset["train"][idx])
         generation = generation[len(prompt) :]
         return prompt + self._stop_at_stop_token(generation, self.stop_words)
 
