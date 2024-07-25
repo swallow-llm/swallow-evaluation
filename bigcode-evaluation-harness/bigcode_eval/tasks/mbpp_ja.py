@@ -26,8 +26,12 @@ class MBPPJa(Task):
         
         # INFO: we sliced the dataset to validate only id: 11 ~ 510
         dataset = dataset.filter(lambda example: 11 <= example["task_id"] <= 510)
+        
+        # assign to the original dataset
+        self.dataset["train"] = dataset
 
         assert len(dataset) == 500
+        assert len(self.dataset) == 500
         assert min(example["task_id"] for example in dataset) == 11
         assert max(example["task_id"] for example in dataset) == 510
         
@@ -38,7 +42,7 @@ class MBPPJa(Task):
         MBPP prompt is built following to InCoder (Fried et al.) approach
         prompt = docstring that includes one test
         """
-        description = doc["text"]
+        description = doc["text_jpn"]
         test_example = doc["test_list"][0]
         prompt = f'"""\n{description}\n{test_example}\n"""\n'
         return prompt
