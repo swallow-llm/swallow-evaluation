@@ -68,7 +68,7 @@ python bigcode-evaluation-harness/main.py \
 # evaluate
 ssh hestia "mkdir -p ${LOCAL_PATH}"
 scp ${OUTDIR}/generation_mbpp.json hestia:${LOCAL_PATH}
-ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp.json\" http://localhost:5000/api" > ${OUTDIR}/metrics.json
+ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp.json\" -F \"task=mbpp\" http://localhost:5001/api" > ${OUTDIR}/metrics.json
 python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp.json --metrics_path ${OUTDIR}/metrics.json
 
 # aggregate results
