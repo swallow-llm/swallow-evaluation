@@ -2329,6 +2329,24 @@ class JapaneseStableLMGammaAdapter(BaseModelAdapter):
         return get_conv_template("japanese-stablelm-instruct-gamma")
 
 
+class KarakuriAdapter(BaseModelAdapter):
+    """The model adapter for Karakuri"""
+
+    def match(self, model_path: str):
+        return "karakuri" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("karakuri-lm-70b-chat")
+
+
+
 class GemmaAdapter(BaseModelAdapter):
     """The model adapter for google/gemma"""
 
