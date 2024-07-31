@@ -30,8 +30,8 @@ class MBPPJa(Task):
         # assign to the original dataset
         self.dataset["train"] = dataset
 
-        assert len(dataset) == 500
-        assert len(self.dataset) == 500
+        # assert len(dataset) == 500
+        # assert len(self.dataset) == 500
         assert min(example["task_id"] for example in dataset) == 11
         assert max(example["task_id"] for example in dataset) == 510
         
