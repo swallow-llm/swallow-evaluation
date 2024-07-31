@@ -35,6 +35,7 @@ class SeparatorStyle(IntEnum):
     CALM2 = auto()
     STABLELM_GAMMA = auto()
     KARAKURI = auto()
+    GEMMA = auto()
 
 
 @dataclasses.dataclass
@@ -293,6 +294,14 @@ class Conversation:
                     ret += self.sep + role + self.sep2 + message
                 else:
                     ret += self.sep + role + self.sep2
+            return ret
+        elif self.sep_style == SeparatorStyle.GEMMA:
+            ret = "<bos>"
+            for role, message in self.messages:
+                if message:
+                    ret += "<start_of_turn>" + role + "\n" + message + self.sep
+                else:
+                    ret += "<start_of_turn>" + role + "\n"
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
@@ -1616,6 +1625,18 @@ register_conv_template(
         sep="<|eot_id|>",
         sep_style=SeparatorStyle.CALM2,
         stop_token_ids=[128009], #"<|eot_id|>"
+    )
+)
+
+# Gemma / Gemma2
+# reference: https://huggingface.co/google/gemma-7b-it?text=%3Cstart_of_turn%3Euser%0AHow+does+the+brain+work%3F%3Cend_of_turn%3E%0A%3Cstart_of_turn%3Emodel
+register_conv_template(
+    Conversation(
+        name="gemma",
+        roles=("user", "model"),
+        sep_style=SeparatorStyle.GEMMA,
+        sep="<end_of_turn>\n",
+        stop_str="<end_of_turn>",
     )
 )
 

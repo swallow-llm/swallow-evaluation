@@ -2328,6 +2328,16 @@ class KarakuriAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("karakuri-lm-70b-chat")
+    
+    
+class GemmaAdapter(BaseModelAdapter):
+    """The model adapter for google/gemma"""
+
+    def match(self, model_path: str):
+        return "gemma" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("gemma")
 
 
 # Note: the registration order matters.
@@ -2425,6 +2435,8 @@ register_model_adapter(MetaMathAdapter)
 register_model_adapter(BagelAdapter)
 register_model_adapter(SolarAdapter)
 register_model_adapter(Yuan2Adapter)
+register_model_adapter(GemmaAdapter)
+register_model_adapter(KarakuriAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
