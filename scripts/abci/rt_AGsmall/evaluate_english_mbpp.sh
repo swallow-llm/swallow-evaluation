@@ -35,7 +35,7 @@ cd $REPO_PATH
 source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
-BATCH_SIZE=5
+BATCH_SIZE=3
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/mbpp"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
@@ -63,6 +63,7 @@ python bigcode-evaluation-harness/main.py \
   --max_memory_per_gpu auto \
   --trust_remote_code \
   --max_length_generation 2048 \
+  --temperature 0.1 \
   ${USE_FAST_TOKENIZER}
 
 # evaluate
