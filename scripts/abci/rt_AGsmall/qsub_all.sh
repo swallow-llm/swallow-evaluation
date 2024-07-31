@@ -32,6 +32,10 @@ qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/" -e "$
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/ja/humaneval-unstripped"
 
+# mbpp-ja
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
+qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/ja/mbpp"
+
 # English
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_english.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
@@ -43,7 +47,3 @@ qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstrippe
 # mbpp
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/"
 qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_english_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/en/mbpp"
-
-# mbpp-ja
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
-qsub -g $GROUP_ID -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp" "$REPO_PATH/scripts/abci/rt_AGsmall/evaluate_ja_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "${LOCAL_PATH}/${MODEL_NAME_PATH}/ja/mbpp"
