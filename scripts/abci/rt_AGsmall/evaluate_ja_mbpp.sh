@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#$ -l rt_AF=1
-#$ -l h_rt=48:00:00
+#$ -l rt_AG.small=1
+#$ -l h_rt=24:00:00
 #$ -j y
 #$ -cwd
 
@@ -35,8 +35,8 @@ cd $REPO_PATH
 source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
-BATCH_SIZE=4
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/humaneval-unstripped"
+BATCH_SIZE=3
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mbpp"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
@@ -51,7 +51,7 @@ mkdir -p $OUTDIR
 
 python bigcode-evaluation-harness/main.py \
   --model ${MODEL_NAME_PATH} \
-  --tasks jhumaneval-unstripped \
+  --tasks mbpp_ja \
   --do_sample True \
   --n_samples ${NUM_SAMPLES} \
   --batch_size ${BATCH_SIZE} \
@@ -62,15 +62,15 @@ python bigcode-evaluation-harness/main.py \
   --use_auth_token \
   --max_memory_per_gpu auto \
   --trust_remote_code \
-  --max_length_generation 1024 \
+  --max_length_generation 2048 \
+  --temperature 0.1 \
   ${USE_FAST_TOKENIZER}
 
 # evaluate
-
 ssh hestia "mkdir -p ${LOCAL_PATH}"
-scp ${OUTDIR}/generation_jhumaneval-unstripped.json hestia:${LOCAL_PATH}
-ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_jhumaneval-unstripped.json\" -F \"task=humaneval\" http://localhost:5001/api" > ${OUTDIR}/metrics.json
-python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_jhumaneval-unstripped.json --metrics_path ${OUTDIR}/metrics.json
+scp ${OUTDIR}/generation_mbpp_ja.json hestia:${LOCAL_PATH}
+ssh hestia "curl -X POST -F \"model_name=${MODEL_NAME_PATH}\" -F \"file=@${LOCAL_PATH}/generation_mbpp_ja.json\" -F \"task=mbpp\" http://localhost:5001/api" > ${OUTDIR}/metrics.json
+python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp_ja.json --metrics_path ${OUTDIR}/metrics.json --task mbpp
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH

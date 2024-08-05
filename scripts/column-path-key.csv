@@ -65,3 +65,9 @@ coding_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Coding.average.japanes
 extraction_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Extraction.average.japanese_char_ratio,1
 stem_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.STEM.average.japanese_char_ratio,1
 humanities_ja_char_ratio,ja/ja_mt_bench/judge.json,MODEL_NAME.Humanities.average.japanese_char_ratio,1
+mbpp_ja@1,ja/mbpp/metrics.json,mbpp.pass@1,1
+mbpp_ja@10,ja/mbpp/metrics.json,mbpp.pass@10,1
+mbpp_ja_answer@10,ja/mbpp/metrics.json,mbpp.answer@10,1
+mbpp@1,en/mbpp/metrics.json,mbpp.pass@1,1
+mbpp@10,en/mbpp/metrics.json,mbpp.pass@10,1
+mbpp_answer@10,en/mbpp/metrics.json,mbpp.answer@10,1

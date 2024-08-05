@@ -2260,6 +2260,22 @@ class Calm2Adapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("calm2")
+    
+class Calm3Adapter(BaseModelAdapter):
+    """The model adapter for calm3"""
+
+    def match(self, model_path: str):
+        return "calm3" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("calm3")
 
 
 class RakutenAIAdapter(BaseModelAdapter):
@@ -2340,11 +2356,23 @@ class GemmaAdapter(BaseModelAdapter):
         return get_conv_template("gemma")
 
 
+
+class GemmaAdapter(BaseModelAdapter):
+    """The model adapter for google/gemma"""
+
+    def match(self, model_path: str):
+        return "gemma" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("gemma")
+    
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(JapaneseStableLMBetaAdapter)
 register_model_adapter(ELYZAJapaneseLlama2Adapter)
 register_model_adapter(Calm2Adapter)
+register_model_adapter(Calm3Adapter)
 register_model_adapter(RakutenAIAdapter)
 register_model_adapter(NekomataAdapter)
 register_model_adapter(JapaneseStableLMGammaAdapter)

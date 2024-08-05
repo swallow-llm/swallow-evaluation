@@ -1,5 +1,7 @@
 # 概要
 
+**バージョン**: 2024/08アップデート
+
 英語の事前学習済み大規模言語モデルから継続学習されたモデルの評価。
 
 評価軸：
@@ -84,9 +86,10 @@ bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode
 source .venv_fastchat/bin/activate
 cd fastchat
 pip install --upgrade pip
-pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
+pip install vllm
 ```
 
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
@@ -232,17 +235,13 @@ singularity exec --bind jalm-evaluation-private/results/MODELPATH/ja/humaneval_1
 ```
 で実行してください。
 
-#### Singularityを使う場合
+## mbpp_jaのタスクで評価
+
+```bash
+bash scripts/evaluate_ja_mbpp.sh $MODEL_PATH
 ```
-cd bigcode-evaluation-harness
-singularity pull docker://ghcr.io/bigcode-project/evaluation-harness:latest
-```
-でimageをpullしてください。
-その後
-```
-singularity exec --bind jalm-evaluation-private/results/MODELPATH/ja/humaneval_10NUM_SAMPLES_1BATCH_SIZE/generation_jhumaneval.json:/app/generations_py.json evaluation-harness_latest.sif python3 main.py --model $MODELPATH --tasks jhumaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10
-```
-で実行してください。
+
+* 評価部分は岡崎研内で採点APIを叩く仕様になっているので、横田研で使用する場合はdocker/singularityなどを使って評価してください。すみませんが未実装です。
 
 ## fastchat(mt_bench)の評価の実行
 
@@ -277,7 +276,6 @@ bash scripts/evaluate_english.sh $MODEL_PATH
 
 ## Humanevalのタスクで評価
 
-
 ### 出力と評価を同時に行う場合
 
 ```bash
@@ -311,3 +309,11 @@ singularity exec --bind jalm-evaluation-private/results/MODELPATH/en/humaneval_1
 ```
 
 で実行してください。
+
+## mbppのタスクで評価
+
+```bash
+bash scripts/evaluate_english_mbpp.sh $MODEL_PATH
+```
+
+* 評価部分は岡崎研内で採点APIを叩く仕様になっているので、横田研で使用する場合はdocker/singularityなどを使って評価してください。すみませんが未実装です。
