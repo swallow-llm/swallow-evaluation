@@ -5,9 +5,13 @@
 #$ -l h_rt=24:00:00
 
 # module load
-. /etc/profile.d/modules.sh
-module load cuda/12.1.0
-module load cudnn/9.0.0
+module use /gs/fs/tga-NII-LLM/modules/modulefiles
+
+module load ylab/cuda/12.1
+module load ylab/cudnn/8.9.7
+module load ylab/nccl/cuda-12.2/2.20.5
+module load ylab/hpcx/2.17.1
+module load ninja/1.11.1
 
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
@@ -24,6 +28,7 @@ NUM_FEWSHOT=1
 NUM_TESTCASE="all"
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 mkdir -p ${OUTDIR}
+export CUDA_LAUNCH_BLOCKING=1
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \

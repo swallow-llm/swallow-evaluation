@@ -24,7 +24,7 @@ NUM_FEWSHOT=4
 NUM_TESTCASE="all"
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/wmt20_ja_en/wmt20_ja_en_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 mkdir -p ${OUTDIR}
-
+export CUDA_LAUNCH_BLOCKING=1
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
     --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \

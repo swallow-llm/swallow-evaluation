@@ -33,10 +33,10 @@ MMLU_NUM_FEWSHOT=5
 MMLU_NUM_TESTCASE="all"
 MMLU_OUTDIR="${OUTDIR}/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
 
-BBH_TASK_NAME="bbh_fewshot"
+BBH_TASK_NAME="bbh_cot_fewshot"
 BBH_NUM_FEWSHOT=3
 BBH_NUM_TESTCASE="all"
-BBH_OUTDIR="${OUTDIR}/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh"
+BBH_OUTDIR="${OUTDIR}/alltasks_${BBH_NUM_FEWSHOT}shot_${BBH_NUM_TESTCASE}cases/bbh_cot"
 
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $MMLU_OUTDIR
@@ -49,7 +49,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
-    --batch_size 16 \
+    --batch_size 8 \
     --device cuda \
     --write_out \
     --output_path "$MMLU_OUTDIR" \
@@ -61,7 +61,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
-    --batch_size 16 \
+    --batch_size 8 \
     --device cuda \
     --write_out \
     --output_path "$BBH_OUTDIR" \
@@ -73,7 +73,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
     --tasks $GENERAL_TASK_NAME \
     --num_fewshot $GENERAL_NUM_FEWSHOT \
-    --batch_size 16 \
+    --batch_size 8 \
     --device cuda \
     --write_out \
     --output_path "$GENERAL_OUTDIR" \
