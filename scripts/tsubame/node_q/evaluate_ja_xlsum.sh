@@ -5,13 +5,9 @@
 #$ -l h_rt=24:00:00
 
 # module load
-module use /gs/fs/tga-NII-LLM/modules/modulefiles
-
-module load ylab/cuda/12.1
-module load ylab/cudnn/8.9.7
-module load ylab/nccl/cuda-12.2/2.20.5
-module load ylab/hpcx/2.17.1
-module load ninja/1.11.1
+. /etc/profile.d/modules.sh
+module load cuda/12.1.0
+module load cudnn/9.0.0
 
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
