@@ -167,3 +167,4 @@ lm_cache/
 results/
 outputs/
 .env
+evaluation-harness_latest.sif
