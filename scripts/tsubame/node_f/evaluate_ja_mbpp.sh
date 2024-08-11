@@ -25,6 +25,7 @@ source .venv_bigcode/bin/activate
 NUM_SAMPLES=10
 BATCH_SIZE=10
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mbpp"
+APPTAINER_IMAGE="${REPO_PATH}/evaluation-harness_latest.sif"
 
 mkdir -p $OUTDIR
 
