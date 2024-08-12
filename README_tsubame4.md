@@ -115,6 +115,20 @@ pip install -e ".[model_worker,llm_judge]"
 pip install vllm
 ```
 
+mbppの評価ができない場合は、
+
+https://huggingface.co/datasets/google-research-datasets/mbpp/discussions/5
+
+
+datasetsのversion問題の可能性が高いため
+
+```bash
+apptainer shell evaluation-harness_latest.sif
+pip install --user -U datasets
+```
+
+を行います
+
 torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
 
 `jalm-evaluation-private/.env`ファイルを作成し、OpenAIのAPIキーを入力する。
