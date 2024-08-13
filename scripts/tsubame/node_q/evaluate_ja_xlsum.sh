@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -cwd
 
-#$ -l node_f=1
+#$ -l node_q=1
 #$ -l h_rt=24:00:00
 
 # module load
@@ -30,9 +30,9 @@ cd $REPO_PATH
 
 source .venv_harness_jp/bin/activate
 
-NUM_FEWSHOT=4
+NUM_FEWSHOT=1
 NUM_TESTCASE="all"
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mgsm/math_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
     USE_FAST_TOKENIZER=False
@@ -41,16 +41,17 @@ else
 fi
 
 mkdir -p ${OUTDIR}
+export CUDA_LAUNCH_BLOCKING=1
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
     --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
-    --tasks "mgsm" \
+    --tasks "xlsum_ja" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
     --verbose \
     --device cuda \
-    --output_path ${OUTDIR}/score_math.json \
+    --output_path ${OUTDIR}/score_xlsum.json \
     --use_cache ${OUTDIR}
 
 # aggregate results

@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -cwd
 
-#$ -l gpu_1=1
+#$ -l node_q=1
 #$ -l h_rt=24:00:00
 
 # module load
@@ -12,9 +12,18 @@ module load cudnn/9.0.0
 REPO_PATH=$1
 HUGGINGFACE_CACHE=$2
 MODEL_NAME_PATH=$3
+CUDA_BLOCKING=${4:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+# Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
+# (This setting should be done only if necessary because it might slow evaluation)
+if [ -n "$CUDA_BLOCKING" ]; then
+  export CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
+else
+  unset CUDA_LAUNCH_BLOCKING
+fi
+echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
 cd $REPO_PATH
 
@@ -23,11 +32,18 @@ source .venv_harness_jp/bin/activate
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/wmt20_en_ja/wmt20_en_ja_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
-mkdir -p $OUTDIR
+# MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast=Falseが指定される
+if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
+    USE_FAST_TOKENIZER=False
+else
+    USE_FAST_TOKENIZER=True
+fi
+
+mkdir -p ${OUTDIR}
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
     --tasks "wmt20-en-ja" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 2 \
