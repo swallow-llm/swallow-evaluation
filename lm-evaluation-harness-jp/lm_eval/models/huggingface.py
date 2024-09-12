@@ -398,7 +398,6 @@ class HuggingFaceAutoLM(BaseLM):
         return self.tokenizer.encode(string, add_special_tokens=self.add_special_tokens)
 
     def tok_encode_batch(self, strings: List[str]) -> TokenSequence:
-        print("add_special_tokens", self.add_special_tokens)
         return self.tokenizer(
             strings,
             padding=True,
