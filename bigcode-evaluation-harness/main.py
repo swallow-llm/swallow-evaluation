@@ -96,8 +96,8 @@ def parse_args():
     parser.add_argument(
         "--precision",
         type=str,
-        default="fp32",
-        help="Model precision, from: fp32, fp16 or bf16",
+        default="auto",
+        help="Model precision, from: fp32, fp16, bf16, or auto",
     )
     parser.add_argument(
         "--load_in_8bit",
@@ -262,10 +262,11 @@ def main():
             "fp32": torch.float32,
             "fp16": torch.float16,
             "bf16": torch.bfloat16,
+            "auto": "auto"
         }
         if args.precision not in dict_precisions:
             raise ValueError(
-                f"Non valid precision {args.precision}, choose from: fp16, fp32, bf16"
+                f"Non valid precision {args.precision}, choose from: fp16, fp32, bf16, auto"
             )
 
         model_kwargs = {
