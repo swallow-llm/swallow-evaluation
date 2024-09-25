@@ -2344,6 +2344,22 @@ class KarakuriAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("karakuri-lm-70b-chat")
+
+class TanukiAdapter(BaseModelAdapter):
+    """The model adapter for Tanuki"""
+
+    def match(self, model_path: str):
+        return "Tanuki" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("tanuki")
     
     
 class GemmaAdapter(BaseModelAdapter):
@@ -2465,6 +2481,8 @@ register_model_adapter(SolarAdapter)
 register_model_adapter(Yuan2Adapter)
 register_model_adapter(GemmaAdapter)
 register_model_adapter(KarakuriAdapter)
+register_model_adapter(TanukiAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
+
