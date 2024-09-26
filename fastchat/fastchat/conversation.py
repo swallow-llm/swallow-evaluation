@@ -544,7 +544,7 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="tanuki",
-        system_message="以下は、タスクを説明する指示です。要求を適切に満たす応答を書きなさい。",
+        system_message="<s>以下は、タスクを説明する指示です。要求を適切に満たす応答を書きなさい。",
         roles=("### 指示", "### 応答"),
         sep_style=SeparatorStyle.ADD_COLON_TWO_NEW_LINE,
         sep="\n\n",
