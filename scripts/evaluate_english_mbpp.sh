@@ -5,7 +5,7 @@ source .venv_bigcode/bin/activate
 MODEL_NAME_PATH=$1
 CUDA_BLOCKING=${2:-}
 NUM_SAMPLES=10
-BATCH_SIZE=4
+BATCH_SIZE=1
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -47,7 +47,7 @@ python bigcode-evaluation-harness/main.py \
   ${USE_FAST_TOKENIZER}
 
 # evaluate
-curl -X POST -F "model_name=${MODEL_NAME_PATH}" -F "file=@${OURDIR}/generation_mbpp.json" -F "task=mbpp" http://localhost:5001/api > ${OUTDIR}/metrics.json
+curl -X POST -F "model_name=${MODEL_NAME_PATH}" -F "file=@${OUTDIR}/generation_mbpp.json" -F "task=mbpp" http://localhost:5001/api > ${OUTDIR}/metrics.json
 python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp.json --metrics_path ${OUTDIR}/metrics.json --task mbpp
 
 # aggregate results
