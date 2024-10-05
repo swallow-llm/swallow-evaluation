@@ -38,6 +38,7 @@ class SeparatorStyle(IntEnum):
     STABLELM_GAMMA = auto()
     KARAKURI = auto()
     GEMMA = auto()
+    PHI3 = auto()
 
 
 @dataclasses.dataclass
@@ -182,6 +183,19 @@ class Conversation:
                         ret += message + " "
                     else:
                         ret += tag + message + seps[i % 2]
+                else:
+                    ret += tag
+            return ret
+        elif self.sep_style == SeparatorStyle.PHI3:
+            sep = self.sep
+            if self.system_message:
+                ret = system_prompt
+            else:
+                ret = "[INST] "
+            for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
+                if message:
+                    ret += tag + message + sep
                 else:
                     ret += tag
             return ret
@@ -1673,6 +1687,19 @@ register_conv_template(
     )
 )
 
+# Phi-3
+# reference: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct
+register_conv_template(
+    Conversation(
+        name="phi-3",
+        system_template="<|system|>\n{system_message}<|end|>\n",
+        system_message="You are a helpful travel assistant.",
+        roles=("<|user|>\n", "<|assistant|>\n"),
+        sep="<|end|>\n",
+        sep_style=SeparatorStyle.PHI3,
+    )
+)
+
 # Gemma / Gemma2
 # reference: https://huggingface.co/google/gemma-7b-it?text=%3Cstart_of_turn%3Euser%0AHow+does+the+brain+work%3F%3Cend_of_turn%3E%0A%3Cstart_of_turn%3Emodel
 register_conv_template(
@@ -1774,3 +1801,11 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
 
+
+    print("Phi-3 template:")
+    conv = get_conv_template("phi-3")
+    conv.append_message(conv.roles[0], "I am going to Paris, what should I see?")
+    conv.append_message(conv.roles[1], "Paris, the capital of France.")
+    conv.append_message(conv.roles[0], "What is so great about #1?")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())

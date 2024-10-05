@@ -8,7 +8,7 @@ DO_GENERATION=$2
 DO_EVAL=$3
 CUDA_BLOCKING=${4:-}
 NUM_SAMPLES=10
-BATCH_SIZE=10
+BATCH_SIZE=1
 OUTDIR="results/${MODEL_NAME_PATH}/en/humaneval-unstripped"
 
 
@@ -54,7 +54,7 @@ if [ ${DO_EVAL} = "true" ]; then
   echo "Generated codes should be place at $(pwd)/${OUTDIR}/generation_humaneval-unstripped.json ."
   touch $(pwd)/${OUTDIR}/metrics.json
   docker run -v $(pwd)/${OUTDIR}/generation_humaneval-unstripped.json:/app/generations_py.json -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json -it evaluation-harness python3 main.py --model ${MODEL_NAME_PATH} --tasks humaneval-unstripped --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10 --metric_output_path /app/metrics.json
-  python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path $(pwd)/${OUTDIR}/generation_humaneval-unstripped.json --metrics_path $(pwd)/${OUTDIR}/metrics.json
+  python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path $(pwd)/${OUTDIR}/generation_humaneval-unstripped.json --metrics_path $(pwd)/${OUTDIR}/metrics.json --task humaneval-unstripped
 fi
 
 # aggregate results
