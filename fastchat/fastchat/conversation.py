@@ -15,6 +15,7 @@ class SeparatorStyle(IntEnum):
 
     ADD_COLON_SINGLE = auto()
     ADD_COLON_TWO = auto()
+    ADD_COLON_TWO_NEW_LINE = auto()
     ADD_COLON_SPACE_SINGLE = auto()
     NO_COLON_SINGLE = auto()
     NO_COLON_TWO = auto()
@@ -84,6 +85,15 @@ class Conversation:
                     ret += role + ": " + message + seps[i % 2]
                 else:
                     ret += role + ":"
+            return ret
+        elif self.sep_style == SeparatorStyle.ADD_COLON_TWO_NEW_LINE:
+            seps = [self.sep, self.sep2]
+            ret = system_prompt + seps[0]
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += role + ":\n" + message + seps[i % 2]
+                else:
+                    ret += role + ":\n"
             return ret
         elif self.sep_style == SeparatorStyle.ADD_COLON_SPACE_SINGLE:
             ret = system_prompt + self.sep
@@ -541,6 +551,18 @@ register_conv_template(
         sep_style=SeparatorStyle.ADD_COLON_TWO,
         sep="\n\n",
         sep2="</s>",
+    )
+)
+
+# weblab-GENIAC/Tanuki-8B-dpo-v1.0 weblab-GENIAC/Tanuki-8x8B-dpo-v1.0 template
+register_conv_template(
+    Conversation(
+        name="tanuki",
+        system_message="<s>以下は、タスクを説明する指示です。要求を適切に満たす応答を書きなさい。",
+        roles=("### 指示", "### 応答"),
+        sep_style=SeparatorStyle.ADD_COLON_TWO_NEW_LINE,
+        sep="\n\n",
+        sep2="</s>\n\n",
     )
 )
 
@@ -1770,6 +1792,15 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[0], "どのように効率的になるのでしょうか？")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
+
+    print("tanuki template:")
+    conv = get_conv_template("tanuki")
+    conv.append_message(conv.roles[0], "AIによって私たちの暮らしはどのように変わりますか？")
+    conv.append_message(conv.roles[1], "より一層効率的な暮らしとなるでしょう。")
+    conv.append_message(conv.roles[0], "どのように効率的になるのでしょうか？")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
 
     print("Phi-3 template:")
     conv = get_conv_template("phi-3")
