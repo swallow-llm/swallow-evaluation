@@ -2344,17 +2344,6 @@ class KarakuriAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("karakuri-lm-70b-chat")
-    
-    
-class GemmaAdapter(BaseModelAdapter):
-    """The model adapter for google/gemma"""
-
-    def match(self, model_path: str):
-        return "gemma" in model_path.lower()
-
-    def get_default_conv_template(self, model_path: str) -> Conversation:
-        return get_conv_template("gemma")
-
 
 
 class GemmaAdapter(BaseModelAdapter):
@@ -2365,11 +2354,21 @@ class GemmaAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("gemma")
-    
+
+
+class Phi3Adapter(BaseModelAdapter):
+    """The model adapter for phi3"""
+
+    def match(self, model_path: str):
+        return "phi-3" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("phi-3")
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(JapaneseStableLMBetaAdapter)
+register_model_adapter(Phi3Adapter)
 register_model_adapter(ELYZAJapaneseLlama2Adapter)
 register_model_adapter(Calm2Adapter)
 register_model_adapter(Calm3Adapter)
