@@ -53,20 +53,20 @@ def display_result_single(args):
             result[model_id][category] = dict()
             result[model_id][category]["first_turn"] = dict()
             result[model_id][category]["first_turn"]["score"] = float(df_1.loc[model_id][0])
-            result[model_id][category]["first_turn"]["new_variance"] = float(df_1.loc[model_id][1])
+            result[model_id][category]["first_turn"]["stdev"] = float(df_1.loc[model_id][1])
         if args.bench_name == "mt_bench" or args.bench_name == "japanese_mt_bench":
             df_2 = df_cat[df_cat["turn"] == 2].groupby("model")["score"].apply(calculate_averages)
             print(df_2)
             for model_id in args.model_list:
                 result[model_id][category]["second_turn"] = dict()
                 result[model_id][category]["second_turn"]["score"] = float(df_2.loc[model_id][0])
-                result[model_id][category]["second_turn"]["new_variance"] = float(df_2.loc[model_id][1])
+                result[model_id][category]["second_turn"]["stdev"] = float(df_2.loc[model_id][1])
             df_3 = df_cat.groupby("model")["score"].apply(calculate_averages)
             print(df_3)
             for model_id in args.model_list:
                 result[model_id][category]["average"] = dict()
                 result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
-                result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
+                result[model_id][category]["average"]["stdev"] = float(df_3.loc[model_id][1])
 
     # スコアの集計
     for category in ["overall"] + CATEGORIES_ordered:
@@ -84,6 +84,7 @@ def display_result_single(args):
             result[model_id][category_name]["average"]["japanese_char_ratio"] = char_ratio
 
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
+    # 2024-08-29: 標準偏差のスケールが平均のスケールと一致するように10で除算
     for model_id in args.model_list:
         result[model_id]["result"] = dict()
         for turn in ["first_turn", "second_turn", "average"]:
@@ -91,8 +92,8 @@ def display_result_single(args):
             result[model_id]["result"][turn]["score"] = ",".join(
                 [f"{(result[model_id][category][turn]['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
             )
-            result[model_id]["result"][turn]["new_variance"] = ",".join(
-                [f"{result[model_id][category][turn]['new_variance']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            result[model_id]["result"][turn]["stdev"] = ",".join(
+                [f"{(result[model_id][category][turn]['stdev'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
             )
 
     if args.output_file is not None:
