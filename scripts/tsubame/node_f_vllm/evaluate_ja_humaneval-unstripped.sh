@@ -49,6 +49,7 @@ mkdir -p $OUTDIR
 
 if [ ${DO_GENERATION} = "true" ]; then
   echo "Generating using vllm"
+  start_time=$(date +%s)
   python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
     --tasks jhumaneval-unstripped \
@@ -66,6 +67,9 @@ if [ ${DO_GENERATION} = "true" ]; then
     --allow_code_execution \
     --tensor_parallel_size 4 \
     ${USE_FAST_TOKENIZER}
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Generation time: ${execution_time} seconds"
 fi
 
 if [ ${DO_EVAL} = "true" ]; then
@@ -74,6 +78,8 @@ if [ ${DO_EVAL} = "true" ]; then
   touch ${OUTDIR}/metrics.json
   # HF_HOMEが、apptainer環境でアクセスできない場所だと、https://github.com/bigcode-project/bigcode-evaluation-harness/issues/131の問題が発生する
   export HF_HOME=$REPO_PATH/HF_HOME
+
+  start_time=$(date +%s)
   apptainer run \
     -B ${OUTDIR}/generation_jhumaneval-unstripped.json:/app/generations_py.json \
     -B ${OUTDIR}/metrics.json:/app/metrics.json \
@@ -91,6 +97,10 @@ if [ ${DO_EVAL} = "true" ]; then
     --generation_path ${OUTDIR}/generation_jhumaneval-unstripped.json \
     --metrics_path ${OUTDIR}/metrics.json \
     --task humaneval
+  
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Evaluating time: ${execution_time} seconds"
 fi
 
 # aggregate results
