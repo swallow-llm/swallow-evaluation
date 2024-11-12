@@ -2,7 +2,7 @@
 #$ -cwd
 
 #$ -l node_q=1
-#$ -l h_rt=24:00:00
+#$ -l h_rt=08:00:00
 
 # module load
 . /etc/profile.d/modules.sh
@@ -96,7 +96,7 @@ if [ ${DO_EVAL} = "true" ]; then
     --generation_path ${OUTDIR}/generation_humaneval-unstripped.json \
     --metrics_path ${OUTDIR}/metrics.json
     --task humaneval
-    
+
   end_time=$(date +%s)
   execution_time=$((end_time - start_time))
   echo "Evaluating time: ${execution_time} seconds"
