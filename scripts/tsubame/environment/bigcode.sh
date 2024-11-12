@@ -20,3 +20,5 @@ pip install vllm
 deactivate
 
 cd $REPO_PATH
+
+apptainer pull docker://ghcr.io/bigcode-project/evaluation-harness
