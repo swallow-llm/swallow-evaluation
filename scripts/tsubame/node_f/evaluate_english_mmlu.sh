@@ -51,6 +51,8 @@ mkdir -p $BBH_OUTDIR
 
 cd lm-evaluation-harness-en
 
+echo "Generating: ${MMLU_TASK_NAME}"
+start_time=$(date +%s)
 echo $MMLU_TASK_NAME
 lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
@@ -62,7 +64,10 @@ lm_eval --model hf \
     --output_path "$MMLU_OUTDIR" \
     --use_cache "$MMLU_OUTDIR" \
     --log_samples \
-    --seed 42 \
+    --seed 42
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Generation time: ${execution_time} seconds"
 
 # aggregate results
 cd ../
