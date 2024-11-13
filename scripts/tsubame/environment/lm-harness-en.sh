@@ -21,6 +21,7 @@ pip install --upgrade pip
 pip install -e .
 pip install sentencepiece protobuf transformers
 pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
 pip install vllm
 deactivate
 
