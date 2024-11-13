@@ -1,3 +1,9 @@
+#!/bin/bash
+#$ -cwd
+
+#$ -l cpu_4=1
+#$ -l h_rt=0:30:00
+
 REPO_PATH="/gs/fs/tga-okazaki/saito/jalm-evaluation-private"
 
 ####
