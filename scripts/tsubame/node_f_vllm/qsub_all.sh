@@ -30,14 +30,16 @@ MODEL_NAME_PATH=$1
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
 $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" "$REPO_PATH/scripts/tsubame/node_f/evaluate_ja_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true"
 
-# # mbpp-ja
+# mbpp-ja
 # mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
 # $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp" "$REPO_PATH/scripts/tsubame/node_f/evaluate_ja_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true"
 
 
 # English
-# mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
-# $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
+$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_general.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
+$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_mmlu.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
+$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_bbh.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
 # humaneval-unstripped
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
