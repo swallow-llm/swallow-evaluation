@@ -461,7 +461,7 @@ class VLLM(TemplateLM):
     @staticmethod
     def modify_gen_kwargs(kwargs: dict) -> dict:
         # sampling_params
-        do_sample = kwargs.pop("do_sample", None)
+        do_sample = kwargs.pop("do_sample", False)
         if do_sample is False or "temperature" not in kwargs:
             kwargs["temperature"] = 0.0
         # hf defaults
