@@ -38,7 +38,7 @@ _CITATION = """
 def _squad_metric(predictions, references):
     import evaluate
 
-    squad_metric = datasets.load("squad_v2")
+    squad_metric = evaluate.load("squad_v2")
     return squad_metric.compute(predictions=predictions, references=references)
 
 
