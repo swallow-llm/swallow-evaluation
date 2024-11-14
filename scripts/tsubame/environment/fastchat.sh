@@ -20,8 +20,8 @@ source .venv_fastchat/bin/activate
 cd fastchat
 pip install --upgrade pip
 pip install python-dotenv pandas "pydantic<2,>=1.10.9"
-pip install -e ".[model_worker,llm_judge]"
 pip install transformers 'accelerate>=0.26.0' vllm
+pip install -e ".[model_worker,llm_judge]"
 deactivate
 
 cd $REPO_PATH
