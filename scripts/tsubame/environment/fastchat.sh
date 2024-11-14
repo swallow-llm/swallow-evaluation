@@ -21,7 +21,7 @@ cd fastchat
 pip install --upgrade pip
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
-pip install vllm
+pip install vllm==0.2.7
 deactivate
 
 cd $REPO_PATH
