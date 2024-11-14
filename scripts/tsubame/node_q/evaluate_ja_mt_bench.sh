@@ -35,9 +35,36 @@ OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
 mkdir -p ${OUTDIR}
 
 cd fastchat/fastchat/llm_judge
-python gen_model_answer.py --model-path ${MODEL_NAME_PATH} --model-id ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --num-choices 5 --num-gpus-total $GPU_NUM --num-gpus-per-model $GPU_NUM
-python gen_judgment.py --model-list ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --parallel 4 --judge-model gpt-4-1106-preview
-python show_result.py --model-list ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --output-file ${OUTDIR}/judge.json --judge-model gpt-4-1106-preview
+
+echo "Generating model answers"
+start_time=$(date +%s)
+python gen_model_answer.py \
+  --model-path ${MODEL_NAME_PATH} \
+  --model-id ${MODEL_NAME_PATH} \
+  --bench-name japanese_mt_bench \
+  --num-choices 5 \
+  --num-gpus-total $GPU_NUM \
+  --num-gpus-per-model $GPU_NUM
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Generation model answers time: ${execution_time} seconds"
+
+echo "Generating judgements"
+start_time=$(date +%s)
+python gen_judgment.py \
+  -model-list ${MODEL_NAME_PATH} \
+  --bench-name japanese_mt_bench \
+  --parallel 4 \
+  --judge-model gpt-4-1106-preview
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Generation judgements time: ${execution_time} seconds"
+
+python show_result.py \
+  --model-list ${MODEL_NAME_PATH} \
+  --bench-name japanese_mt_bench \
+  --output-file ${OUTDIR}/judge.json \
+  --judge-model gpt-4-1106-preview
 
 # aggregate results
 cd ../../../

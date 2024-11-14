@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -cwd
 
-#$ -l node_f=1
+#$ -l node_q=1
 #$ -l h_rt=24:00:00
 
 # module load
@@ -36,7 +36,7 @@ mkdir -p ${OUTDIR}
 
 cd fastchat/fastchat/llm_judge
 
-echo "Generating model answers"
+echo "Generating model answers using vllm"
 start_time=$(date +%s)
 python gen_model_answer.py \
   --model-path ${MODEL_NAME_PATH} \
@@ -44,12 +44,13 @@ python gen_model_answer.py \
   --bench-name japanese_mt_bench \
   --num-choices 5 \
   --num-gpus-total $GPU_NUM \
-  --num-gpus-per-model $GPU_NUM
+  --num-gpus-per-model $GPU_NUM \
+  --use-vllm
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Generation model answers time: ${execution_time} seconds"
 
-echo "Generating judgements"
+echo "Generating judgements using vllm"
 start_time=$(date +%s)
 python gen_judgment.py \
   --model-list ${MODEL_NAME_PATH} \
