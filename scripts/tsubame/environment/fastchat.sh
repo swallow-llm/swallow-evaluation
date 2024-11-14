@@ -20,7 +20,9 @@ source .venv_fastchat/bin/activate
 cd fastchat
 pip install --upgrade pip
 pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
-pip install python-dotenv pandas
+pip install python-dotenv pandas "pydantic<2,>=1.10.9"
 pip install -e ".[model_worker,llm_judge]"
 pip install transformers 'accelerate>=0.26.0' vllm
+deactivate
 
+cd $REPO_PATH
