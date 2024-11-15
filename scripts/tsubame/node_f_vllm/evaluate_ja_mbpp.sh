@@ -18,6 +18,7 @@ CUDA_BLOCKING=${6:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -47,7 +48,7 @@ fi
 mkdir -p $OUTDIR
 
 if [ ${DO_GENERATION} = "true" ]; then
-  echo "Generating"
+  echo "Generating using vllm"
   start_time=$(date +%s)
   python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
@@ -62,6 +63,9 @@ if [ ${DO_GENERATION} = "true" ]; then
     --max_memory_per_gpu auto \
     --trust_remote_code \
     --max_length_generation 2048 \
+    --use_vllm \
+    --allow_code_execution \
+    --tensor_parallel_size 4 \
     --temperature 0.1 \
     ${USE_FAST_TOKENIZER}
   end_time=$(date +%s)

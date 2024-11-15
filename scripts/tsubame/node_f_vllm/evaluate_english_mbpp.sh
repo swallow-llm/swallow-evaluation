@@ -18,6 +18,7 @@ CUDA_BLOCKING=${6:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -34,7 +35,7 @@ source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
 BATCH_SIZE=10
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mbpp"
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/mbpp"
 APPTAINER_IMAGE="${REPO_PATH}/evaluation-harness_latest.sif"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
@@ -47,11 +48,11 @@ fi
 mkdir -p $OUTDIR
 
 if [ ${DO_GENERATION} = "true" ]; then
-  echo "Generating"
+  echo "Generating using vllm"
   start_time=$(date +%s)
   python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
-    --tasks mbpp_ja \
+    --tasks mbpp \
     --do_sample True \
     --n_samples ${NUM_SAMPLES} \
     --batch_size ${BATCH_SIZE} \
@@ -62,6 +63,9 @@ if [ ${DO_GENERATION} = "true" ]; then
     --max_memory_per_gpu auto \
     --trust_remote_code \
     --max_length_generation 2048 \
+    --use_vllm \
+    --allow_code_execution \
+    --tensor_parallel_size 4 \
     --temperature 0.1 \
     ${USE_FAST_TOKENIZER}
   end_time=$(date +%s)
@@ -71,11 +75,11 @@ fi
 
 if [ ${DO_EVAL} = "true" ]; then
   echo "Evaluating"
-  echo "Generated codes should be placed at ${OUTDIR}/generation_mbpp_ja.json ."
+  echo "Generated codes should be placed at ${OUTDIR}/generation_mbpp.json ."
   touch ${OUTDIR}/metrics.json
   export HF_HOME=$REPO_PATH/HF_HOME
   apptainer run \
-    -B ${OUTDIR}/generation_mbpp_ja.json:/app/generations_py.json \
+    -B ${OUTDIR}/generation_mbpp.json:/app/generations_py.json \
     -B ${OUTDIR}/metrics.json:/app/metrics.json \
     --pwd /app \
     ${APPTAINER_IMAGE} \
@@ -88,7 +92,7 @@ if [ ${DO_EVAL} = "true" ]; then
     --metric_output_path /app/metrics.json
 
   python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
-    --generation_path ${OUTDIR}/generation_mbpp_ja.json \
+    --generation_path ${OUTDIR}/generation_mbpp.json \
     --metrics_path ${OUTDIR}/metrics.json \
     --task mbpp
 fi

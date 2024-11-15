@@ -48,7 +48,8 @@ mkdir -p $OUTDIR
 
 if [ ${DO_GENERATION} = "true" ]; then
   echo "Generating"
-python bigcode-evaluation-harness/main.py \
+  start_time=$(date +%s)
+  python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
     --tasks mbpp \
     --do_sample True \
@@ -63,6 +64,9 @@ python bigcode-evaluation-harness/main.py \
     --max_length_generation 2048 \
     --temperature 0.1 \
     ${USE_FAST_TOKENIZER}
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Generation time: ${execution_time} seconds"
 fi
 
 if [ ${DO_EVAL} = "true" ]; then
