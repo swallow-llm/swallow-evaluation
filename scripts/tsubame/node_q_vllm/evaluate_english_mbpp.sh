@@ -76,6 +76,8 @@ if [ ${DO_EVAL} = "true" ]; then
   echo "Generated codes should be placed at ${OUTDIR}/generation_mbpp.json ."
   touch ${OUTDIR}/metrics.json
   export HF_HOME=$REPO_PATH/HF_HOME
+
+  start_time=$(date +%s)
   apptainer run \
     -B ${OUTDIR}/generation_mbpp.json:/app/generations_py.json \
     -B ${OUTDIR}/metrics.json:/app/metrics.json \
@@ -93,6 +95,10 @@ if [ ${DO_EVAL} = "true" ]; then
     --generation_path ${OUTDIR}/generation_mbpp.json \
     --metrics_path ${OUTDIR}/metrics.json \
     --task mbpp
+
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Evaluation time: ${execution_time} seconds"
 fi
 
 # aggregate results
