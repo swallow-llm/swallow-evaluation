@@ -51,7 +51,7 @@ mkdir -p $BBH_OUTDIR
 
 cd lm-evaluation-harness-en
 
-echo "Generating using vllm: ${BBH_TASK_NAME}"
+echo "Generating: ${BBH_TASK_NAME}"
 start_time=$(date +%s)
 lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
