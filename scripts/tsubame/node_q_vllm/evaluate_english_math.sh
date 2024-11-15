@@ -33,7 +33,7 @@ source .venv_harness_en/bin/activate
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/harness_en"
 mkdir -p ${OUTDIR}
 
-MATH_TASK_NAME="hendrycks_math"
+MATH_TASK_NAME="minerva_math"
 MATH_NUM_FEWSHOT=4
 MATH_NUM_TESTCASE="all"
 MATH_OUTDIR="${OUTDIR}/alltasks_${MATH_NUM_FEWSHOT}shot_${MATH_NUM_TESTCASE}cases/hendrycks_math"
