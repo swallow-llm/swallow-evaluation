@@ -47,8 +47,6 @@ else
 fi
 
 mkdir -p $GENERAL_OUTDIR
-mkdir -p $MMLU_OUTDIR
-mkdir -p $BBH_OUTDIR
 
 cd lm-evaluation-harness-en
 

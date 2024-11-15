@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -cwd
 
-#$ -l node_q=1
+#$ -l node_f=1
 #$ -l h_rt=24:00:00
 
 # module load
@@ -16,6 +16,7 @@ CUDA_BLOCKING=${4:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -33,10 +34,10 @@ source .venv_harness_en/bin/activate
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/harness_en"
 mkdir -p ${OUTDIR}
 
-MMLU_TASK_NAME="mmlu"
-MMLU_NUM_FEWSHOT=5
-MMLU_NUM_TESTCASE="all"
-MMLU_OUTDIR="${OUTDIR}/alltasks_${MMLU_NUM_FEWSHOT}shot_${MMLU_NUM_TESTCASE}cases/mmlu"
+MATH_TASK_NAME="hendrycks_math"
+MATH_NUM_FEWSHOT=4
+MATH_NUM_TESTCASE="all"
+MATH_OUTDIR="${OUTDIR}/alltasks_${MATH_NUM_FEWSHOT}shot_${MATH_NUM_TESTCASE}cases/hendrycks_math"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
@@ -45,21 +46,21 @@ else
     USE_FAST_TOKENIZER=True
 fi
 
-mkdir -p $MMLU_OUTDIR
+mkdir -p $MATH_OUTDIR
 
 cd lm-evaluation-harness-en
 
-echo "Generating using vllm: ${MMLU_TASK_NAME}"
+echo "Generating using vllm: ${MATH_TASK_NAME}"
 start_time=$(date +%s)
 lm_eval --model vllm \
-    --model_args "gpu_memory_utilization=0.45,pretrained=$MODEL_NAME_PATH,trust_remote_code=True,tensor_parallel_size=1" \
-    --tasks $MMLU_TASK_NAME \
-    --num_fewshot $MMLU_NUM_FEWSHOT \
+    --model_args "gpu_memory_utilization=0.45,pretrained=$MODEL_NAME_PATH,trust_remote_code=True,tensor_parallel_size=4" \
+    --tasks $MATH_TASK_NAME \
+    --num_fewshot $MATH_NUM_FEWSHOT \
     --batch_size 8 \
     --device cuda \
     --write_out \
-    --output_path "$MMLU_OUTDIR" \
-    --use_cache "$MMLU_OUTDIR" \
+    --output_path "$MATH_OUTDIR" \
+    --use_cache "$MATH_OUTDIR" \
     --log_samples \
     --seed 42
 end_time=$(date +%s)

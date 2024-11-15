@@ -46,8 +46,6 @@ else
     USE_FAST_TOKENIZER=True
 fi
 
-mkdir -p $GENERAL_OUTDIR
-mkdir -p $MMLU_OUTDIR
 mkdir -p $BBH_OUTDIR
 
 cd lm-evaluation-harness-en
@@ -58,7 +56,7 @@ lm_eval --model vllm \
     --model_args "gpu_memory_utilization=0.45,pretrained=$MODEL_NAME_PATH,trust_remote_code=True,tensor_parallel_size=4" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
-    --batch_size auto \
+    --batch_size 8 \
     --device cuda \
     --write_out \
     --output_path "$BBH_OUTDIR" \
