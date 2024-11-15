@@ -37,7 +37,7 @@ while read -r job_id state; do
   elif [[ $gn_mig_value -eq 8 ]]; then
       node_kind="node_f"
   else
-      echo "Failed to identify node kind"
+      echo "Failed to identify node kind for ${job_id}"
       node_kind="_"
   fi
 
@@ -48,7 +48,7 @@ while read -r job_id state; do
   elif [[ $script_path == *"node_q"* || $script_path == *"node_f"* ]]; then
       use_vllm="_"
   else
-      echo "Failed to identify if using vllm"
+      echo "Failed to identify if using vllm for ${job_id}"
       use_vllm="_"
   fi
 
