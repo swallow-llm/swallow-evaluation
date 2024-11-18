@@ -10,13 +10,9 @@ import os
 import re
 import time
 from typing import Optional
-import random
 
 import openai
 import anthropic
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from fastchat.model.model_adapter import (
     get_conversation_template,
@@ -27,7 +23,6 @@ from fastchat.model.model_adapter import (
 # API setting constants
 API_MAX_RETRY = 16
 API_RETRY_SLEEP = 10
-MAX_API_RETRY_SLEEP = 600
 API_ERROR_OUTPUT = "$ERROR$"
 
 TIE_DELTA = 0.1
@@ -42,7 +37,6 @@ one_score_pattern = re.compile("\[\[(\d+\.?\d*)\]\]")
 one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
 
 # Sampling temperature configs for
-# ORIGINAL
 temperature_config = {
     "writing": 0.7,
     "roleplay": 0.7,
@@ -54,21 +48,6 @@ temperature_config = {
     "humanities": 0.1,
     "arena-hard-200": 0.0,
 }
-
-# STABILITY
-"""
-temperature_config = {
-    "writing": 0.5,
-    "roleplay": 0.5,
-    "extraction": 0.2,
-    "math": 0.1,
-    "coding": 0.1,
-    "reasoning": 0.1,
-    "stem": 0.2,
-    "humanities": 0.2,
-    "arena-hard-200": 0.0,
-}
-"""
 
 reverse_model_map = {
     "model_1": "model_2",
@@ -153,7 +132,7 @@ def load_judge_prompts(prompt_file: str):
     return prompts
 
 
-def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azure=True):
+def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
@@ -161,68 +140,56 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azur
         if multi_turn:
             kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
 
-    rating_list = []
-    user_prompt_list = []
-    judgment_list = []
-    for i in range(len(answer["choices"])):
-        if multi_turn:
-            user_prompt = judge.prompt_template["prompt_template"].format(
-                question_1=question["turns"][0],
-                question_2=question["turns"][1],
-                answer_1=answer["choices"][i]["turns"][0],
-                answer_2=answer["choices"][i]["turns"][1],
-                **kwargs,
-            )
+    if multi_turn:
+        user_prompt = judge.prompt_template["prompt_template"].format(
+            question_1=question["turns"][0],
+            question_2=question["turns"][1],
+            answer_1=answer["choices"][0]["turns"][0],
+            answer_2=answer["choices"][0]["turns"][1],
+            **kwargs,
+        )
+    else:
+        user_prompt = judge.prompt_template["prompt_template"].format(
+            question=question["turns"][0],
+            answer=answer["choices"][0]["turns"][0],
+            **kwargs,
+        )
+
+    rating = -1
+
+    system_prompt = judge.prompt_template["system_prompt"]
+    conv = get_conversation_template(model)
+    conv.set_system_message(system_prompt)
+    conv.append_message(conv.roles[0], user_prompt)
+    conv.append_message(conv.roles[1], None)
+
+    if model in OPENAI_MODEL_LIST:
+        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+    elif model in ANTHROPIC_MODEL_LIST:
+        judgment = chat_completion_anthropic(
+            model, conv, temperature=0, max_tokens=1024
+        )
+    else:
+        raise ValueError(f"Invalid judge model name: {model}")
+
+    if judge.prompt_template["output_format"] == "[[rating]]":
+        match = re.search(one_score_pattern, judgment)
+        if not match:
+            match = re.search(one_score_pattern_backup, judgment)
+
+        if match:
+            rating = ast.literal_eval(match.groups()[0])
         else:
-            user_prompt = judge.prompt_template["prompt_template"].format(
-                question=question["turns"][0],
-                answer=answer["choices"][i]["turns"][0],
-                **kwargs,
-            )
+            rating = -1
+    else:
+        raise ValueError(
+            f"invalid output format: {judge.prompt_template['output_format']}"
+        )
 
-        rating = -1
-
-        system_prompt = judge.prompt_template["system_prompt"]
-        conv = get_conversation_template(model)
-        conv.set_system_message(system_prompt)
-        conv.append_message(conv.roles[0], user_prompt)
-        conv.append_message(conv.roles[1], None)
-
-        if model in OPENAI_MODEL_LIST:
-            if azure:
-                judgment = chat_completion_openai_azure(
-                    model, conv, temperature=0, max_tokens=2048
-                )
-            else:
-                judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
-        elif model in ANTHROPIC_MODEL_LIST:
-            judgment = chat_completion_anthropic(
-                model, conv, temperature=0, max_tokens=1024
-            )
-        else:
-            raise ValueError(f"Invalid judge model name: {model}")
-
-        if judge.prompt_template["output_format"] == "[[rating]]":
-            match = re.search(one_score_pattern, judgment)
-            if not match:
-                match = re.search(one_score_pattern_backup, judgment)
-
-            if match:
-                rating = ast.literal_eval(match.groups()[0])
-            else:
-                rating = -1
-        else:
-            raise ValueError(
-                f"invalid output format: {judge.prompt_template['output_format']}"
-            )
-        rating_list.append(rating)
-        user_prompt_list.append(user_prompt)
-        judgment_list.append(judgment)
-
-    return rating_list, user_prompt_list, judgment_list
+    return rating, user_prompt, judgment
 
 
-def play_a_match_single(match: MatchPair, output_file: str, azure=True):
+def play_a_match_single(match: MatchSingle, output_file: str):
     question, model, answer, judge, ref_answer, multi_turn = (
         match.question,
         match.model,
@@ -233,8 +200,8 @@ def play_a_match_single(match: MatchPair, output_file: str, azure=True):
     )
 
     if judge.prompt_template["type"] == "single":
-        score_list, user_prompt_list, judgment_list = run_judge_single(
-            question, answer, judge, ref_answer, multi_turn=multi_turn, azure=azure
+        score, user_prompt, judgment = run_judge_single(
+            question, answer, judge, ref_answer, multi_turn=multi_turn
         )
 
         question_id = question["question_id"]
@@ -243,15 +210,15 @@ def play_a_match_single(match: MatchPair, output_file: str, azure=True):
             "question_id": question_id,
             "model": model,
             "judge": (judge.model_name, judge.prompt_template["name"]),
-            "user_prompt": user_prompt_list,
-            "judgment": judgment_list,
-            "score": score_list,
+            "user_prompt": user_prompt,
+            "judgment": judgment,
+            "score": score,
             "turn": turn,
             "tstamp": time.time(),
         }
         print(
             f"question: {question_id}, turn: {turn}, model: {model}, "
-            f"score: {score_list}, "
+            f"score: {score}, "
             f"judge: {(judge.model_name, judge.prompt_template['name'])}"
         )
     else:
@@ -260,12 +227,12 @@ def play_a_match_single(match: MatchPair, output_file: str, azure=True):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
+            fout.write(json.dumps(result) + "\n")
 
     return result
 
 
-def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False, azure=True):
+def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
@@ -301,12 +268,7 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
 
     if model in OPENAI_MODEL_LIST:
         conv.set_system_message(system_prompt)
-        if azure:
-            judgment = chat_completion_openai_azure(
-                model, conv, temperature=0, max_tokens=2048
-            )
-        else:
-            judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
     elif model in ANTHROPIC_MODEL_LIST:
         if system_prompt != "You are a helpful assistant.":
             user_prompt = "[Instruction]\n" + system_prompt + "\n\n" + user_prompt
@@ -362,10 +324,10 @@ def play_a_match_pair(match: MatchPair, output_file: str):
 
     if judge.prompt_template["type"] == "pairwise":
         g1_winner, g1_user_prompt, g1_judgment = run_judge_pair(
-            question, answer_1, answer_2, judge, ref_answer, multi_turn=multi_turn, azure=True
+            question, answer_1, answer_2, judge, ref_answer, multi_turn=multi_turn
         )
         g2_winner, g2_user_prompt, g2_judgment = run_judge_pair(
-            question, answer_2, answer_1, judge, ref_answer, multi_turn=multi_turn, azure=True
+            question, answer_2, answer_1, judge, ref_answer, multi_turn=multi_turn
         )
 
         g1_map = {"A": "model_1", "B": "model_2"}
@@ -397,10 +359,10 @@ def play_a_match_pair(match: MatchPair, output_file: str):
         )
     elif judge.prompt_template["type"] == "single":
         m1_score, m1_user_prompt, m1_judgment = run_judge_single(
-            question, answer_1, judge, azure=True
+            question, answer_1, judge
         )
         m2_score, m2_user_prompt, m2_judgment = run_judge_single(
-            question, answer_2, judge, azure=True
+            question, answer_2, judge
         )
 
         if abs(m1_score - m2_score) <= TIE_DELTA:
@@ -437,7 +399,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
+            fout.write(json.dumps(result) + "\n")
 
     return result
 
@@ -446,11 +408,7 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
     if api_dict is not None:
         openai.api_base = api_dict["api_base"]
         openai.api_key = api_dict["api_key"]
-    else:
-        openai.api_key = os.environ["OPENAI_API_KEY"]
     output = API_ERROR_OUTPUT
-    min_sleep_time = 1
-    max_sleep_time = API_RETRY_SLEEP
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
@@ -463,13 +421,6 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
             )
             output = response["choices"][0]["message"]["content"]
             break
-        except openai.error.RateLimitError as e:
-            print(type(e), e)
-            sleep_time = random.randint(min_sleep_time, max_sleep_time)
-            print(f"Sleeping for {sleep_time} seconds")
-            time.sleep(sleep_time)
-            max_sleep_time = min(MAX_API_RETRY_SLEEP, max_sleep_time * 2)
-            min_sleep_time = max_sleep_time // 2
         except openai.error.OpenAIError as e:
             print(type(e), e)
             time.sleep(API_RETRY_SLEEP)
@@ -491,8 +442,6 @@ def chat_completion_openai_azure(model, conv, temperature, max_tokens, api_dict=
         model = model[6:]
 
     output = API_ERROR_OUTPUT
-    min_sleep_time = 1
-    max_sleep_time = API_RETRY_SLEEP
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
@@ -505,13 +454,6 @@ def chat_completion_openai_azure(model, conv, temperature, max_tokens, api_dict=
             )
             output = response["choices"][0]["message"]["content"]
             break
-        except openai.error.RateLimitError as e:
-            print(type(e), e)
-            sleep_time = random.randint(min_sleep_time, max_sleep_time)
-            print(f"Sleeping for {sleep_time} seconds")
-            time.sleep(sleep_time)
-            max_sleep_time = min(MAX_API_RETRY_SLEEP, max_sleep_time * 2)
-            min_sleep_time = max_sleep_time // 2
         except openai.error.OpenAIError as e:
             print(type(e), e)
             time.sleep(API_RETRY_SLEEP)

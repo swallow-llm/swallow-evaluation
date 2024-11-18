@@ -207,12 +207,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
-    parser.add_argument(
-        "--azure", action="store_true", help="Use Azure API instead of openai.", default=False
-    )
     args = parser.parse_args()
-
-    args.model_list = [model_path.replace("/", "_") for model_path in args.model_list]
 
     question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"
@@ -239,27 +234,17 @@ if __name__ == "__main__":
     if args.mode == "single":
         judges = make_judge_single(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_single
-        if args.azure:
-            output_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_single_azure.jsonl"
-            )
-        else:
-            output_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
-            )
+        output_file = (
+            f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
+        )
         make_match_func = make_match_single
         baseline_model = None
     else:
         judges = make_judge_pairwise(args.judge_model, judge_prompts)
         play_a_match_func = play_a_match_pair
-        if args.azure:
-            output_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair_azure.jsonl"
-            )
-        else:
-            output_file = (
-                f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
-            )
+        output_file = (
+            f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
+        )
         if args.mode == "pairwise-all":
             make_match_func = make_match_all_pairs
             baseline_model = None
@@ -315,17 +300,17 @@ if __name__ == "__main__":
 
     # Show match stats and prompt enter to continue
     print("Stats:")
-    print(json.dumps(match_stat, indent=4, ensure_ascii=False))
-    # input("Press Enter to confirm...")
+    print(json.dumps(match_stat, indent=4))
+    input("Press Enter to confirm...")
 
     # Play matches
     if args.parallel == 1:
         for match in tqdm(matches):
-            play_a_match_func(match, output_file=output_file, azure=args.azure)
+            play_a_match_func(match, output_file=output_file)
     else:
 
         def play_a_match_wrapper(match):
-            play_a_match_func(match, output_file=output_file, azure=args.azure)
+            play_a_match_func(match, output_file=output_file)
 
         np.random.seed(0)
         np.random.shuffle(matches)

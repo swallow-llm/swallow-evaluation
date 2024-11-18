@@ -1,16 +1,17 @@
 # FastChat
-| [**Demo**](https://chat.lmsys.org/) | [**Discord**](https://discord.gg/HSWAKCrnFx) | [**X**](https://x.com/lmsysorg) |
+| [**Demo**](https://lmarena.ai/) | [**Discord**](https://discord.gg/6GXcFg3TH8) | [**X**](https://x.com/lmsysorg) |
 
 FastChat is an open platform for training, serving, and evaluating large language model based chatbots.
-- FastChat powers Chatbot Arena (https://chat.lmsys.org/), serving over 6 million chat requests for 50+ LLMs.
-- Arena has collected over 100K human votes from side-by-side LLM battles to compile an online [LLM Elo leaderboard](https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard).
+- FastChat powers Chatbot Arena ([lmarena.ai](https://lmarena.ai)), serving over 10 million chat requests for 70+ LLMs.
+- Chatbot Arena has collected over 1.5M human votes from side-by-side LLM battles to compile an online [LLM Elo leaderboard](https://lmarena.ai/?leaderboard).
 
 FastChat's core features include:
 - The training and evaluation code for state-of-the-art models (e.g., Vicuna, MT-Bench).
 - A distributed multi-model serving system with web UI and OpenAI-compatible RESTful APIs.
 
 ## News
-- [2023/09] 🔥 We released **LMSYS-Chat-1M**, a large-scale real-world LLM conversation dataset. Read the [report](https://arxiv.org/abs/2309.11998).
+- [2024/03] 🔥 We released Chatbot Arena technical [report](https://arxiv.org/abs/2403.04132).
+- [2023/09] We released **LMSYS-Chat-1M**, a large-scale real-world LLM conversation dataset. Read the [report](https://arxiv.org/abs/2309.11998).
 - [2023/08] We released **Vicuna v1.5** based on Llama 2 with 4K and 16K context lengths. Download [weights](#vicuna-weights).
 - [2023/07] We released **Chatbot Arena Conversations**, a dataset containing 33k conversations with human preferences. Download it [here](https://huggingface.co/datasets/lmsys/chatbot_arena_conversations).
 
@@ -25,7 +26,7 @@ FastChat's core features include:
 
 </details>
 
-<a href="https://chat.lmsys.org"><img src="assets/demo_narrow.gif" width="70%"></a>
+<a href="https://lmarena.ai"><img src="assets/demo_narrow.gif" width="70%"></a>
 
 ## Contents
 - [Install](#install)
@@ -69,6 +70,8 @@ pip3 install -e ".[model_worker,webui]"
 [Vicuna](https://lmsys.org/blog/2023-03-30-vicuna/) is based on Llama 2 and should be used under Llama's [model license](https://github.com/facebookresearch/llama/blob/main/LICENSE).
 
 You can use the commands below to start chatting. It will automatically download the weights from Hugging Face repos.
+Downloaded weights are stored in a `.cache` folder in the user's home folder (e.g., `~/.cache/huggingface/hub/<model_name>`).
+
 See more command options and how to handle out-of-memory in the "Inference with Command Line Interface" section below.
 
 **NOTE: `transformers>=4.31` is required for 16K versions.**
@@ -83,23 +86,18 @@ See more command options and how to handle out-of-memory in the "Inference with 
 
 **Old weights**: see [docs/vicuna_weights_version.md](docs/vicuna_weights_version.md) for all versions of weights and their differences.
 
-### LongChat
-We release [LongChat](https://lmsys.org/blog/2023-06-29-longchat/) models under Llama's [model license](https://github.com/facebookresearch/llama/blob/main/LICENSE).
+### Other Models
+Besides Vicuna, we also released two additional models: [LongChat](https://lmsys.org/blog/2023-06-29-longchat/) and FastChat-T5.
+You can use the commands below to chat with them. They will automatically download the weights from Hugging Face repos.
 
-| Size | Chat Command | Hugging Face Repo |
+| Model | Chat Command | Hugging Face Repo |
 | ---  | --- | --- |
-| 7B   | `python3 -m fastchat.serve.cli --model-path lmsys/longchat-7b-32k-v1.5`  | [lmsys/longchat-7b-32k](https://huggingface.co/lmsys/longchat-7b-32k-v1.5)   |
-
-### FastChat-T5
-You can use the commands below to chat with FastChat-T5. It will automatically download the weights from Hugging Face repos.
-
-| Size | Chat Command | Hugging Face Repo |
-| ---  | --- | --- |
-| 3B   | `python3 -m fastchat.serve.cli --model-path lmsys/fastchat-t5-3b-v1.0`  | [lmsys/fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0) |
+| LongChat-7B   | `python3 -m fastchat.serve.cli --model-path lmsys/longchat-7b-32k-v1.5`  | [lmsys/longchat-7b-32k](https://huggingface.co/lmsys/longchat-7b-32k-v1.5)   |
+| FastChat-T5-3B   | `python3 -m fastchat.serve.cli --model-path lmsys/fastchat-t5-3b-v1.0`  | [lmsys/fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0) |
 
 ## Inference with Command Line Interface
 
-<a href="https://chat.lmsys.org"><img src="assets/screenshot_cli.png" width="70%"></a>
+<a href="https://lmarena.ai"><img src="assets/screenshot_cli.png" width="70%"></a>
 
 (Experimental Feature: You can specify `--style rich` to enable rich text output and better text streaming quality for some non-ASCII content. This may not work properly on certain terminals.)
 
@@ -196,9 +194,15 @@ This requires 8-bit compression to be enabled and the bitsandbytes package to be
 - FastChat supports AWQ 4bit inference with [mit-han-lab/llm-awq](https://github.com/mit-han-lab/llm-awq). See [docs/awq.md](/docs/awq.md).
 - [MLC LLM](https://mlc.ai/mlc-llm/), backed by [TVM Unity](https://github.com/apache/tvm/tree/unity) compiler, deploys Vicuna natively on phones, consumer-class GPUs and web browsers via Vulkan, Metal, CUDA and WebGPU.
 
+#### Use models from modelscope
+For Chinese users, you can use models from www.modelscope.cn via specify the following environment variables.
+```bash
+export FASTCHAT_USE_MODELSCOPE=True
+```
+
 ## Serving with Web GUI
 
-<a href="https://chat.lmsys.org"><img src="assets/screenshot_gui.png" width="70%"></a>
+<a href="https://lmarena.ai"><img src="assets/screenshot_gui.png" width="70%"></a>
 
 To serve using the web UI, you need three main components: web servers that interface with users, model workers that host one or more models, and a controller to coordinate the webserver and model workers. You can learn more about the architecture [here](docs/server_arch.md).
 
@@ -233,6 +237,33 @@ This is the user interface that users will interact with.
 By following these steps, you will be able to serve your models using the web UI. You can open your browser and chat with a model now.
 If the models do not show up, try to reboot the gradio web server.
 
+## Launch Chatbot Arena (side-by-side battle UI)
+
+Currently, Chatbot Arena is powered by FastChat. Here is how you can launch an instance of Chatbot Arena locally.
+
+FastChat supports popular API-based models such as OpenAI, Anthropic, Gemini, Mistral and more. To add a custom API, please refer to the model support [doc](./docs/model_support.md). Below we take OpenAI models as an example.
+
+Create a JSON configuration file `api_endpoint.json` with the api endpoints of the models you want to serve, for example:
+```
+{
+    "gpt-4o-2024-05-13": {
+        "model_name": "gpt-4o-2024-05-13",
+        "api_base": "https://api.openai.com/v1",
+        "api_type": "openai",
+        "api_key": [Insert API Key],
+        "anony_only": false
+    }
+}
+```
+For Anthropic models, specify `"api_type": "anthropic_message"` with your Anthropic key. Similarly, for gemini model, specify `"api_type": "gemini"`. More details can be found in [api_provider.py](https://github.com/lm-sys/FastChat/blob/main/fastchat/serve/api_provider.py).
+
+To serve your own model using local gpus, follow the instructions in [Serving with Web GUI](#serving-with-web-gui).
+
+Now you're ready to launch the server:
+```
+python3 -m fastchat.serve.gradio_web_server_multi --register-api-endpoint-file api_endpoint.json
+```
+
 #### (Optional): Advanced Features, Scalability, Third Party UI
 - You can register multiple model workers to a single controller, which can be used for serving a single model with higher throughput or serving multiple models at the same time. When doing so, please allocate different GPUs and ports for different model workers.
 ```
@@ -248,16 +279,11 @@ python3 -m fastchat.serve.gradio_web_server_multi
 - The default model worker based on huggingface/transformers has great compatibility but can be slow. If you want high-throughput batched serving, you can try [vLLM integration](docs/vllm_integration.md).
 - If you want to host it on your own UI or third party UI, see [Third Party UI](docs/third_party_ui.md).
 
-## Use models from modelscope
-For Chinese users, you can use models from www.modelscope.cn via specify the following environment variables.
-```bash
-export FASTCHAT_USE_MODELSCOPE=True
-```
-
 ## API
 ### OpenAI-Compatible RESTful APIs & SDK
 FastChat provides OpenAI-compatible APIs for its supported models, so you can use FastChat as a local drop-in replacement for OpenAI APIs.
 The FastChat server is compatible with both [openai-python](https://github.com/openai/openai-python) library and cURL commands.
+The REST API is capable of being executed from Google Colab free tier, as demonstrated in the [FastChat_API_GoogleColab.ipynb](https://github.com/lm-sys/FastChat/blob/main/playground/FastChat_API_GoogleColab.ipynb) notebook, available in our repository.
 See [docs/openai_api.md](docs/openai_api.md).
 
 ### Hugging Face Generation APIs
