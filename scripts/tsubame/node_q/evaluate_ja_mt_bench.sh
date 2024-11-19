@@ -52,7 +52,7 @@ echo "Generation model answers time: ${execution_time} seconds"
 echo "Generating judgements"
 start_time=$(date +%s)
 python gen_judgment.py \
-  -model-list ${MODEL_NAME_PATH} \
+  --model-list ${MODEL_NAME_PATH} \
   --bench-name japanese_mt_bench \
   --parallel 4 \
   --judge-model gpt-4-1106-preview
