@@ -4,43 +4,110 @@ python3 show_result.py --mode [single|pairwise-baseline|pairwise-all]
 """
 import argparse
 import pandas as pd
+import json
+import numpy as np
+
+from fastchat.llm_judge.custom_utils import CATEGORIES, CATEGORIES_ordered, calculate_japanese_character_ratio
+
+def calculate_averages(scores):
+    # scores: [N, T], N: 設問数, T: 回答数(5)
+    scores = np.array(list(scores))
+    valid_scores = scores != -1
+    valid_count = valid_scores.sum(axis=0)
+    question_mean = np.where(valid_scores, scores, 0).sum(axis=0) / valid_count
+    mu = np.mean(question_mean)
+    sigma = np.std(question_mean, ddof=1)
+    return mu, sigma
 
 
 def display_result_single(args):
     if args.input_file is None:
-        input_file = (
-            f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
-        )
+        if args.azure:
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_single_azure.jsonl"
+        else:
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_single.jsonl"
     else:
         input_file = args.input_file
 
     print(f"Input file: {input_file}")
     df_all = pd.read_json(input_file, lines=True)
-    df = df_all[["model", "score", "turn"]]
-    df = df[df["score"] != -1]
+    df_all["category"] = df_all["question_id"].apply(lambda x: CATEGORIES[(x - 81) // 10])
+    df = df_all[["model", "score", "turn", "category"]]
 
     if args.model_list is not None:
         df = df[df["model"].isin(args.model_list)]
 
-    print("\n########## First turn ##########")
-    df_1 = df[df["turn"] == 1].groupby(["model", "turn"]).mean()
-    print(df_1.sort_values(by="score", ascending=False))
+    result = dict()
+    for model_id in args.model_list:
+        result[model_id] = dict()
 
-    if args.bench_name == "mt_bench":
-        print("\n########## Second turn ##########")
-        df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
-        print(df_2.sort_values(by="score", ascending=False))
+    def score_category(category):
+        if category != "overall":
+            df_cat = df[df["category"] == category][["model", "score", "turn"]]
+        else:
+            df_cat = df[["model", "score", "turn"]]
+        df_1 = df_cat[df_cat["turn"] == 1].groupby("model")["score"].apply(calculate_averages)
+        print(df_1)
 
-        print("\n########## Average ##########")
-        df_3 = df[["model", "score"]].groupby(["model"]).mean()
-        print(df_3.sort_values(by="score", ascending=False))
+        for model_id in args.model_list:
+            result[model_id][category] = dict()
+            result[model_id][category]["first_turn"] = dict()
+            result[model_id][category]["first_turn"]["score"] = float(df_1.loc[model_id][0])
+            result[model_id][category]["first_turn"]["stdev"] = float(df_1.loc[model_id][1])
+
+        if args.bench_name == "mt_bench" or args.bench_name == "japanese_mt_bench":
+            df_2 = df_cat[df_cat["turn"] == 2].groupby("model")["score"].apply(calculate_averages)
+            print(df_2)
+            for model_id in args.model_list:
+                result[model_id][category]["second_turn"] = dict()
+                result[model_id][category]["second_turn"]["score"] = float(df_2.loc[model_id][0])
+                result[model_id][category]["second_turn"]["stdev"] = float(df_2.loc[model_id][1])
+
+            df_3 = df_cat.groupby("model")["score"].apply(calculate_averages)
+            print(df_3)
+            for model_id in args.model_list:
+                result[model_id][category]["average"] = dict()
+                result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
+                result[model_id][category]["average"]["stdev"] = float(df_3.loc[model_id][1])
+
+    # スコアの集計
+    for category in ["overall"] + CATEGORIES_ordered:
+        score_category(category)
+
+    # 応答文における日本語の割合の集計
+    for model_id in args.model_list:
+        output_path = f"data/{args.bench_name}/model_answer/{model_id}.jsonl"
+        model_output = []
+        with open(output_path, "r") as f:
+            for line in f:
+                model_output.append(json.loads(line))
+        char_rate_info = calculate_japanese_character_ratio(model_output)
+        for category_name, char_ratio in char_rate_info.items():
+            result[model_id][category_name]["average"]["japanese_char_ratio"] = char_ratio
+
+    # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
+    for model_id in args.model_list:
+        result[model_id]["result"] = dict()
+        for turn in ["first_turn", "second_turn", "average"]:
+            result[model_id]["result"][turn] = dict()
+            result[model_id]["result"][turn]["score"] = ",".join(
+                [f"{(result[model_id][category][turn]['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            )
+            result[model_id]["result"][turn]["stdev"] = ",".join(
+                [f"{result[model_id][category][turn]['stdev']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            )
+
+    if args.output_file is not None:
+        with open(args.output_file, "w") as f:
+            json.dump(result, f, indent=4)
 
 
 def display_result_pairwise(args):
     if args.input_file is None:
-        input_file = (
-            f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
-        )
+        if args.azure:
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair_azure.jsonl"
+        else:
+            input_file = f"data/{args.bench_name}/model_judgment/{args.judge_model}_pair.jsonl"
     else:
         input_file = args.input_file
 
@@ -48,9 +115,7 @@ def display_result_pairwise(args):
     df_all = pd.read_json(input_file, lines=True)
     df_all = df_all[(df_all["g1_winner"] != "error") & (df_all["g2_winner"] != "error")]
 
-    model_list = (
-        df_all["model_1"].unique().tolist() + df_all["model_2"].unique().tolist()
-    )
+    model_list = df_all["model_1"].unique().tolist() + df_all["model_2"].unique().tolist()
     model_list = list(set(model_list))
 
     list_res = []
@@ -84,11 +149,7 @@ def display_result_pairwise(args):
     df["win_rate"] = df["win"] / (df["win"] + df["loss"] + df["tie"])
     df["loss_rate"] = df["loss"] / (df["win"] + df["loss"] + df["tie"])
     # each tie counts as 0.5 win + 0.5 loss
-    df["win_rate_adjusted"] = (df["win"] + 0.5 * df["tie"]) / (
-        df["win"] + df["loss"] + df["tie"]
-    )
-    # print(df.sort_values(by="win_rate", ascending=False))
-    # print(df.sort_values(by="loss_rate", ascending=True))
+    df["win_rate_adjusted"] = (df["win"] + 0.5 * df["tie"]) / (df["win"] + df["loss"] + df["tie"])
     print(df.sort_values(by="win_rate_adjusted", ascending=False))
 
 
@@ -117,7 +178,15 @@ if __name__ == "__main__":
             "`single` runs single answer grading."
         ),
     )
+    parser.add_argument(
+        "--azure",
+        action="store_true",
+        help="Did you use Azure API instead of openai when generating the judgment?",
+        default=False,
+    )
     args = parser.parse_args()
+
+    args.model_list = [model_name.replace("/", "_") for model_name in args.model_list]
 
     if args.mode == "single":
         display_result_func = display_result_single

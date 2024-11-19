@@ -207,7 +207,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
+    parser.add_argument(
+        "--azure", action="store_true", help="Use Azure API instead of openai.", default=False
+    )
     args = parser.parse_args()
+
+    args.model_list = [model_path.replace("/", "_") for model_path in args.model_list]
 
     question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"

@@ -30,6 +30,10 @@ tests/state_of_the_union.txt
 # Build
 build
 
+# Ignore
+fastchat/llm_judge/data/*/model_answer/*
+fastchat/llm_judge/data/*/model_judgment/*
+
 # Image data
 serve_images
 val2014

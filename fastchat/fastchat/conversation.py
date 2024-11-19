@@ -18,6 +18,7 @@ class SeparatorStyle(IntEnum):
 
     ADD_COLON_SINGLE = auto()
     ADD_COLON_TWO = auto()
+    ADD_COLON_TWO_NEW_LINE = auto()
     ADD_COLON_SPACE_SINGLE = auto()
     NO_COLON_SINGLE = auto()
     NO_COLON_TWO = auto()
@@ -39,6 +40,12 @@ class SeparatorStyle(IntEnum):
     GEMMA = auto()
     CLLM = auto()
     DEFAULT = auto()
+    SWALLOW = auto()
+    CALM2 = auto()
+    CALM3 = auto()
+    STABLELM_GAMMA = auto()
+    KARAKURI = auto()
+    PHI3 = auto()
 
 
 IMAGE_PLACEHOLDER_STR = "$$<image>$$"
@@ -98,6 +105,15 @@ class Conversation:
                     ret += role + ": " + message + seps[i % 2]
                 else:
                     ret += role + ":"
+            return ret
+        elif self.sep_style == SeparatorStyle.ADD_COLON_TWO_NEW_LINE:
+            seps = [self.sep, self.sep2]
+            ret = system_prompt + seps[0]
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += role + ":\n" + message + seps[i % 2]
+                else:
+                    ret += role + ":\n"
             return ret
         elif self.sep_style == SeparatorStyle.ADD_COLON_SPACE_SINGLE:
             ret = system_prompt + self.sep
@@ -173,6 +189,48 @@ class Conversation:
                     ret += f"{message.strip()}<|eot_id|>"
                 else:
                     ret += f"<|start_header_id|>{role}<|end_header_id|>\n\n"
+            return ret
+        elif self.sep_style == SeparatorStyle.KARAKURI:
+            seps = [self.sep, self.sep2]
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
+                if message:
+                    if i == 0:
+                        ret += message + " " + seps[i % 2]
+                    else:
+                        ret += tag + message + " " + seps[i % 2]
+                else:
+                    ret += tag
+            return ret
+        elif self.sep_style == SeparatorStyle.SWALLOW:
+            seps = [self.sep, self.sep2]
+            if self.system_message:
+                ret = system_prompt
+            else:
+                ret = "[INST] "
+            for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
+                if message:
+                    if i == 0:
+                        ret += message + " "
+                    else:
+                        ret += tag + message + seps[i % 2]
+                else:
+                    ret += tag
+            return ret
+        elif self.sep_style == SeparatorStyle.PHI3:
+            sep = self.sep
+            if self.system_message:
+                ret = system_prompt
+            else:
+                ret = "[INST] "
+            for i, (role, message) in enumerate(self.messages):
+                tag = self.roles[i % 2]
+                if message:
+                    ret += tag + message + sep
+                else:
+                    ret += tag
             return ret
         elif self.sep_style == SeparatorStyle.CHATGLM:
             # source: https://huggingface.co/THUDM/chatglm-6b/blob/1d240ba371910e9282298d4592532d7f0f3e9f3e/modeling_chatglm.py#L1302-L1308
@@ -323,6 +381,30 @@ class Conversation:
                     ret += role + ": " + message + "\n"
                 else:
                     ret += role + ":"
+            return ret
+        elif self.sep_style == SeparatorStyle.CALM2:
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += role + message + self.sep
+                else:
+                    ret += role
+            return ret
+        elif self.sep_style == SeparatorStyle.CALM3:
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += self.sep + role + '\n' + message + self.sep2 + '\n'
+                else:
+                    ret += self.sep + role + '\n'
+            return ret
+        elif self.sep_style == SeparatorStyle.STABLELM_GAMMA:
+            ret = system_prompt
+            for role, message in self.messages:
+                if message:
+                    ret += self.sep + role + self.sep2 + message
+                else:
+                    ret += self.sep + role + self.sep2
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
@@ -848,6 +930,18 @@ register_conv_template(
         sep_style=SeparatorStyle.ADD_COLON_TWO,
         sep="\n\n",
         sep2="</s>",
+    )
+)
+
+# weblab-GENIAC/Tanuki-8B-dpo-v1.0 weblab-GENIAC/Tanuki-8x8B-dpo-v1.0 template
+register_conv_template(
+    Conversation(
+        name="tanuki",
+        system_message="<s>以下は、タスクを説明する指示です。要求を適切に満たす応答を書きなさい。",
+        roles=("### 指示", "### 応答"),
+        sep_style=SeparatorStyle.ADD_COLON_TWO_NEW_LINE,
+        sep="\n\n",
+        sep2="</s>\n\n",
     )
 )
 
@@ -2299,6 +2393,150 @@ register_conv_template(
 )
 
 
+# Swallow default template
+# reference: https://huggingface.co/tokyotech-llm/Swallow-7b-VE-instruct-v1.0-baseline-lr_2e-5-minlr_2e-6-iter0002430/blob/main/tokenizer_config.json#L12
+register_conv_template(
+    Conversation(
+        name="swallow",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="あなたは誠実で優秀な日本人のアシスタントです。",
+        roles=("[INST] ", "[/INST]"),
+        sep_style=SeparatorStyle.SWALLOW,
+        sep=" ",
+        sep2="</s>"
+    )
+)
+
+
+# japanese-stablelm-instrcut-beta default template
+# reference: https://huggingface.co/stabilityai/japanese-stablelm-instruct-beta-70b
+register_conv_template(
+    Conversation(
+        name="japanese-stablelm-instruct-beta",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="あなたは役立つアシスタントです。",
+        roles=("[INST] ", "[/INST]"),
+        sep_style=SeparatorStyle.SWALLOW,
+        sep=" ",
+        sep2="</s>"
+    )
+)
+
+
+# ELYZA-japanese-Llama-2 default template
+# reference: https://huggingface.co/elyza/ELYZA-japanese-Llama-2-13b-instruct
+register_conv_template(
+    Conversation(
+        name="ELYZA-japanese-Llama-2",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="あなたは誠実で優秀な日本人のアシスタントです。",
+        roles=("[INST] ", "[/INST]"),
+        sep_style=SeparatorStyle.SWALLOW,
+        sep=" ",
+        sep2="</s>"
+    )
+)
+
+
+# calm2 template
+# reference: https://huggingface.co/cyberagent/calm2-7b-chat
+register_conv_template(
+    Conversation(
+        name="calm2",
+        roles=("USER: ", "ASSISTANT: "),
+        sep_style=SeparatorStyle.CALM2,
+        sep="\n",
+    )
+)
+
+
+# calm3 template
+# reference: https://huggingface.co/cyberagent/calm3-22b-chat
+register_conv_template(
+    Conversation(
+        name="calm3",
+        system_template="<|im_start|>system\n{system_message}<|im_end|>\n",
+        system_message="あなたは親切なAIアシスタントです。",
+        roles=("user", "assistant"),
+        sep_style=SeparatorStyle.CALM3,
+        sep="<|im_start|>",
+        sep2="<|im_end|>",
+    )
+)
+
+
+# RakutenAI template
+# reference: https://huggingface.co/Rakuten/RakutenAI-7B-instruct
+register_conv_template(
+    Conversation(
+        name="RakutenAI",
+        system_template="{system_message}",
+        system_message="A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. ",
+        roles=("USER: ", "ASSISTANT: "),
+        sep_style=SeparatorStyle.CALM2,
+        sep=" ",
+    )
+)
+
+
+# nekomata template
+# reference: https://huggingface.co/rinna/nekomata-7b-instruction
+register_conv_template(
+    Conversation(
+        name="nekomata",
+        system_template="{system_message}",
+        system_message="以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。\n\n###指示:\n入力文に対して、適切な応答を生成してください。\n\n",
+        roles=("### 入力:\n", "### 応答:\n"),
+        sep_style=SeparatorStyle.CALM2,
+        sep="\n\n",
+    )
+)
+
+
+# japanese-stablelm-instruct-gamma template
+# reference: https://huggingface.co/stabilityai/japanese-stablelm-instruct-gamma-7b
+register_conv_template(
+    Conversation(
+        name="japanese-stablelm-instruct-gamma",
+        system_template="{system_message}",
+        system_message="以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。",
+        roles=("指示", "応答"),
+        sep_style=SeparatorStyle.STABLELM_GAMMA,
+        sep="\n\n### ",
+        sep2=": \n",
+    )
+)
+
+
+# karakuri-ai/karakuri-lm-70b-chat-v0.1 template
+# reference: https://huggingface.co/karakuri-ai/karakuri-lm-70b-chat-v0.1
+register_conv_template(
+    Conversation(
+        name="karakuri-lm-70b-chat",
+        system_template="<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
+        system_message="You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+        roles=("[INST] ", "[/INST] "),
+        sep="[ATTR] helpfulness: 4 correctness: 4 coherence: 4 complexity: 4 verbosity: 4 quality: 4 toxicity: 0 humor: 0 creativity: 0 [/ATTR] ",
+        sep2="</s><s>",
+        sep_style=SeparatorStyle.KARAKURI,
+    )
+)
+
+
+# Phi-3
+# reference: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct
+register_conv_template(
+    Conversation(
+        name="phi-3",
+        system_template="<|system|>\n{system_message}<|end|>\n",
+        system_message="You are a helpful travel assistant.",
+        roles=("<|user|>\n", "<|assistant|>\n"),
+        sep="<|end|>\n",
+        sep_style=SeparatorStyle.PHI3,
+    )
+)
+
+
 if __name__ == "__main__":
     from fastchat.conversation import get_conv_template
 
@@ -2338,5 +2576,35 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
+    print("\n")
+
+    print("Japaneselm template:")
+    conv = get_conv_template("karakuri-lm-70b-chat")
+    conv.append_message(conv.roles[0], "LLM君、お元気ですか?")
+    conv.append_message(conv.roles[1], "元気です、ありがとう。")
+    conv.append_message(conv.roles[0], "それはよかった。明日の天気を教えて。")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
+    print("\n")
+
+    print("tanuki template:")
+    conv = get_conv_template("tanuki")
+    conv.append_message(conv.roles[0], "AIによって私たちの暮らしはどのように変わりますか？")
+    conv.append_message(conv.roles[1], "より一層効率的な暮らしとなるでしょう。")
+    conv.append_message(conv.roles[0], "どのように効率的になるのでしょうか？")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
+    print("\n")
+
+    print("Phi-3 template:")
+    conv = get_conv_template("phi-3")
+    conv.append_message(conv.roles[0], "I am going to Paris, what should I see?")
+    conv.append_message(conv.roles[1], "Paris, the capital of France.")
+    conv.append_message(conv.roles[0], "What is so great about #1?")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())

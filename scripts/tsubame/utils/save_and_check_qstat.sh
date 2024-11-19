@@ -3,11 +3,12 @@
 # スクリプトのあるディレクトリに移動
 cd "$(dirname "$0")"
 
-# 現在のジョブの状態を取得して一時ファイルに保存
+# 現在のジョブと以前のジョブの状態を取得
 qstat_output=$(qstat -u $USER)
+old_jobs=$(cat qstat_history.out)
 
-# qstatの返り値が空文字、すなわちキューが何もない時は終了
-if [ -z "$qstat_output" ]; then
+# 現在のジョブについても以前のジョブについても情報がない時は終了
+if [[ -z "$qstat_output" && ! -z "$old_jobs" ]]; then
   exit 0
 fi
 
@@ -64,9 +65,7 @@ printf "%-10s %-8s %-8s %-8s %-8s %-35s %-100s\n" "job_ID" "state" "node" "vllm"
 echo -e "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 # 前回のジョブの状態を読み込む
-if [ -f qstat_history.out ]; then
-  old_jobs=$(cat qstat_history.out)
-
+if [ -f "$old_jobs" ]; then
   # 前回のジョブIDが現在のジョブIDにない場合は終了したとみなす
   echo "$old_jobs" | while read -r old_job_id old_state old_node_kind old_use_vllm old_slots old_task_kind old_model_name; do
     if [[ -z "${current_job_map[$old_job_id]}" ]]; then

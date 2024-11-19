@@ -118,15 +118,11 @@ class BaseModelAdapter:
         try:
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
-                low_cpu_mem_usage=True,
-                trust_remote_code=True,
                 **from_pretrained_kwargs,
             )
         except NameError:
             model = AutoModel.from_pretrained(
                 model_path,
-                low_cpu_mem_usage=True,
-                trust_remote_code=True,
                 **from_pretrained_kwargs,
             )
         return model, tokenizer
@@ -235,7 +231,7 @@ def load_model(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
                 )
     elif device == "cuda":
-        kwargs = {"torch_dtype": torch.float16}
+        kwargs = {"torch_dtype": "auto"}
         if num_gpus != 1:
             kwargs["device_map"] = "auto"
             if max_gpu_memory is None:
@@ -1564,7 +1560,7 @@ class Llama2Adapter(BaseModelAdapter):
     """The model adapter for Llama-2 (e.g., meta-llama/Llama-2-7b-hf)"""
 
     def match(self, model_path: str):
-        return "llama-2" in model_path.lower()
+        return "llama-2" in model_path.lower() or "llama-ct" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
@@ -1822,6 +1818,14 @@ class QwenChatAdapter(BaseModelAdapter):
 
         return model, tokenizer
 
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("qwen-7b-chat")
+
+
+class Qwen2ChatAdapter(BaseModelAdapter):
+    """The model adapter for Qwen/Qwen2-7B-Instruct"""
+    def match(self, model_path: str):
+        return "qwen2" in model_path.lower()
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("qwen-7b-chat")
 
@@ -2498,10 +2502,174 @@ class NoSystemAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("api_based_default")
+    
+
+class SwallowAdapter(BaseModelAdapter):
+    """The model adapter for Swallow"""
+
+    def match(self, model_path: str):
+        return "swallow" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, low_cpu_mem_usage=True, device_map="auto", **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("swallow")
+
+
+class JapaneseStableLMBetaAdapter(BaseModelAdapter):
+    """The model adapter for japanese-stablelm-instruct-beta"""
+    def match(self, model_path: str):
+        return "japanese-stablelm-instruct-beta" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("japanese-stablelm-instruct-beta")
+
+
+class ELYZAJapaneseLlama2Adapter(BaseModelAdapter):
+    """The model adapter for ELYZA-japanese-Llama-2"""
+    def match(self, model_path: str):
+        return "elyza-japanese-llama-2" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("ELYZA-japanese-Llama-2")
+
+
+class Calm2Adapter(BaseModelAdapter):
+    """The model adapter for calm2"""
+    def match(self, model_path: str):
+        return "calm2" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("calm2")
+
+
+class Calm3Adapter(BaseModelAdapter):
+    """The model adapter for calm3"""
+    def match(self, model_path: str):
+        return "calm3" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("calm3")
+
+
+class RakutenAIAdapter(BaseModelAdapter):
+    """The model adapter for calm2"""
+    def match(self, model_path: str):
+        return "rakutenai" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("RakutenAI")
+
+
+class NekomataAdapter(BaseModelAdapter):
+    """The model adapter for calm2"""
+    def match(self, model_path: str):
+        return "nekomata" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs, trust_remote_code=True
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("nekomata")
+
+
+class JapaneseStableLMGammaAdapter(BaseModelAdapter):
+    """The model adapter for japanese-stablelm-instruct-gamma"""
+    def match(self, model_path: str):
+        return "japanese-stablelm-instruct-gamma" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("japanese-stablelm-instruct-gamma")
+
+
+class KarakuriAdapter(BaseModelAdapter):
+    """The model adapter for Karakuri"""
+
+    def match(self, model_path: str):
+        return "karakuri" in model_path.lower()
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("karakuri-lm-70b-chat")    
+
+
+class TanukiAdapter(BaseModelAdapter):
+    """The model adapter for Tanuki"""
+    def match(self, model_path: str):
+        return "Tanuki" in model_path.lower()
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path, **from_pretrained_kwargs,
+        )
+        return model, tokenizer
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("tanuki")
+    
+
+class Phi3Adapter(BaseModelAdapter):
+    """The model adapter for phi3"""
+
+    def match(self, model_path: str):
+        return "phi-3" in model_path.lower()
+    
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("phi-3")
 
 
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
+register_model_adapter(JapaneseStableLMBetaAdapter)
+register_model_adapter(Phi3Adapter)
+register_model_adapter(ELYZAJapaneseLlama2Adapter)
+register_model_adapter(Calm2Adapter)
+register_model_adapter(Calm3Adapter)
+register_model_adapter(RakutenAIAdapter)
+register_model_adapter(NekomataAdapter)
+register_model_adapter(JapaneseStableLMGammaAdapter)
 register_model_adapter(PeftModelAdapter)
 register_model_adapter(StableVicunaAdapter)
 register_model_adapter(VicunaAdapter)
@@ -2550,6 +2718,7 @@ register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
 register_model_adapter(Llama2Adapter)
+register_model_adapter(SwallowAdapter)
 register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
 register_model_adapter(DolphinAdapter)
@@ -2558,6 +2727,7 @@ register_model_adapter(NousHermes2MixtralAdapter)
 register_model_adapter(NousHermesAdapter)
 register_model_adapter(MistralAdapter)
 register_model_adapter(WizardCoderAdapter)
+register_model_adapter(Qwen2ChatAdapter)
 register_model_adapter(QwenChatAdapter)
 register_model_adapter(AquilaChatAdapter)
 register_model_adapter(BGEAdapter)
@@ -2601,6 +2771,8 @@ register_model_adapter(SmaugChatAdapter)
 register_model_adapter(Llama3Adapter)
 register_model_adapter(Llama31Adapter)
 register_model_adapter(GrokAdapter)
+register_model_adapter(KarakuriAdapter)
+register_model_adapter(TanukiAdapter)
 register_model_adapter(NoSystemAdapter)
 
 # After all adapters, try the default base adapter.
