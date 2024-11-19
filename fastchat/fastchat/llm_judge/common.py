@@ -14,6 +14,9 @@ import random
 
 import openai
 import anthropic
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from fastchat.model.model_adapter import (
     get_conversation_template,
