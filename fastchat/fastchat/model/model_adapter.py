@@ -24,6 +24,7 @@ from transformers import (
     LlamaForCausalLM,
     T5Tokenizer,
 )
+from vllm import LLM
 
 from fastchat.constants import CPU_ISA
 from fastchat.conversation import Conversation, get_conv_template
@@ -102,7 +103,7 @@ class BaseModelAdapter:
     def match(self, model_path: str):
         return True
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
         revision = from_pretrained_kwargs.get("revision", "main")
         try:
             tokenizer = AutoTokenizer.from_pretrained(
@@ -115,16 +116,29 @@ class BaseModelAdapter:
             tokenizer = AutoTokenizer.from_pretrained(
                 model_path, use_fast=False, revision=revision, trust_remote_code=True
             )
-        try:
-            model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                **from_pretrained_kwargs,
-            )
-        except NameError:
-            model = AutoModel.from_pretrained(
-                model_path,
-                **from_pretrained_kwargs,
-            )
+        if not use_vllm:
+            try:
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    low_cpu_mem_usage=True,
+                    trust_remote_code=True,
+                    **from_pretrained_kwargs,
+                )
+            except NameError:
+                model = AutoModel.from_pretrained(
+                    model_path,
+                    low_cpu_mem_usage=True,
+                    trust_remote_code=True,
+                    **from_pretrained_kwargs,
+                )
+            return model, tokenizer
+        if "torch_dtype" in from_pretrained_kwargs:
+            from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
+            del from_pretrained_kwargs["torch_dtype"]
+        model = LLM(
+            model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True
+        )
+        model.set_tokenizer(tokenizer)
         return model, tokenizer
 
     def load_compress_model(self, model_path, device, torch_dtype, revision="main"):
@@ -208,6 +222,7 @@ def load_model(
     xft_config: Optional[XftConfig] = None,
     revision: str = "main",
     debug: bool = False,
+    use_vllm: bool = False,
 ):
     """Load a model from Hugging Face."""
     import accelerate
@@ -233,18 +248,7 @@ def load_model(
     elif device == "cuda":
         kwargs = {"torch_dtype": "auto"}
         if num_gpus != 1:
-            kwargs["device_map"] = "auto"
-            if max_gpu_memory is None:
-                kwargs[
-                    "device_map"
-                ] = "sequential"  # This is important for not the same VRAM sizes
-                available_gpu_memory = get_gpu_memory(num_gpus)
-                kwargs["max_memory"] = {
-                    i: str(int(available_gpu_memory[i] * 0.85)) + "GiB"
-                    for i in range(num_gpus)
-                }
-            else:
-                kwargs["max_memory"] = {i: max_gpu_memory for i in range(num_gpus)}
+            kwargs["tensor_parallel_size"] = num_gpus
     elif device == "mps":
         kwargs = {"torch_dtype": torch.float16}
         import transformers
@@ -366,7 +370,10 @@ def load_model(
             raise e
 
     # Load model
-    model, tokenizer = adapter.load_model(model_path, kwargs)
+    if use_vllm:
+        model, tokenizer = adapter.load_model(model_path, kwargs, use_vllm)
+    else:
+        model, tokenizer = adapter.load_model(model_path, kwargs)
 
     if (
         device == "cpu"
@@ -380,7 +387,8 @@ def load_model(
         "xpu",
         "npu",
     ):
-        model.to(device)
+        pass
+        # model.to(device)
 
     if device == "xpu":
         model = torch.xpu.optimize(model, dtype=kwargs["torch_dtype"], inplace=True)
@@ -703,17 +711,24 @@ class VicunaAdapter(BaseModelAdapter):
     def match(self, model_path: str):
         return "vicuna" in model_path.lower()
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
         revision = from_pretrained_kwargs.get("revision", "main")
         tokenizer = AutoTokenizer.from_pretrained(
             model_path, use_fast=self.use_fast_tokenizer, revision=revision
         )
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            low_cpu_mem_usage=True,
-            **from_pretrained_kwargs,
-        )
-        self.raise_warning_for_old_weights(model)
+        if not use_vllm:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                low_cpu_mem_usage=True,
+                **from_pretrained_kwargs,
+            )
+            self.raise_warning_for_old_weights(model)
+            return model, tokenizer
+        if "torch_dtype" in from_pretrained_kwargs:
+            from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
+            del from_pretrained_kwargs["torch_dtype"]
+        model = LLM(model_path, **from_pretrained_kwargs)
+        model.set_tokenizer(tokenizer)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1546,10 +1561,8 @@ class MistralAdapter(BaseModelAdapter):
     def match(self, model_path: str):
         return "mistral" in model_path.lower() or "mixtral" in model_path.lower()
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
-        model.config.eos_token_id = tokenizer.eos_token_id
-        model.config.pad_token_id = tokenizer.pad_token_id
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
+        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs, use_vllm=use_vllm)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1562,10 +1575,8 @@ class Llama2Adapter(BaseModelAdapter):
     def match(self, model_path: str):
         return "llama-2" in model_path.lower() or "llama-ct" in model_path.lower()
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
-        model.config.eos_token_id = tokenizer.eos_token_id
-        model.config.pad_token_id = tokenizer.pad_token_id
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
+        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs, use_vllm=use_vllm)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1578,10 +1589,8 @@ class Llama3Adapter(BaseModelAdapter):
     def match(self, model_path: str):
         return "llama-3-" in model_path.lower()
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
-        model.config.eos_token_id = tokenizer.eos_token_id
-        model.config.pad_token_id = tokenizer.pad_token_id
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
+        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs, use_vllm=use_vllm)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
@@ -1783,7 +1792,7 @@ class QwenChatAdapter(BaseModelAdapter):
         else:
             print("Invalid option. Please choose one from 'bf16', 'fp16' and 'fp32'.")
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
         from transformers.generation import GenerationConfig
 
         revision = from_pretrained_kwargs.get("revision", "main")
@@ -1797,24 +1806,40 @@ class QwenChatAdapter(BaseModelAdapter):
         generation_config = GenerationConfig.from_pretrained(
             model_path, trust_remote_code=True
         )
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            config=config,
-            low_cpu_mem_usage=True,
-            trust_remote_code=True,
-            **from_pretrained_kwargs,
-        ).eval()
-        if hasattr(model.config, "use_dynamic_ntk") and model.config.use_dynamic_ntk:
-            model.config.max_sequence_length = 16384
+        if not use_vllm:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                config=config,
+                low_cpu_mem_usage=True,
+                trust_remote_code=True,
+                **from_pretrained_kwargs,
+            ).eval()
+            if (
+                hasattr(model.config, "use_dynamic_ntk")
+                and model.config.use_dynamic_ntk
+            ):
+                model.config.max_sequence_length = 16384
+            tokenizer = AutoTokenizer.from_pretrained(
+                model_path, trust_remote_code=True, revision=revision
+            )
+            tokenizer.eos_token_id = config.eos_token_id
+            tokenizer.bos_token_id = config.bos_token_id
+            tokenizer.pad_token_id = generation_config.pad_token_id
+            model.config.eos_token_id = tokenizer.eos_token_id
+            model.config.bos_token_id = tokenizer.bos_token_id
+            model.config.pad_token_id = tokenizer.pad_token_id
+            return model, tokenizer
+        if "torch_dtype" in from_pretrained_kwargs:
+            from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
+            del from_pretrained_kwargs["torch_dtype"]
+        model = LLM(model_path, trust_remote_code=True, **from_pretrained_kwargs)
         tokenizer = AutoTokenizer.from_pretrained(
             model_path, trust_remote_code=True, revision=revision
         )
         tokenizer.eos_token_id = config.eos_token_id
         tokenizer.bos_token_id = config.bos_token_id
         tokenizer.pad_token_id = generation_config.pad_token_id
-        model.config.eos_token_id = tokenizer.eos_token_id
-        model.config.bos_token_id = tokenizer.bos_token_id
-        model.config.pad_token_id = tokenizer.pad_token_id
+        model.set_tokenizer(tokenizer)
 
         return model, tokenizer
 
@@ -2510,11 +2535,22 @@ class SwallowAdapter(BaseModelAdapter):
     def match(self, model_path: str):
         return "swallow" in model_path.lower()
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
         tokenizer = AutoTokenizer.from_pretrained(model_path)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path, low_cpu_mem_usage=True, device_map="auto", **from_pretrained_kwargs,
-        )
+        # model = AutoModelForCausalLM.from_pretrained(
+        #     model_path, **from_pretrained_kwargs,
+        # )
+        if not use_vllm:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                **from_pretrained_kwargs,
+            )
+            return model, tokenizer
+        if "torch_dtype" in from_pretrained_kwargs:
+            from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
+            del from_pretrained_kwargs["torch_dtype"]
+        model = LLM(model_path, **from_pretrained_kwargs)
+        model.set_tokenizer(tokenizer)
         return model, tokenizer
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
