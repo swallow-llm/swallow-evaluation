@@ -134,7 +134,7 @@ def load_judge_prompts(prompt_file: str):
     return prompts
 
 
-def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azure=True):
+def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azure=False):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
@@ -202,7 +202,7 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azur
     return rating_list, user_prompt_list, judgment_list
 
 
-def play_a_match_single(match: MatchSingle, output_file: str, azure=True):
+def play_a_match_single(match: MatchSingle, output_file: str, azure=False):
     question, model, answer, judge, ref_answer, multi_turn = (
         match.question,
         match.model,
@@ -245,7 +245,7 @@ def play_a_match_single(match: MatchSingle, output_file: str, azure=True):
     return result
 
 
-def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False, azure=True):
+def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False, azure=False):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
