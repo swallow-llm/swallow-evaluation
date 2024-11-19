@@ -22,6 +22,7 @@ pip install --upgrade pip
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 pip install vllm
+pip install torch --index-url https://download.pytorch.org/whl/cu121
 deactivate
 
 cd $REPO_PATH
