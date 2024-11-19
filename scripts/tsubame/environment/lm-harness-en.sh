@@ -21,10 +21,10 @@ source .venv_harness_en/bin/activate
 cd lm-evaluation-harness-en
 pip install --upgrade pip
 pip install -e  ".[math]"
-pip install sentencepiece protobuf transformers
+pip install sentencepiece==0.2.0 protobuf==5.28.3 transformers==4.46.2
 pip install 'accelerate>=0.26.0'
 pip install datasets==2.21.0
-pip install vllm
+pip install vllm==v0.6.3.post1
 deactivate
 
 cd $REPO_PATH
