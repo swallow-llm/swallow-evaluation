@@ -311,11 +311,11 @@ if __name__ == "__main__":
     # Play matches
     if args.parallel == 1:
         for match in tqdm(matches):
-            play_a_match_func(match, output_file=output_file)
+            play_a_match_func(match, output_file=output_file, azure=args.azure)
     else:
 
         def play_a_match_wrapper(match):
-            play_a_match_func(match, output_file=output_file)
+            play_a_match_func(match, output_file=output_file, azure=args.azure)
 
         np.random.seed(0)
         np.random.shuffle(matches)
