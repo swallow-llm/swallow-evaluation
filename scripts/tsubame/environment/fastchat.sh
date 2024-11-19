@@ -22,7 +22,6 @@ pip install --upgrade pip
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 pip install vllm==v0.6.3.post1
-pip install openai==0.28
 deactivate
 
 cd $REPO_PATH
