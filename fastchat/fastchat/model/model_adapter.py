@@ -246,9 +246,20 @@ def load_model(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
                 )
     elif device == "cuda":
-        kwargs = {"torch_dtype": "auto"}
+        kwargs = {"torch_dtype": torch.float16}
         if num_gpus != 1:
-            kwargs["tensor_parallel_size"] = num_gpus
+            kwargs["device_map"] = "auto"
+            if max_gpu_memory is None:
+                kwargs[
+                    "device_map"
+                ] = "sequential"  # This is important for not the same VRAM sizes
+                available_gpu_memory = get_gpu_memory(num_gpus)
+                kwargs["max_memory"] = {
+                    i: str(int(available_gpu_memory[i] * 0.85)) + "GiB"
+                    for i in range(num_gpus)
+                }
+            else:
+                kwargs["max_memory"] = {i: max_gpu_memory for i in range(num_gpus)}
     elif device == "mps":
         kwargs = {"torch_dtype": torch.float16}
         import transformers
@@ -382,13 +393,12 @@ def load_model(
     ):
         model = ipex.optimize(model, dtype=kwargs["torch_dtype"])
 
-    if (device == "cuda" and num_gpus == 1 and not cpu_offloading) or device in (
+    if ((device == "cuda" and num_gpus == 1 and not cpu_offloading) or device in (
         "mps",
         "xpu",
         "npu",
-    ):
-        pass
-        # model.to(device)
+    )) and not use_vllm:
+        model.to(device)
 
     if device == "xpu":
         model = torch.xpu.optimize(model, dtype=kwargs["torch_dtype"], inplace=True)
