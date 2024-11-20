@@ -65,7 +65,7 @@ printf "%-10s %-8s %-8s %-8s %-8s %-35s %-100s\n" "job_ID" "state" "node" "vllm"
 echo -e "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 # 前回のジョブの状態を読み込む
-if [ -f "$old_jobs" ]; then
+if [ -n "$old_jobs" ]; then
   # 前回のジョブIDが現在のジョブIDにない場合は終了したとみなす
   echo "$old_jobs" | while read -r old_job_id old_state old_node_kind old_use_vllm old_slots old_task_kind old_model_name; do
     if [[ -z "${current_job_map[$old_job_id]}" ]]; then
