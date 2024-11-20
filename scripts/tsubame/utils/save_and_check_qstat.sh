@@ -8,7 +8,7 @@ qstat_output=$(qstat -u $USER)
 old_jobs=$(cat qstat_history.out)
 
 # 現在のジョブについても以前のジョブについても情報がない時は終了
-if [[ -z "$qstat_output" && ! -z "$old_jobs" ]]; then
+if [[ -z "$qstat_output" && -z "$old_jobs" ]]; then
   exit 0
 fi
 
