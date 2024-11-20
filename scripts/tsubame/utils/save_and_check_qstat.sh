@@ -30,31 +30,32 @@ while read -r job_id state; do
   model_name=$(echo "$job_info" |grep stderr_path_list | sed 's|.*results/\([^/]*\)/\([^/]*\).*|\1/\2|')
   slots=$(echo "$job_info" | grep parallel | awk '{print $5}')
 
-  # ノードの種類を判定
-  resource_list=$(echo "$job_info" | grep "hard_resource_list")
-  gn_mig_value=$(echo $resource_list | grep -oP 'gn_mig=\K[0-9]+')
-  if [[ $gn_mig_value -eq 2 ]]; then
-      node_kind="node_q"
-  elif [[ $gn_mig_value -eq 8 ]]; then
-      node_kind="node_f"
-  else
-      echo "Failed to identify node kind for ${job_id}"
-      node_kind="_"
-  fi
-
-  # use_vllmの判定
-  script_path=$(echo "$job_info" | grep "script_file" | awk '{print $2}')
-  if [[ $script_path == *"node_q_vllm"* || $script_path == *"node_f_vllm"* ]]; then
-      use_vllm="o"
-  elif [[ $script_path == *"node_q"* || $script_path == *"node_f"* ]]; then
-      use_vllm="_"
-  else
-      echo "Failed to identify if using vllm for ${job_id}"
-      use_vllm="_"
-  fi
-
   # タスク名とモデル名が空でない場合のみ結果を蓄積
   if [[ -n "$task_kind" && -n "$model_name" ]]; then
+  
+    # ノードの種類を判定
+    resource_list=$(echo "$job_info" | grep "hard_resource_list")
+    gn_mig_value=$(echo $resource_list | grep -oP 'gn_mig=\K[0-9]+')
+    if [[ $gn_mig_value -eq 2 ]]; then
+        node_kind="node_q"
+    elif [[ $gn_mig_value -eq 8 ]]; then
+        node_kind="node_f"
+    else
+        echo "Failed to identify node kind for ${job_id}"
+        node_kind="_"
+    fi
+
+    # use_vllmの判定
+    script_path=$(echo "$job_info" | grep "script_file" | awk '{print $2}')
+    if [[ $script_path == *"node_q_vllm"* || $script_path == *"node_f_vllm"* ]]; then
+        use_vllm="o"
+    elif [[ $script_path == *"node_q"* || $script_path == *"node_f"* ]]; then
+        use_vllm="_"
+    else
+        echo "Failed to identify if using vllm for ${job_id}"
+        use_vllm="_"
+    fi
+
     results+="$job_id\t$state\t$node_kind\t$use_vllm\t$slots\t$task_kind\t$model_name\n"
     current_job_map["$job_id"]="$state $node_kind $use_vllm $slots $task_kind $model_name"
   fi
