@@ -1610,31 +1610,31 @@ class Llama3Adapter(BaseModelAdapter):
         return get_conv_template("llama-3")
 
 
-class Llama31Adapter(BaseModelAdapter):
-    """The model adapter for Llama-3 (e.g., meta-llama/Meta-Llama-3-8B-Instruct)"""
+# class Llama31Adapter(BaseModelAdapter):
+#     """The model adapter for Llama-3 (e.g., meta-llama/Meta-Llama-3-8B-Instruct)"""
 
-    def match(self, model_path: str):
-        keywords = [
-            "llama-3.1",
-        ]
-        for keyword in keywords:
-            if keyword in model_path.lower():
-                return True
+#     def match(self, model_path: str):
+#         keywords = [
+#             "llama-3.1",
+#         ]
+#         for keyword in keywords:
+#             if keyword in model_path.lower():
+#                 return True
 
-    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
-        model.config.eos_token_id = tokenizer.eos_token_id
-        model.config.pad_token_id = tokenizer.pad_token_id
-        return model, tokenizer
+#     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+#         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs)
+#         model.config.eos_token_id = tokenizer.eos_token_id
+#         model.config.pad_token_id = tokenizer.pad_token_id
+#         return model, tokenizer
 
-    def get_default_conv_template(self, model_path: str) -> Conversation:
-        if model_path.lower() in [
-            "llama-3.1-8b-instruct",
-            "llama-3.1-70b-instruct",
-            "the-real-chatbot-v2",
-        ]:
-            return get_conv_template("meta-llama-3.1-sp")
-        return get_conv_template("meta-llama-3.1")
+#     def get_default_conv_template(self, model_path: str) -> Conversation:
+#         if model_path.lower() in [
+#             "llama-3.1-8b-instruct",
+#             "llama-3.1-70b-instruct",
+#             "the-real-chatbot-v2",
+#         ]:
+#             return get_conv_template("meta-llama-3.1-sp")
+#         return get_conv_template("meta-llama-3.1")
 
 
 class GrokAdapter(BaseModelAdapter):
@@ -2767,7 +2767,7 @@ register_model_adapter(XGenAdapter)
 register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
-register_model_adapter(Llama31Adapter)
+# register_model_adapter(Llama31Adapter)
 register_model_adapter(Llama3Adapter)
 register_model_adapter(Llama2Adapter)
 register_model_adapter(SwallowAdapter)
