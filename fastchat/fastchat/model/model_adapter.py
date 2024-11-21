@@ -2546,7 +2546,6 @@ class SwallowAdapter(BaseModelAdapter):
     """The model adapter for Swallow"""
 
     def match(self, model_path: str):
-        assert False, "Reached Swallow Adapter"
         return "swallow" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
