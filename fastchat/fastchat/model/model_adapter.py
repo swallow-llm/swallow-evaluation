@@ -2546,6 +2546,7 @@ class SwallowAdapter(BaseModelAdapter):
     """The model adapter for Swallow"""
 
     def match(self, model_path: str):
+        assert False, "Reached Swallow Adapter"
         return "swallow" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
@@ -2766,9 +2767,9 @@ register_model_adapter(XGenAdapter)
 register_model_adapter(PythiaAdapter)
 register_model_adapter(InternLMChatAdapter)
 register_model_adapter(StarChatAdapter)
-register_model_adapter(Llama2Adapter)
-register_model_adapter(Llama3Adapter)
 register_model_adapter(Llama31Adapter)
+register_model_adapter(Llama3Adapter)
+register_model_adapter(Llama2Adapter)
 register_model_adapter(SwallowAdapter)
 register_model_adapter(CuteGPTAdapter)
 register_model_adapter(OpenOrcaAdapter)
