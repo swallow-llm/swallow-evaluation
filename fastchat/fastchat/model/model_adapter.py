@@ -248,7 +248,7 @@ def load_model(
     elif device == "cuda":
         kwargs = {"torch_dtype": torch.float16}
         if num_gpus != 1:
-            if use_vllm:
+            if not use_vllm:
                 kwargs["device_map"] = "auto"
                 if max_gpu_memory is None:
                     kwargs[
