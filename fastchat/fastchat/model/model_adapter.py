@@ -135,8 +135,6 @@ class BaseModelAdapter:
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
-        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
-        del from_pretrained_kwargs['device_map']
         model = LLM(
             model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True
         )
@@ -250,18 +248,21 @@ def load_model(
     elif device == "cuda":
         kwargs = {"torch_dtype": torch.float16}
         if num_gpus != 1:
-            kwargs["device_map"] = "auto"
-            if max_gpu_memory is None:
-                kwargs[
-                    "device_map"
-                ] = "sequential"  # This is important for not the same VRAM sizes
-                available_gpu_memory = get_gpu_memory(num_gpus)
-                kwargs["max_memory"] = {
-                    i: str(int(available_gpu_memory[i] * 0.85)) + "GiB"
-                    for i in range(num_gpus)
-                }
+            if use_vllm:
+                kwargs["device_map"] = "auto"
+                if max_gpu_memory is None:
+                    kwargs[
+                        "device_map"
+                    ] = "sequential"  # This is important for not the same VRAM sizes
+                    available_gpu_memory = get_gpu_memory(num_gpus)
+                    kwargs["max_memory"] = {
+                        i: str(int(available_gpu_memory[i] * 0.85)) + "GiB"
+                        for i in range(num_gpus)
+                    }
+                else:
+                    kwargs["max_memory"] = {i: max_gpu_memory for i in range(num_gpus)}
             else:
-                kwargs["max_memory"] = {i: max_gpu_memory for i in range(num_gpus)}
+                kwargs["tensor_parallel_size"] = num_gpus
     elif device == "mps":
         kwargs = {"torch_dtype": torch.float16}
         import transformers
@@ -739,8 +740,6 @@ class VicunaAdapter(BaseModelAdapter):
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
-        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
-        del from_pretrained_kwargs['device_map']
         model = LLM(model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True)
         model.set_tokenizer(tokenizer)
         return model, tokenizer
@@ -1846,8 +1845,6 @@ class QwenChatAdapter(BaseModelAdapter):
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
-        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
-        del from_pretrained_kwargs['device_map']
         model = LLM(model_path, trust_remote_code=True, **from_pretrained_kwargs, disable_custom_all_reduce=True)
         tokenizer = AutoTokenizer.from_pretrained(
             model_path, trust_remote_code=True, revision=revision
@@ -2565,8 +2562,6 @@ class SwallowAdapter(BaseModelAdapter):
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
-        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
-        del from_pretrained_kwargs['device_map']
         model = LLM(model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True)
         model.set_tokenizer(tokenizer)
         return model, tokenizer
