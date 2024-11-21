@@ -242,7 +242,7 @@ def play_a_match_single(match: MatchSingle, output_file: str, azure=False):
 
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        with open(output_file, "a") as fout:
+        with open(output_file, "a", encoding="utf-8") as fout:
             fout.write(json.dumps(result) + "\n")
 
     return result
