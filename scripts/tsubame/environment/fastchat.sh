@@ -5,7 +5,7 @@
 #$ -j y
 #$ -cwd
 
-REPO_PATH="/gs/fs/tga-okazaki/saito/jalm-evaluation-private"
+REPO_PATH=$1
 
 ####
 
@@ -25,3 +25,4 @@ pip install vllm==v0.6.3.post1
 deactivate
 
 cd $REPO_PATH
+echo Make sure to write your OPENAI API KEY in .env to generate judgements with OpenAI API.

@@ -6,7 +6,7 @@
 #$ -j y
 #$ -cwd
 
-REPO_PATH="/gs/fs/tga-okazaki/saito/jalm-evaluation-private"
+REPO_PATH=$1
 
 ####
 
