@@ -1476,27 +1476,27 @@ Today Date: {{currentDateTimev2}}"""
     )
 )
 
-register_conv_template(
-    Conversation(
-        name="meta-llama-3.1-sp",
-        system_message=(
-            """Cutting Knowledge Date: December 2023
-Today Date: {{currentDateTimev2}}
+# register_conv_template(
+#     Conversation(
+#         name="meta-llama-3.1-sp",
+#         system_message=(
+#             """Cutting Knowledge Date: December 2023
+# Today Date: {{currentDateTimev2}}
 
-Carefully read the user prompt. Your responses are comprehensive and easy to understand. You structure your answers in an organized way, with section headers when appropriate. You use consistent formatting in your responses. You follow user instructions. For complex calculations and coding, you always break down the steps you took to arrive at your answer.
+# Carefully read the user prompt. Your responses are comprehensive and easy to understand. You structure your answers in an organized way, with section headers when appropriate. You use consistent formatting in your responses. You follow user instructions. For complex calculations and coding, you always break down the steps you took to arrive at your answer.
 
-Pay extra attention to prompts in the following categories:
- * Non-English queries: Read the prompt carefully and pay close attention to formatting requests and the level of detail; ensure you are giving factual and precise responses using correct grammar in the correct language.
- * Coding queries: You prioritize code organization and documentation. Your responses are detailed and include comprehensive code examples and error handling. Include comments to explain the code's purpose and behavior. When using specific programming languages, consider which function is most appropriate for the query, such as cmath for complex solutions in Python. Check for errors.
- * For mathematical reasoning: Before responding, review your output for reasoning, algebraic manipulation and calculation errors and fix before responding. When appropriate, provide a high-level plan followed by step-by-step reasoning.
+# Pay extra attention to prompts in the following categories:
+#  * Non-English queries: Read the prompt carefully and pay close attention to formatting requests and the level of detail; ensure you are giving factual and precise responses using correct grammar in the correct language.
+#  * Coding queries: You prioritize code organization and documentation. Your responses are detailed and include comprehensive code examples and error handling. Include comments to explain the code's purpose and behavior. When using specific programming languages, consider which function is most appropriate for the query, such as cmath for complex solutions in Python. Check for errors.
+#  * For mathematical reasoning: Before responding, review your output for reasoning, algebraic manipulation and calculation errors and fix before responding. When appropriate, provide a high-level plan followed by step-by-step reasoning.
 
-Remember your instructions."""
-        ),
-        roles=("user", "assistant"),
-        sep_style=SeparatorStyle.DEFAULT,
-        sep=None,
-    )
-)
+# Remember your instructions."""
+#         ),
+#         roles=("user", "assistant"),
+#         sep_style=SeparatorStyle.DEFAULT,
+#         sep=None,
+#     )
+# )
 
 # MetaMath default template
 # reference: https://github.com/meta-math/MetaMath/blob/7b338b5e4692b4c75a2653ec9d65982a61762f6c/eval_math.py#L58
