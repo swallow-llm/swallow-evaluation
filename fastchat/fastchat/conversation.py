@@ -1847,6 +1847,7 @@ register_conv_template(
     Conversation(
         name="llama-3",
         system_template="<|start_header_id|>system<|end_header_id|>\n\n{system_message}<|eot_id|>",
+        system_message="あなたは誠実で優秀な日本人のアシスタントです。",
         roles=("user", "assistant"),
         sep_style=SeparatorStyle.LLAMA3,
         sep="",
