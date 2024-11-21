@@ -1600,7 +1600,7 @@ class Llama3Adapter(BaseModelAdapter):
     """The model adapter for Llama-3 (e.g., meta-llama/Meta-Llama-3-8B-Instruct)"""
 
     def match(self, model_path: str):
-        return "llama-3-" in model_path.lower()
+        return "llama-3" in model_path.lower()
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict, use_vllm: bool=False):
         model, tokenizer = super().load_model(model_path, from_pretrained_kwargs, use_vllm=use_vllm)
