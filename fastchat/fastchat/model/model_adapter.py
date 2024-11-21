@@ -135,6 +135,8 @@ class BaseModelAdapter:
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
+        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
+        del from_pretrained_kwargs['device_map']
         model = LLM(
             model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True
         )
@@ -737,6 +739,8 @@ class VicunaAdapter(BaseModelAdapter):
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
+        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
+        del from_pretrained_kwargs['device_map']
         model = LLM(model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True)
         model.set_tokenizer(tokenizer)
         return model, tokenizer
@@ -1842,6 +1846,8 @@ class QwenChatAdapter(BaseModelAdapter):
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
+        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
+        del from_pretrained_kwargs['device_map']
         model = LLM(model_path, trust_remote_code=True, **from_pretrained_kwargs, disable_custom_all_reduce=True)
         tokenizer = AutoTokenizer.from_pretrained(
             model_path, trust_remote_code=True, revision=revision
@@ -2559,6 +2565,8 @@ class SwallowAdapter(BaseModelAdapter):
         if "torch_dtype" in from_pretrained_kwargs:
             from_pretrained_kwargs["dtype"] = from_pretrained_kwargs["torch_dtype"]
             del from_pretrained_kwargs["torch_dtype"]
+        from_pretrained_kwargs['device'] = from_pretrained_kwargs['device_map']
+        del from_pretrained_kwargs['device_map']
         model = LLM(model_path, **from_pretrained_kwargs, disable_custom_all_reduce=True)
         model.set_tokenizer(tokenizer)
         return model, tokenizer
