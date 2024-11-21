@@ -1463,18 +1463,18 @@ register_conv_template(
     )
 )
 
-register_conv_template(
-    Conversation(
-        name="meta-llama-3.1",
-        system_message=(
-            """Cutting Knowledge Date: December 2023
-Today Date: {{currentDateTimev2}}"""
-        ),
-        roles=("user", "assistant"),
-        sep_style=SeparatorStyle.DEFAULT,
-        sep=None,
-    )
-)
+# register_conv_template(
+#     Conversation(
+#         name="meta-llama-3.1",
+#         system_message=(
+#             """Cutting Knowledge Date: December 2023
+# Today Date: {{currentDateTimev2}}"""
+#         ),
+#         roles=("user", "assistant"),
+#         sep_style=SeparatorStyle.DEFAULT,
+#         sep=None,
+#     )
+# )
 
 # register_conv_template(
 #     Conversation(
