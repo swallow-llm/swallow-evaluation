@@ -1846,13 +1846,12 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="llama-3",
-        system_template="<|start_header_id|>system<|end_header_id|>\n\n{system_message}<|eot_id|>",
+        system_template="<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_message}<|eot_id|>",
         system_message="あなたは誠実で優秀な日本人のアシスタントです。",
-        roles=("user", "assistant"),
-        sep_style=SeparatorStyle.LLAMA3,
-        sep="",
-        stop_str="<|eot_id|>",
-        stop_token_ids=[128001, 128009],
+        roles=("<|start_header_id|>user<|end_header_id|>\n\n", "<|start_header_id|>assistant<|end_header_id|>\n\n"),
+        sep="<|eot_id|>",
+        sep_style=SeparatorStyle.CALM2,
+        stop_token_ids=[128009], #"<|eot_id|>"
     )
 )
 
