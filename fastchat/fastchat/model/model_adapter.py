@@ -246,7 +246,7 @@ def load_model(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
                 )
     elif device == "cuda":
-        kwargs = {"torch_dtype": torch.float16}
+        kwargs = {"torch_dtype": "auto"}    # This line is unnecessary just for explicitness.
         if num_gpus != 1:
             if not use_vllm:
                 kwargs["device_map"] = "auto"
