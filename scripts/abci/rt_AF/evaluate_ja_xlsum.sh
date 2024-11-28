@@ -38,6 +38,7 @@ source .venv_harness_jp/bin/activate
 NUM_FEWSHOT=1
 NUM_TESTCASE="all"
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
     USE_FAST_TOKENIZER=False
@@ -45,11 +46,18 @@ else
     USE_FAST_TOKENIZER=True
 fi
 
+# MODEL_NAME_PATHにgemma-2が含まれているとき,add_special_tokens=Trueが指定される
+if [[ $MODEL_NAME_PATH == *"gemma-2"* ]]; then
+    ADD_SPECIAL_TOKENS=True
+else
+    ADD_SPECIAL_TOKENS=False
+fi
+
 mkdir -p $OUTDIR
 
 python lm-evaluation-harness-jp/main.py \
     --model hf-causal-experimental \
-    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER" \
+    --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER,add_special_tokens=$ADD_SPECIAL_TOKENS" \
     --tasks "xlsum_ja" \
     --num_fewshot $NUM_FEWSHOT \
     --batch_size 1 \
