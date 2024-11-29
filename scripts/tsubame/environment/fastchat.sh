@@ -6,8 +6,11 @@
 #$ -cwd
 
 REPO_PATH=$1
+PIP_CACHE=$2
 
 ####
+
+export PIP_CACHE_DIR=$PIP_CACHE
 
 cd $REPO_PATH
 

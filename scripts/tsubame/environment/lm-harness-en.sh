@@ -7,8 +7,11 @@
 #$ -cwd
 
 REPO_PATH=$1
+PIP_CACHE=$2
 
 ####
+
+export PIP_CACHE_DIR=$PIP_CACHE
 
 cd $REPO_PATH
 
@@ -25,6 +28,7 @@ pip install sentencepiece==0.2.0 protobuf==5.28.3 transformers==4.46.2
 pip install 'accelerate>=0.26.0'
 pip install datasets==2.21.0
 pip install vllm==v0.6.3.post1
+
 deactivate
 
 cd $REPO_PATH

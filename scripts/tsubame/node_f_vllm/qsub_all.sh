@@ -1,5 +1,6 @@
 REPO_PATH="/gs/fs/tga-okazaki/saito/jalm-evaluation-private"
 HUGGINGFACE_CACHE="/gs/bs/tga-okazaki/saito/HF_HOME"
+APPTAINER_CACHE="/gs/bs/tga-okazaki/saito/apptainer_chace"
 QSUB_CMD="qsub -g tga-okazaki"
 MODEL_NAME_PATH=$1
 
@@ -28,11 +29,11 @@ MODEL_NAME_PATH=$1
 
 # jhumaneval-unstripped
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
-$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_ja_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true"
+$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_ja_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true" $APPTAINER_CACHE
 
 # mbpp-ja
 # mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
-# $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_ja_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true"
+# $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_ja_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true" $APPTAINER_CACHE
 
 
 # English
@@ -44,8 +45,8 @@ $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH
 
 # humaneval-unstripped
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
-$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_english_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true"
+$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_english_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true" $APPTAINER_CACHE
 
 # # mbpp
 # mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/"
-# $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_english_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true"
+# $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp" "$REPO_PATH/scripts/tsubame/node_f_vllm/evaluate_english_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH "true" "true" $APPTAINER_CACHE
