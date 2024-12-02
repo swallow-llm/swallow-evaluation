@@ -259,8 +259,7 @@ class VLLM(TemplateLM):
 
         # batch tokenize contexts
         context, all_gen_kwargs = zip(*(req.args for req in requests))
-        if not add_special_tokens:
-            add_special_tokens = False or self.add_bos_token
+        add_special_tokens = False or self.add_bos_token
         context_encoding = self.tokenizer(context, add_special_tokens=add_special_tokens).input_ids
         requests = [
             ((a, b), c) for a, b, c in zip(context, context_encoding, all_gen_kwargs)
