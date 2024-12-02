@@ -15,11 +15,11 @@ MODEL_NAME_PATH=$3
 DO_GENERATION=$4
 DO_EVAL=$5
 APPTAINER_CACHE=$6
-CUDA_BLOCKING=${6:-}
+CUDA_BLOCKING=${7:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
-export APPTAINER_CACHEDIR=$HUGGINGFACE_CACHE
+export APPTAINER_CACHEDIR=$APPTAINER_CACHE
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
