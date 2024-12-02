@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -cwd
 
-#$ -l cpu_4=1
+#$ -l cpu_16=1
 #$ -l h_rt=0:30:00
 #$ -j y
 #$ -cwd
@@ -28,7 +28,7 @@ pip install sacrebleu
 pip install sentencepiece
 pip install protobuf
 pip install nagisa
-pip uninstall torch torchvision torchaudio
+pip uninstall -y torch torchvision torchaudio
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 deactivate
 

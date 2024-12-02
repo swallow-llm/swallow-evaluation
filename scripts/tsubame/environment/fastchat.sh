@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$ -l cpu_4=1
+#$ -l cpu_16=1
 #$ -l h_rt=0:30:00
 #$ -j y
 #$ -cwd
@@ -25,7 +25,7 @@ pip install --upgrade pip
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
 pip install vllm==v0.6.3.post1
-pip uninstall torch torchvision torchaudio
+pip uninstall -y torch torchvision torchaudio
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 deactivate
 

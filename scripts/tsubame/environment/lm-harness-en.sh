@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -cwd
 
-#$ -l cpu_4=1
+#$ -l cpu_16=1
 #$ -l h_rt=0:30:00
 #$ -j y
 #$ -cwd
@@ -28,7 +28,7 @@ pip install sentencepiece==0.2.0 protobuf==5.28.3 transformers==4.46.2
 pip install 'accelerate>=0.26.0'
 pip install datasets==2.21.0
 pip install vllm==v0.6.3.post1
-pip uninstall torch torchvision torchaudio
+pip uninstall -y torch torchvision torchaudio
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 deactivate
 
