@@ -162,6 +162,7 @@ class VLLM(TemplateLM):
         """ """
         if not add_special_tokens:
             add_special_tokens = False or self.add_bos_token
+        print(f"add_special_tokens: {add_special_tokens}")
         encoding = self.tokenizer.encode(
             string, add_special_tokens=add_special_tokens, truncation=truncation
         )
