@@ -6,6 +6,8 @@
 #$ -j y
 #$ -cwd
 
+set -e
+
 REPO_PATH=$1
 PIP_CACHE=$2
 
