@@ -74,7 +74,7 @@ bash scripts/tsubame/environment/bigcode.sh
 ```bash
 cd /gs/fs/tga-okazaki/path/to/your/repo
 echo OPENAI_API_KEY=sk-... > .env
-echo HF_TOKEN=hf_... > .env
+echo HF_TOKEN=hf_... >> .env
 ```
 
 - [Qiita. "OpenAIのAPIキー取得方法|2024年7月最新版|料金体系や注意事項".](https://qiita.com/kurata04/items/a10bdc44cc0d1e62dad3)
