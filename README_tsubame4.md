@@ -115,14 +115,14 @@ echo HF_TOKEN=hf_... > .env
 ## 2. 評価スクリプトの実行
 評価したいモデルを Huggingface の表記に従って `MODEL_NAME` に格納し、先に編集したスクリプトの引数に渡してキューを投げる。
 
-実行例：
+実行例 (`tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2` を vLLM ありで評価する場合)：
 ```bash
 MODEL_NAME=tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2
-qsub -g tga-okazaki scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
+bash scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
 ```
 
 ## 3. 評価状況の確認
-`scripts/tsubame/utils/save_and_check.sh` を実行することで評価の進捗状況を確認することができる。
+`scripts/tsubame/utils/save_and_check_qstat.sh` を実行することで評価の進捗状況を確認することができる。
 
 出力例：
 ```bash
