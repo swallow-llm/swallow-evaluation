@@ -26,8 +26,9 @@ source .venv_llm_jp_eval/bin/activate
 cd llm-jp-eval
 pip install --upgrade pip
 pip install -e .
-pip install protobuf
-pip install sentencepiece
+pip install protobuf sentencepiece
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 python scripts/preprocess_dataset.py --dataset-name all --output-dir ./dataset
 deactivate

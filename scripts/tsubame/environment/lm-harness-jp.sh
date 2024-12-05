@@ -26,10 +26,9 @@ source .venv_harness_jp/bin/activate
 cd lm-evaluation-harness-jp
 pip install --upgrade pip
 pip install -e ".[ja]"
-pip install sacrebleu
-pip install sentencepiece
-pip install protobuf
-pip install nagisa
+pip install sacrebleu sentencepiece protobuf nagisa
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 deactivate
 
