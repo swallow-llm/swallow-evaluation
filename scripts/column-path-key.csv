@@ -72,3 +72,5 @@ mbpp_ja_answer@10,ja/mbpp/metrics.json,mbpp.answer@10,1
 mbpp@1,en/mbpp/metrics.json,mbpp.pass@1,1
 mbpp@10,en/mbpp/metrics.json,mbpp.pass@10,1
 mbpp_answer@10,en/mbpp/metrics.json,mbpp.answer@10,1
+MT-Bench_1st_turn,ja/ja_mt_bench/judge.json,MODEL_NAME.overall.first_turn.score,10
+MT-Bench_2st_turn,ja/ja_mt_bench/judge.json,MODEL_NAME.overall.second_turn.score,10

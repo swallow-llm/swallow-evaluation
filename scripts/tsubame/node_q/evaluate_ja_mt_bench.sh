@@ -55,7 +55,7 @@ python gen_judgment.py \
   --model-list ${MODEL_NAME_PATH} \
   --bench-name japanese_mt_bench \
   --parallel 4 \
-  --judge-model gpt-4-1106-preview
+  --judge-model gpt-4o-2024-08-06
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Generation judgements time: ${execution_time} seconds"
@@ -64,7 +64,7 @@ python show_result.py \
   --model-list ${MODEL_NAME_PATH} \
   --bench-name japanese_mt_bench \
   --output-file ${OUTDIR}/judge.json \
-  --judge-model gpt-4-1106-preview
+  --judge-model gpt-4o-2024-08-06
 
 # aggregate results
 cd ../../../
