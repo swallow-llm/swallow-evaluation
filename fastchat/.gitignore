@@ -33,3 +33,8 @@ build
 # Ignore
 fastchat/llm_judge/data/*/model_answer/*
 fastchat/llm_judge/data/*/model_judgment/*
+
+# Image data
+serve_images
+val2014
+vqa_examples

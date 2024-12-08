@@ -1,0 +1,35 @@
+#!/bin/bash
+#$ -cwd
+
+#$ -l cpu_16=1
+#$ -l h_rt=0:30:00
+#$ -j y
+#$ -cwd
+
+set -e
+
+REPO_PATH=$1
+PIP_CACHE=$2
+
+####
+
+export PIP_CACHE_DIR=$PIP_CACHE
+
+cd $REPO_PATH
+
+module load cuda/12.1.0
+module load cudnn/9.0.0
+
+python -m venv .venv_harness_jp
+
+source .venv_harness_jp/bin/activate
+cd lm-evaluation-harness-jp
+pip install --upgrade pip
+pip install -e ".[ja]"
+pip install sacrebleu sentencepiece protobuf nagisa
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
+pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
+deactivate
+
+cd $REPO_PATH

@@ -2,6 +2,7 @@ import os
 import fnmatch
 import json
 import warnings
+import vllm
 
 import datasets
 import torch
@@ -97,7 +98,7 @@ def parse_args():
         "--precision",
         type=str,
         default="auto",
-        help="Model precision, from: fp32, fp16, bf16, or auto",
+        help="Model precision, from: auto, fp32, fp16 or bf16",
     )
     parser.add_argument(
         "--load_in_8bit",
@@ -215,6 +216,17 @@ def parse_args():
         action="store_true",
         help="Configure using fast tokenizer. (Mainly for sarashina2)",
     )
+    parser.add_argument(
+        "--use_vllm", 
+        action="store_true", 
+        help="Use vllm for generation"
+    )
+    parser.add_argument(
+        "--tensor_parallel_size",
+        type=int,
+        default=1,
+        help="The number of GPUs to use for tensor parallelism"
+    )
     return parser.parse_args()
 
 
@@ -259,14 +271,14 @@ def main():
     else:
         # here we generate code and save it (evaluation is optional but True by default)
         dict_precisions = {
+            "auto": "auto",
             "fp32": torch.float32,
             "fp16": torch.float16,
             "bf16": torch.bfloat16,
-            "auto": "auto"
         }
         if args.precision not in dict_precisions:
             raise ValueError(
-                f"Non valid precision {args.precision}, choose from: fp16, fp32, bf16, auto"
+                f"Non valid precision {args.precision}, choose from: auto, fp16, fp32, bf16"
             )
 
         model_kwargs = {
@@ -297,10 +309,20 @@ def main():
                     print("Loading model in auto mode")
 
         if args.modeltype == "causal":
-            model = AutoModelForCausalLM.from_pretrained(
-                args.model,
-                **model_kwargs,
-            )
+            if args.use_vllm:
+                model = vllm.LLM(
+                    model=args.model, 
+                    gpu_memory_utilization=0.9,
+                    revision=args.revision,
+                    trust_remote_code=args.trust_remote_code,
+                    dtype=dict_precisions[args.precision],
+                    tensor_parallel_size=args.tensor_parallel_size,
+                    )
+            else: 
+                model = AutoModelForCausalLM.from_pretrained(
+                    args.model,
+                    **model_kwargs,
+                )
         elif args.modeltype == "seq2seq":
             warnings.warn(
                 "Seq2Seq models have only been tested for HumanEvalPack & CodeT5+ models."

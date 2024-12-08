@@ -78,6 +78,7 @@ class Evaluator:
             save_every_k_tasks=self.args.save_every_k_tasks,
             intermediate_generations=curr_generations,
             intermediate_save_generations_path=intermediate_save_generations_path,
+            use_vllm = self.args.use_vllm,
         )
 
         if len(generations[0]) > self.args.n_samples:

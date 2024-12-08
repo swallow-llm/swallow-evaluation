@@ -2,7 +2,7 @@
 #$ -cwd
 
 #$ -l node_q=1
-#$ -l h_rt=24:00:00
+#$ -l h_rt=08:00:00
 
 # module load
 . /etc/profile.d/modules.sh
@@ -14,10 +14,12 @@ HUGGINGFACE_CACHE=$2
 MODEL_NAME_PATH=$3
 DO_GENERATION=$4
 DO_EVAL=$5
-CUDA_BLOCKING=${6:-}
+APPTAINER_CACHE=$6
+CUDA_BLOCKING=${7:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+export APPTAINER_CACHEDIR=$APPTAINER_CACHE
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -48,6 +50,7 @@ mkdir -p $OUTDIR
 
 if [ ${DO_GENERATION} = "true" ]; then
   echo "Generating"
+  start_time=$(date +%s)
   python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
     --tasks jhumaneval-unstripped \
@@ -62,6 +65,9 @@ if [ ${DO_GENERATION} = "true" ]; then
     --trust_remote_code \
     --max_length_generation 1024 \
     ${USE_FAST_TOKENIZER}
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Generation time: ${execution_time} seconds"
 fi
 
 if [ ${DO_EVAL} = "true" ]; then
@@ -70,6 +76,8 @@ if [ ${DO_EVAL} = "true" ]; then
   touch ${OUTDIR}/metrics.json
   # HF_HOMEが、apptainer環境でアクセスできない場所だと、https://github.com/bigcode-project/bigcode-evaluation-harness/issues/131の問題が発生する
   export HF_HOME=$REPO_PATH/HF_HOME
+
+  start_time=$(date +%s)
   apptainer run \
     -B ${OUTDIR}/generation_jhumaneval-unstripped.json:/app/generations_py.json \
     -B ${OUTDIR}/metrics.json:/app/metrics.json \
@@ -87,6 +95,10 @@ if [ ${DO_EVAL} = "true" ]; then
     --generation_path ${OUTDIR}/generation_jhumaneval-unstripped.json \
     --metrics_path ${OUTDIR}/metrics.json \
     --task humaneval
+
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Evaluating time: ${execution_time} seconds"
 fi
 
 # aggregate results

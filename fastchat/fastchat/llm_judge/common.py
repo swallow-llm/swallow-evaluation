@@ -42,7 +42,6 @@ one_score_pattern = re.compile("\[\[(\d+\.?\d*)\]\]")
 one_score_pattern_backup = re.compile("\[(\d+\.?\d*)\]")
 
 # Sampling temperature configs for
-# ORIGINAL
 temperature_config = {
     "writing": 0.7,
     "roleplay": 0.7,
@@ -54,21 +53,6 @@ temperature_config = {
     "humanities": 0.1,
     "arena-hard-200": 0.0,
 }
-
-# STABILITY
-"""
-temperature_config = {
-    "writing": 0.5,
-    "roleplay": 0.5,
-    "extraction": 0.2,
-    "math": 0.1,
-    "coding": 0.1,
-    "reasoning": 0.1,
-    "stem": 0.2,
-    "humanities": 0.2,
-    "arena-hard-200": 0.0,
-}
-"""
 
 reverse_model_map = {
     "model_1": "model_2",
@@ -153,7 +137,7 @@ def load_judge_prompts(prompt_file: str):
     return prompts
 
 
-def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azure=True):
+def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azure=False):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
@@ -187,7 +171,6 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azur
         conv.set_system_message(system_prompt)
         conv.append_message(conv.roles[0], user_prompt)
         conv.append_message(conv.roles[1], None)
-
         if model in OPENAI_MODEL_LIST:
             if azure:
                 judgment = chat_completion_openai_azure(
@@ -222,7 +205,7 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False, azur
     return rating_list, user_prompt_list, judgment_list
 
 
-def play_a_match_single(match: MatchPair, output_file: str, azure=True):
+def play_a_match_single(match: MatchSingle, output_file: str, azure=False):
     question, model, answer, judge, ref_answer, multi_turn = (
         match.question,
         match.model,
@@ -259,13 +242,13 @@ def play_a_match_single(match: MatchPair, output_file: str, azure=True):
 
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        with open(output_file, "a") as fout:
-            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
+        with open(output_file, "a", encoding="utf-8") as fout:
+            fout.write(json.dumps(result) + "\n")
 
     return result
 
 
-def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False, azure=True):
+def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=False, azure=False):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
@@ -301,12 +284,7 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
 
     if model in OPENAI_MODEL_LIST:
         conv.set_system_message(system_prompt)
-        if azure:
-            judgment = chat_completion_openai_azure(
-                model, conv, temperature=0, max_tokens=2048
-            )
-        else:
-            judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
     elif model in ANTHROPIC_MODEL_LIST:
         if system_prompt != "You are a helpful assistant.":
             user_prompt = "[Instruction]\n" + system_prompt + "\n\n" + user_prompt
@@ -362,10 +340,10 @@ def play_a_match_pair(match: MatchPair, output_file: str):
 
     if judge.prompt_template["type"] == "pairwise":
         g1_winner, g1_user_prompt, g1_judgment = run_judge_pair(
-            question, answer_1, answer_2, judge, ref_answer, multi_turn=multi_turn, azure=True
+            question, answer_1, answer_2, judge, ref_answer, multi_turn=multi_turn
         )
         g2_winner, g2_user_prompt, g2_judgment = run_judge_pair(
-            question, answer_2, answer_1, judge, ref_answer, multi_turn=multi_turn, azure=True
+            question, answer_2, answer_1, judge, ref_answer, multi_turn=multi_turn
         )
 
         g1_map = {"A": "model_1", "B": "model_2"}
@@ -397,10 +375,10 @@ def play_a_match_pair(match: MatchPair, output_file: str):
         )
     elif judge.prompt_template["type"] == "single":
         m1_score, m1_user_prompt, m1_judgment = run_judge_single(
-            question, answer_1, judge, azure=True
+            question, answer_1, judge
         )
         m2_score, m2_user_prompt, m2_judgment = run_judge_single(
-            question, answer_2, judge, azure=True
+            question, answer_2, judge
         )
 
         if abs(m1_score - m2_score) <= TIE_DELTA:
@@ -437,7 +415,7 @@ def play_a_match_pair(match: MatchPair, output_file: str):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
+            fout.write(json.dumps(result) + "\n")
 
     return result
 
@@ -454,14 +432,15 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
-            response = openai.ChatCompletion.create(
+            client = openai.OpenAI()
+            response = client.chat.completions.create(
                 model=model,
                 messages=messages,
                 n=1,
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
-            output = response["choices"][0]["message"]["content"]
+            output = response.choices[0].message.content
             break
         except openai.error.RateLimitError as e:
             print(type(e), e)

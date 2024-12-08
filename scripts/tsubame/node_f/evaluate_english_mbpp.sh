@@ -14,10 +14,12 @@ HUGGINGFACE_CACHE=$2
 MODEL_NAME_PATH=$3
 DO_GENERATION=$4
 DO_EVAL=$5
-CUDA_BLOCKING=${6:-}
+APPTAINER_CACHE=$6
+CUDA_BLOCKING=${7:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+export APPTAINER_CACHEDIR=$APPTAINER_CACHE
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -48,7 +50,8 @@ mkdir -p $OUTDIR
 
 if [ ${DO_GENERATION} = "true" ]; then
   echo "Generating"
-python bigcode-evaluation-harness/main.py \
+  start_time=$(date +%s)
+  python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
     --tasks mbpp \
     --do_sample True \
@@ -63,6 +66,9 @@ python bigcode-evaluation-harness/main.py \
     --max_length_generation 2048 \
     --temperature 0.1 \
     ${USE_FAST_TOKENIZER}
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Generation time: ${execution_time} seconds"
 fi
 
 if [ ${DO_EVAL} = "true" ]; then
@@ -70,6 +76,8 @@ if [ ${DO_EVAL} = "true" ]; then
   echo "Generated codes should be placed at ${OUTDIR}/generation_mbpp.json ."
   touch ${OUTDIR}/metrics.json
   export HF_HOME=$REPO_PATH/HF_HOME
+
+  start_time=$(date +%s)
   apptainer run \
     -B ${OUTDIR}/generation_mbpp.json:/app/generations_py.json \
     -B ${OUTDIR}/metrics.json:/app/metrics.json \
@@ -87,6 +95,10 @@ if [ ${DO_EVAL} = "true" ]; then
     --generation_path ${OUTDIR}/generation_mbpp.json \
     --metrics_path ${OUTDIR}/metrics.json \
     --task mbpp
+
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Evaluation time: ${execution_time} seconds"
 fi
 
 # aggregate results

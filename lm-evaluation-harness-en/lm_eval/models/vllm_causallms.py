@@ -118,6 +118,11 @@ class VLLM(TemplateLM):
             tokenizer_revision=tokenizer_revision,
         )
         self.add_bos_token = add_bos_token
+        if "gemma" in pretrained.lower():
+            self.add_bos_token = True
+            eval_logger.info(
+                "Found 'gemma' in model name, a BOS token will be used as Gemma underperforms without it."
+            )
 
         self._max_gen_toks = max_gen_toks
 
@@ -157,6 +162,7 @@ class VLLM(TemplateLM):
         """ """
         if not add_special_tokens:
             add_special_tokens = False or self.add_bos_token
+        print(f"add_special_tokens: {add_special_tokens}")
         encoding = self.tokenizer.encode(
             string, add_special_tokens=add_special_tokens, truncation=truncation
         )
@@ -253,7 +259,8 @@ class VLLM(TemplateLM):
 
         # batch tokenize contexts
         context, all_gen_kwargs = zip(*(req.args for req in requests))
-        context_encoding = self.tokenizer(context, add_special_tokens=False).input_ids
+        add_special_tokens = False or self.add_bos_token
+        context_encoding = self.tokenizer(context, add_special_tokens=add_special_tokens).input_ids
         requests = [
             ((a, b), c) for a, b, c in zip(context, context_encoding, all_gen_kwargs)
         ]
@@ -461,7 +468,7 @@ class VLLM(TemplateLM):
     @staticmethod
     def modify_gen_kwargs(kwargs: dict) -> dict:
         # sampling_params
-        do_sample = kwargs.pop("do_sample", None)
+        do_sample = kwargs.pop("do_sample", False)
         if do_sample is False or "temperature" not in kwargs:
             kwargs["temperature"] = 0.0
         # hf defaults
