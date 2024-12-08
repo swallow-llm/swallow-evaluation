@@ -36,7 +36,7 @@ extraction,ja/ja_mt_bench/judge.json,MODEL_NAME.Extraction.average.score,10
 stem,ja/ja_mt_bench/judge.json,MODEL_NAME.STEM.average.score,10
 humanities,ja/ja_mt_bench/judge.json,MODEL_NAME.Humanities.average.score,10
 gsm8k,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.gsm8k.exact_match,strict-match",1
-squad2,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.squadv2.exact,none",100
+squad2,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.squadv2.best_exact,none",100
 triviaqa,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.triviaqa.exact_match,remove_whitespace",1
 hellaswag,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.hellaswag.acc,none",1
 openbookqa,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.openbookqa.acc,none",1
