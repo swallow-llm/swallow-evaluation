@@ -1,6 +1,6 @@
-REPO_PATH="/gs/fs/tga-okazaki/path/to/your/repo"
-HUGGINGFACE_CACHE="/gs/bs/tga-okazaki/path/to/your/huggingface_cache"
-APPTAINER_CACHE="/gs/bs/tga-okazak/path/to/your/apptainer_cache"
+REPO_PATH="/gs/fs/tga-okazaki/ohi/jalm-evaluation-private_2412_update"
+HUGGINGFACE_CACHE="/gs/bs/tga-okazaki/tga-ohi/cache"
+APPTAINER_CACHE="/gs/bs/tga-okazak/tga-ohi/apptainer_cache"
 QSUB_CMD="qsub -g tga-okazaki"
 MODEL_NAME_PATH=$1
 
@@ -42,6 +42,7 @@ $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH
 $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_mmlu.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_bbh.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 $QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_math.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
+$QSUB_CMD -o "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/" -e "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en" "$REPO_PATH/scripts/tsubame/node_f/evaluate_english_gpqa.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
 # humaneval-unstripped
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
