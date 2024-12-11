@@ -29,7 +29,7 @@ pip install -e ".[ja]"
 pip install sacrebleu sentencepiece protobuf nagisa
 pip install 'accelerate>=0.26.0'
 pip install datasets==2.21.0
-pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
+pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 deactivate
 
 cd $REPO_PATH
