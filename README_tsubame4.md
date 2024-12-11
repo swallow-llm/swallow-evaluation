@@ -73,8 +73,8 @@ bash scripts/tsubame/environment/bigcode.sh
 環境構築のジョブが走り切ったら `OPENAI_API_KEY` と `HF_TOKEN` を設定しておく。
 ```bash
 cd /gs/fs/tga-okazaki/path/to/your/repo
-echo OPENAI_API_KEY=sk-... > .env
-echo HF_TOKEN=hf_... > .env
+echo OPENAI_API_KEY=sk-... >> .env
+echo HF_TOKEN=hf_... >> .env
 ```
 
 - [Qiita. "OpenAIのAPIキー取得方法|2024年7月最新版|料金体系や注意事項".](https://qiita.com/kurata04/items/a10bdc44cc0d1e62dad3)
@@ -115,14 +115,14 @@ echo HF_TOKEN=hf_... > .env
 ## 2. 評価スクリプトの実行
 評価したいモデルを Huggingface の表記に従って `MODEL_NAME` に格納し、先に編集したスクリプトの引数に渡してキューを投げる。
 
-実行例：
+実行例 (`tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2` を vLLM ありで評価する場合)：
 ```bash
 MODEL_NAME=tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2
-qsub -g tga-okazaki scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
+bash tga-okazaki scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
 ```
 
 ## 3. 評価状況の確認
-`scripts/tsubame/utils/save_and_check.sh` を実行することで評価の進捗状況を確認することができる。
+`scripts/tsubame/utils/save_and_check_qstat.sh` を実行することで評価の進捗状況を確認することができる。
 
 出力例：
 ```bash
