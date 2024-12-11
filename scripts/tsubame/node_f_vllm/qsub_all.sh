@@ -1,6 +1,6 @@
-REPO_PATH="/gs/fs/tga-okazaki/path/to/your/repo"
-HUGGINGFACE_CACHE="/gs/bs/tga-okazaki/path/to/your/huggingface_cache"
-APPTAINER_CACHE="/gs/bs/tga-okazak/path/to/your/apptainer_cache"
+REPO_PATH="/gs/fs/tga-okazaki/shimada/vllm/jalm-evaluation-private"
+HUGGINGFACE_CACHE="/gs/bs/tga-okazaki/shimada/HF_HOME"
+APPTAINER_CACHE="/gs/bs/tga-okazaki/shimada/HF_HOME/apptainer_chace"
 QSUB_CMD="qsub -g tga-okazaki"
 MODEL_NAME_PATH=$1
 
