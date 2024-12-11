@@ -16,6 +16,7 @@ CUDA_BLOCKING=${4:-}
 
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -55,7 +56,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
-    --batch_size 8 \
+    --batch_size 4 \
     --device cuda \
     --write_out \
     --output_path "$MMLU_OUTDIR" \

@@ -472,7 +472,7 @@ class VLLM(TemplateLM):
         if do_sample is False or "temperature" not in kwargs:
             kwargs["temperature"] = 0.0
         # hf defaults
-        kwargs["skip_special_tokens"] = kwargs.get("skip_special_tokens", False)
+        kwargs["skip_special_tokens"] = kwargs.get("skip_special_tokens", True)
         kwargs["spaces_between_special_tokens"] = kwargs.get(
             "spaces_between_special_tokens", False
         )
