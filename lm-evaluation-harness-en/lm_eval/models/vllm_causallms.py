@@ -257,8 +257,13 @@ class VLLM(TemplateLM):
     ) -> List[str]:
         res = []
 
+        # check if the requests is empty 
+        # such situation can be caused, for example, when all responses have already been saved in a cache and those are loaded
+        if len(requests) == 0:
+            return res
+
         # batch tokenize contexts
-        context, all_gen_kwargs = zip(*(req.args for req in requests if len(req.args) > 0))
+        context, all_gen_kwargs = zip(*(req.args for req in requests))
         add_special_tokens = False or self.add_bos_token
         context_encoding = self.tokenizer(context, add_special_tokens=add_special_tokens).input_ids
         requests = [
