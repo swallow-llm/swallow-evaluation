@@ -83,11 +83,17 @@ def process_results(doc: dict, results: List[str]) -> Dict[str, int]:
     # We modified this function reffering to the following implement by Meta:
     # https://github.com/meta-llama/llama-recipes/blob/v0.0.4
     candidates = results[0]
-    last_boxed_string = last_boxed_only_string(candidates)
+    last_boxed_string = last_boxed_only_string(candidates)    
     if not last_boxed_string:
-        # No boxed string found, so we can't evaluate
-        return {"exact_match": 0}
-    unnormalized_answer = remove_boxed(last_boxed_string)
+        # No boxed string found, so twe retry using "The final answer is ..." template.
+        unnormalized_answer = get_unnormalized_answer(candidates)
+        
+        # Even "The final answer is ..." template failed, then we'll give up.
+        if unnormalized_answer == "[invalidanswer]":
+            return {"exact_match": 0}
+    else:
+        unnormalized_answer = remove_boxed(last_boxed_string)
+    
     answer = normalize_final_answer(unnormalized_answer)
 
     if answer.strip() == doc["answer"].strip() or is_equiv(answer, doc["answer"]):
