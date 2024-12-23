@@ -11,6 +11,8 @@ doc_to_target: "{{answer}}"
 generation_kwargs:
   until:
     - "Problem:"
+    - "</s>"
+    - "<|im_end|>"
   do_sample: false
   temperature: 0
   max_gen_toks: 1024
