@@ -47,7 +47,6 @@ mmlu_social_sciences,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"gr
 mmlu_humanities,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_humanities.acc,none",1
 mmlu_stem,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_stem.acc,none",1
 mmlu_other,en/harness_en/alltasks_5shot_allcases/mmlu/results.json,"groups.mmlu_other.acc,none",1
-math_500,en/harness_en/alltasks_4shot_allcases/math_500/results.json,"results.math_500.exact_match,none",1
 humaneval@1,en/humaneval/metrics.json,humaneval.pass@1,1
 humaneval@10,en/humaneval/metrics.json,humaneval.pass@10,1
 humaneval_answer@10,en/humaneval/metrics.json,humaneval.answer@10,1
@@ -72,3 +71,9 @@ mbpp_ja_answer@10,ja/mbpp/metrics.json,mbpp.answer@10,1
 mbpp@1,en/mbpp/metrics.json,mbpp.pass@1,1
 mbpp@10,en/mbpp/metrics.json,mbpp.pass@10,1
 mbpp_answer@10,en/mbpp/metrics.json,mbpp.answer@10,1
+mt_bench_1st_turn,ja/ja_mt_bench/judge.json,MODEL_NAME.overall.first_turn.score,10
+mt_bench_2st_turn,ja/ja_mt_bench/judge.json,MODEL_NAME.overall.second_turn.score,10
+minerva_math,en/harness_en/alltasks_4shot_allcases/minerva_math/results.json,"groups.minerva_math.exact_match,none",1
+gpqa_main_meta_llama3_cot_zeroshot,en/harness_en/alltasks_0shot_allcases/gpqa_main_cot_zeroshot_meta_llama3_wo_chat/results.json,"results.gpqa_main_cot_zeroshot_meta_llama3_wo_chat.exact_match,strict-match",1
+squad2_best_exact,en/harness_en/alltasks_4shot_allcases/general/results.json,"results.squadv2.best_exact,none",100
+math_500,en/harness_en/alltasks_4shot_allcases/math_500/results.json,"results.math_500.exact_match,none",1

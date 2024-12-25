@@ -41,8 +41,8 @@ mkdir -p $OUTDIR
 
 cd fastchat/fastchat/llm_judge
 python gen_model_answer.py --model-path ${MODEL_NAME_PATH} --model-id ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --num-choices 5 --num-gpus-total $GPU_NUM --num-gpus-per-model $GPU_NUM
-python gen_judgment.py --model-list ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --parallel 4 --judge-model gpt-4-1106-preview
-python show_result.py --model-list ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --output-file ${OUTDIR}/judge.json --judge-model gpt-4-1106-preview
+python gen_judgment.py --model-list ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --parallel 4 --judge-model gpt-4o-2024-08-06
+python show_result.py --model-list ${MODEL_NAME_PATH} --bench-name japanese_mt_bench --output-file ${OUTDIR}/judge.json --judge-model gpt-4o-2024-08-06
 
 # aggregate results
 cd ../../../
