@@ -33,10 +33,10 @@ source .venv_harness_en/bin/activate
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/harness_en"
 mkdir -p ${OUTDIR}
 
-MATH_TASK_NAME="minerva_math"
+MATH_TASK_NAME="math_500"
 MATH_NUM_FEWSHOT=4
 MATH_NUM_TESTCASE="all"
-MATH_OUTDIR="${OUTDIR}/alltasks_${MATH_NUM_FEWSHOT}shot_${MATH_NUM_TESTCASE}cases/minerva_math"
+MATH_OUTDIR="${OUTDIR}/alltasks_${MATH_NUM_FEWSHOT}shot_${MATH_NUM_TESTCASE}cases/${MATH_TASK_NAME}"
 
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then

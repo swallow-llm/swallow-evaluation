@@ -51,6 +51,7 @@ fi
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $JMMLU_OUTDIR
 
+start_time=$(date +%s)
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
@@ -61,7 +62,11 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   dataset_dir=$DATASET_DIR \
   log_dir=$GENERAL_OUTDIR \
   wandb.run_name=llm_jp_eval_general
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Evaluation General time: ${execution_time} seconds"
 
+start_time=$(date +%s)
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
@@ -72,6 +77,9 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   dataset_dir=$DATASET_DIR \
   log_dir=$JMMLU_OUTDIR \
   wandb.run_name=llm_jp_eval_jmmlu
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Evaluation JMMLU time: ${execution_time} seconds"
 
 python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path $JMMLU_OUTDIR
 

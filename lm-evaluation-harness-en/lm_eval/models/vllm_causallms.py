@@ -257,6 +257,11 @@ class VLLM(TemplateLM):
     ) -> List[str]:
         res = []
 
+        # check if the requests is empty 
+        # such situation can be caused, for example, when all responses have already been saved in a cache and those are loaded
+        if len(requests) == 0:
+            return res
+
         # batch tokenize contexts
         context, all_gen_kwargs = zip(*(req.args for req in requests))
         add_special_tokens = False or self.add_bos_token
@@ -472,7 +477,7 @@ class VLLM(TemplateLM):
         if do_sample is False or "temperature" not in kwargs:
             kwargs["temperature"] = 0.0
         # hf defaults
-        kwargs["skip_special_tokens"] = kwargs.get("skip_special_tokens", False)
+        kwargs["skip_special_tokens"] = kwargs.get("skip_special_tokens", True)
         kwargs["spaces_between_special_tokens"] = kwargs.get(
             "spaces_between_special_tokens", False
         )

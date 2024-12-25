@@ -73,7 +73,7 @@ bash scripts/tsubame/environment/bigcode.sh
 環境構築のジョブが走り切ったら `OPENAI_API_KEY` と `HF_TOKEN` を設定しておく。
 ```bash
 cd /gs/fs/tga-okazaki/path/to/your/repo
-echo OPENAI_API_KEY=sk-... > .env
+echo OPENAI_API_KEY=sk-... >> .env
 echo HF_TOKEN=hf_... >> .env
 ```
 
@@ -118,7 +118,7 @@ echo HF_TOKEN=hf_... >> .env
 実行例 (`tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2` を vLLM ありで評価する場合)：
 ```bash
 MODEL_NAME=tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2
-bash scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
+bash tga-okazaki scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
 ```
 
 ## 3. 評価状況の確認
