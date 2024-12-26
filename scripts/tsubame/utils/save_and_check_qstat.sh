@@ -29,6 +29,7 @@ while read -r job_id state; do
   task_kind=$(echo "$job_info" | grep job_name | awk '{print $2}' | sed -e 's:evaluate_::' -e 's:\.sh::')
   model_name=$(echo "$job_info" |grep stderr_path_list | sed 's|.*results/\([^/]*\)/\([^/]*\).*|\1/\2|')
   slots=$(echo "$job_info" | grep parallel | awk '{print $5}')
+  priority=$(echo "$job_info" | grep priority | awk '{print $2}')
 
   # タスク名とモデル名が空でない場合のみ結果を蓄積
   if [[ -n "$task_kind" && -n "$model_name" ]]; then
@@ -56,29 +57,29 @@ while read -r job_id state; do
         use_vllm="_"
     fi
 
-    results+="$job_id\t$state\t$node_kind\t$use_vllm\t$slots\t$task_kind\t$model_name\n"
-    current_job_map["$job_id"]="$state $node_kind $use_vllm $slots $task_kind $model_name"
+    results+="$job_id\t$state\t$node_kind\t$use_vllm\t$slots\t$priority\t$task_kind\t$model_name\n"
+    current_job_map["$job_id"]="$state $node_kind $use_vllm $slots $priority $task_kind $model_name"
   fi
 done <<< "$current_jobs"
 
 # 出力のヘッダー
-printf "%-10s %-8s %-8s %-8s %-8s %-35s %-100s\n" "job_ID" "state" "node" "vllm" "slots" "task" "model name"
+printf "%-10s %-8s %-8s %-6s %-8s %-10s %-35s %-100s\n" "job_ID" "state" "node" "vllm" "slots" "priority" "task" "model name"
 echo -e "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 # 前回のジョブの状態を読み込む
 if [ -n "$old_jobs" ]; then
   # 前回のジョブIDが現在のジョブIDにない場合は終了したとみなす
-  echo "$old_jobs" | while read -r old_job_id old_state old_node_kind old_use_vllm old_slots old_task_kind old_model_name; do
+  echo "$old_jobs" | while read -r old_job_id old_state old_node_kind old_use_vllm old_slots old_priority old_task_kind old_model_name; do
     if [[ -z "${current_job_map[$old_job_id]}" ]]; then
-      printf "%-10s %-8s %-8s %-8s %-8s %-35s %-100s\n" "$old_job_id" "done" "$old_node_kind" "$old_use_vllm" "$old_slots" "$old_task_kind" "$old_model_name"
+      printf "%-10s %-8s %-8s %-6s %-8s %-8s %-10s %-35s %-100s\n" "$old_job_id" "done" "$old_node_kind" "$old_use_vllm" "$old_slots" "$old_priority" "$old_task_kind" "$old_model_name"
     fi
   done
 fi
 
 # 現在のジョブ情報を表示
-echo -e "$results" | while read -r job_id state node_kind use_vllm slots task_kind model_name; do
+echo -e "$results" | while read -r job_id state node_kind use_vllm slots priority task_kind model_name; do
   if [[ -n "$job_id" ]]; then
-    printf "%-10s %-8s %-8s %-8s %-8s %-35s %-100s\n" "$job_id" "$state" "$node_kind" "$use_vllm" "$slots" "$task_kind" "$model_name"
+    printf "%-10s %-8s %-8s %-6s %-8s %-10s %-35s %-100s\n" "$job_id" "$state" "$node_kind" "$use_vllm" "$slots" "$priority" "$task_kind" "$model_name"
   fi
 done
 
