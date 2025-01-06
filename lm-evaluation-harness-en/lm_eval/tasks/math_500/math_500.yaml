@@ -13,6 +13,7 @@ generation_kwargs:
     - "Problem:"
     - "</s>"
     - "<|im_end|>"
+    - "I hope it is correct"
   do_sample: false
   temperature: 0
   max_gen_toks: 2048
