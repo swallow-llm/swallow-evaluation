@@ -1,11 +1,12 @@
 import json
 import sys
-from typing import List, Dict , Any
+from typing import List, Dict, Any
 from collections import defaultdict
 
 
 CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
 CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
+
 
 # question_id を category に変換する関数
 def map_question_to_category(question_id: int) -> str:
@@ -22,6 +23,14 @@ def map_question_to_category(question_id: int) -> str:
     category_index = (question_id - 1) // questions_per_category % num_categories
 
     return CATEGORIES[category_index]
+
+
+# テキスト中の記号を削除する関数
+def remove_symbols(text: str) -> str:
+    symbols = "[ !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]\n"
+    # 文字列からsymbolsに含まれる文字を削除
+    return "".join(char for char in text if char not in symbols)
+
 
 # 日本語文字か否かを判定する関数
 def is_japanese_char(ch):
@@ -63,30 +72,31 @@ def calculate_japanese_character_ratio(lst_mtbench_model_answers: List[Dict[str,
     カテゴリ別 (coding, math, ...) およびカテゴリ全体の9種類を計算します．
     値はマイクロ平均です．
     つまり，マルチターン・複数回応答文生成・複数の設問で得られたすべての応答文を連結して割合を計算しています．
-    
+
     Args:
         lst_mtbench_model_answers (List[Dict[str, Any]]): gen_model_answer.pyが出力した応答文
-    
+
     Returns:
         {"ja_char_ratio-{カテゴリ名 または ALL}": <ひらがな・カタカナ・漢字の割合>}
     """
-    
+
     total_chars = 0
     total_japanese_chars = 0
     category_counts = defaultdict(lambda: defaultdict(int))
-    
+
     # まずひらがな・カタカナ・漢字の文字数を数える
     for mtbench_answer in lst_mtbench_model_answers:
         question_id = mtbench_answer.get("question_id", 0)
         question_category = map_question_to_category(question_id=question_id)
-    
+
         for choice in mtbench_answer.get("choices", []):
             for response in choice.get("turns", []):
-                num_chars = len(response)
-                num_ja_chars = count_japanese_chars(response)
+                response_wo_symbols = remove_symbols(response)
+                num_chars = len(response_wo_symbols)
+                num_ja_chars = count_japanese_chars(response_wo_symbols)
 
                 total_chars += num_chars
-                total_japanese_chars += num_ja_chars                
+                total_japanese_chars += num_ja_chars
                 category_counts[question_category]["total_chars"] += num_chars
                 category_counts[question_category]["japanese_chars"] += num_ja_chars
 
@@ -99,7 +109,7 @@ def calculate_japanese_character_ratio(lst_mtbench_model_answers: List[Dict[str,
         denom = dict_char_counts["total_chars"]
         results[category_name] = safe_divide(numerator=num, denominator=denom)
     results["overall"] = safe_divide(numerator=total_japanese_chars, denominator=total_chars)
-    
+
     return results
 
 
@@ -107,7 +117,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python custom_utils.py {gen_model_answer.pyが出力したjsonlファイル}")
         sys.exit(1)
-    
+
     input_file_path = sys.argv[1]
     lst_mtbench_model_answers = []
 
@@ -115,7 +125,7 @@ if __name__ == "__main__":
         for line in ifs:
             record = json.loads(line.strip())
             lst_mtbench_model_answers.append(record)
-    
+
     model_id = lst_mtbench_model_answers[0].get("model_id", None)
     dict_ja_char_ratio = calculate_japanese_character_ratio(lst_mtbench_model_answers=lst_mtbench_model_answers)
     dict_ja_char_ratio["model_id"] = model_id
