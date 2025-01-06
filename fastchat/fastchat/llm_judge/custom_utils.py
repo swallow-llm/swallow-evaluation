@@ -3,6 +3,9 @@ import sys
 from typing import List, Dict, Any
 from collections import defaultdict
 
+from markdown import markdown
+from bs4 import BeautifulSoup
+
 
 CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
 CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
@@ -25,11 +28,15 @@ def map_question_to_category(question_id: int) -> str:
     return CATEGORIES[category_index]
 
 
-# テキスト中の記号を削除する関数
-def remove_symbols(text: str) -> str:
-    symbols = "[ !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]\n"
-    # 文字列からsymbolsに含まれる文字を削除
-    return "".join(char for char in text if char not in symbols)
+# Markdownからテキスト部分を抜き出す関数
+def extract_plain_text(markdown_text: str) -> str:
+    # MarkdownをHTMLに変換
+    html = markdown(markdown_text)
+    # HTMLから純粋なテキストを抽出
+    soup = BeautifulSoup(html, "html.parser")
+    plain_text = soup.get_text()
+    # テキストの文字数をカウント
+    return plain_text
 
 
 # 日本語文字か否かを判定する関数
@@ -91,9 +98,9 @@ def calculate_japanese_character_ratio(lst_mtbench_model_answers: List[Dict[str,
 
         for choice in mtbench_answer.get("choices", []):
             for response in choice.get("turns", []):
-                response_wo_symbols = remove_symbols(response)
-                num_chars = len(response_wo_symbols)
-                num_ja_chars = count_japanese_chars(response_wo_symbols)
+                plain_text = extract_plain_text(response)
+                num_chars = len(plain_text)
+                num_ja_chars = count_japanese_chars(plain_text)
 
                 total_chars += num_chars
                 total_japanese_chars += num_ja_chars
