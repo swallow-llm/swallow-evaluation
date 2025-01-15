@@ -31,16 +31,18 @@
 - `scripts/tsubame/environment/create_environment.sh`
 - `scripts/tsubame/node_q/qsub_all.sh`
 - `scripts/tsubame/node_f/qsub_all.sh`
+- `scripts/tsubame/node_q_vllm/qsub_all.sh`（vLLMを使用する場合のみ必要）
+- `scripts/tsubame/node_f_vllm/qsub_all.sh`（vLLMを使用する場合のみ必要）
 
 にハードコードされている以下の変数を自分の環境に合わせて編集する
 
 | 変数名 | 役割 |
 | -- | -- |
-| `REPO_PATH` | `jalm-evaluation-private`の絶対パス |
-| `PIP_CACHE` | `pip install`のキャッシュを置く場所 (環境構築の際に使用) |
-| `HUGGINGFACE_CACHE` | Huggingfaceのモデルの重みを置く場所 (評価の際に使用) |
-| `APPTAINER_CACHE` | APPTAINERのキャッシュを置く場所 (J/HumanEvalやJA/EN MBPPの評価時に使用) |
-| `QSUB_CMD`  | `qsub -g {グループ名}` `groups` コマンドで自分が使えるグループが確認できる | 
+| `REPO_PATH` | `jalm-evaluation-private`の絶対パス。 |
+| `PIP_CACHE` | `pip install`のキャッシュを置く場所（環境構築の際に使用）。|
+| `HUGGINGFACE_CACHE` | Huggingfaceのモデルの重みを置く場所（評価の際に使用）。|
+| `APPTAINER_CACHE` | APPTAINERのキャッシュを置く場所（J/HumanEvalやJA/EN MBPPの評価時に使用）。|
+| `QSUB_CMD`  | 評価のジョブを投げるコマンド：`qsub -g {グループ名} -p {優先度}`。`groups` コマンドで自分のグループ名を確認できる。優先度は`-3`が最大で`-5`がデフォルト。ただし課金額が変わるため優先度を上げる場合は必ず他の評価メンバーと相談すること。 | 
 
 ## 2. 環境構築
 
@@ -91,6 +93,7 @@ echo HF_TOKEN=hf_... >> .env
     - 2.21.0 でダメなら 2.19.2 で解決する人もいる
     - mbpp で失敗する issue: [Huggingface. google-research-datasets/mbpp. "This dataset is broken!".](https://huggingface.co/datasets/google-research-datasets/mbpp/discussions/5)
 
+> ただし、実装の変更によってスコアが変動してしまう可能性があるため、必ず他の評価メンバーと相談をすること。
 
 <br>
 
@@ -111,6 +114,8 @@ echo HF_TOKEN=hf_... >> .env
 - JA/EN MBPP
 - Harness EN
 - MT-Bench
+  
+> ただし 2024/12 のアップデート時点で vLLM を用いた評価は標準としていない。
 
 ## 2. 評価スクリプトの実行
 評価したいモデルを Huggingface の表記に従って `MODEL_NAME` に格納し、先に編集したスクリプトの引数に渡してキューを投げる。
@@ -118,7 +123,7 @@ echo HF_TOKEN=hf_... >> .env
 実行例 (`tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2` を vLLM ありで評価する場合)：
 ```bash
 MODEL_NAME=tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2
-bash tga-okazaki scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
+bash scripts/tsubame/node_q/qsub_all.sh $MODEL_NAME
 ```
 
 ## 3. 評価状況の確認
@@ -126,15 +131,15 @@ bash tga-okazaki scripts/tsubame/node_q_vllm/qsub_all.sh $MODEL_NAME
 
 出力例：
 ```bash
-job_ID     state    node     vllm     slots    task               model name                                                                                          
--------------------------------------------------------------------------------------------------------------------------
-1828500    done     node_v   _        48       ja_mt_bench        tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
-1828503    done     node_v   _        48       ja_mbpp            tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
-1828504    r        node_q   o        48       english_general    tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
-1828506    r        node_q   o        48       english_mmlu       tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
-1828507    r        node_q   o        48       english_bbh        tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
-1828508    r        node_q   o        48       english_math       tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
-1828511    qw       node_q   _        48       english_mbpp       tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
+job_ID     state    node     vllm   slots    priority   task                                model name                                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1828500    done     node_v   _      48       -5         ja_mt_bench                         tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
+1828503    done     node_v   _      48       -5         ja_mbpp                             tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
+1828504    r        node_q   o      48       -5         english_general                     tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
+1828506    r        node_q   o      48       -5         english_mmlu                        tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
+1828507    r        node_q   o      48       -5         english_bbh                         tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
+1828508    r        node_q   o      48       -5         english_math                        tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
+1828511    qw       node_q   _      48       -5         english_mbpp                        tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
 ```
 
 
@@ -154,9 +159,10 @@ job_ID     state    node     vllm     slots    task               model name
 | `evaluate_english_bbh.sh` | BBH (論理推論・算術推論)
 | `evaluate_english_general.sh` | TriviaQA (百科事典的知識・常識), GSM8K (算術推論), OpenBookQA (百科事典的知識・常識), Hellaswag (百科事典的知識・常識), XWINO(読解), SQuAD2(読解) |
 | `evaluate_english_humaneval-unstripped.sh` | HumanEval (コード生成)|
-| `evaluate_english_math.sh` | Math [minerva_math] (算術推論) |
+| `evaluate_english_math.sh` | Math [hendrycksmath2021から、OpenAIの"Let's Verify Step by Step"に倣って500問をサンプリング] (算術推論) |
 | `evaluate_english_mbpp.sh` | MBPP (コード生成)|
 | `evaluate_english_mbpp.sh` | MMLU (一般教養)|
+| `evaluate_english_gpqa.sh` | GPQA（博士課程）|
 | `evaluate_english.sh` (現在は不使用) | Harness En 全て (BBH, Math, MMLU, TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2) |
 | `evaluate_ja_humaneval-unstripped.sh` | JHumanEval (コード生成)|
 | `evaluate_ja_llmjp.sh` | NIILC (百科事典的知識・常識), JCommonsenseQA (百科事典的知識・常識), JSQuAD (読解) |
@@ -173,6 +179,7 @@ job_ID     state    node     vllm     slots    task               model name
 | -- | -- | -- |
 | EN | harness_en | gsm8k |
 ||| squad2 |
+|||squad2_best_exact |
 ||| triviaqa |
 ||| hellaswag |
 ||| openbookqa |
@@ -184,6 +191,8 @@ job_ID     state    node     vllm     slots    task               model name
 ||| mmlu_humanities |
 ||| mmlu_stem |
 ||| mmlu_other |
+||| math_500 |
+||| gpqa_main_meta_llama3_cot_zeroshot |
 || humaneval | humaneval@1 |
 ||| humaneval@10 |
 ||| humaneval_answer@10 |
