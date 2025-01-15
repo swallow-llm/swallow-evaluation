@@ -133,8 +133,8 @@ bash scripts/tsubame/node_q/qsub_all.sh $MODEL_NAME
 ```bash
 job_ID     state    node     vllm   slots    priority   task                                model name                                                                                          
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-1828500    done     node_v   _      48       -5         ja_mt_bench                         tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
-1828503    done     node_v   _      48       -5         ja_mbpp                             tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
+1828500    done     node_f   _      48       -5         ja_mt_bench                         tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
+1828503    done     node_f   _      48       -5         ja_mbpp                             tokyotech-llm/Llama-3.1-Swallow-70B-Instruct-v0.1
 1828504    r        node_q   o      48       -5         english_general                     tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
 1828506    r        node_q   o      48       -5         english_mmlu                        tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
 1828507    r        node_q   o      48       -5         english_bbh                         tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.1
