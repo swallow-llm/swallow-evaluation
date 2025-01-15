@@ -2,7 +2,7 @@
 #$ -cwd
 
 #$ -l node_q=1
-#$ -l h_rt=24:00:00
+#$ -l h_rt=00:40:00
 
 # module load
 . /etc/profile.d/modules.sh

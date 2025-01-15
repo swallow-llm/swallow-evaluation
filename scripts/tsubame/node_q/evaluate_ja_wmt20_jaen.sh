@@ -2,8 +2,8 @@
 #$ -cwd
 
 #$ -l node_q=1
-#$ -l h_rt=24:00:00
-
+#$ -l h_rt=01:00:00
+s=
 # module load
 . /etc/profile.d/modules.sh
 module load cuda/12.1.0
