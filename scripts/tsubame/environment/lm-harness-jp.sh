@@ -17,6 +17,8 @@ export PIP_CACHE_DIR=$PIP_CACHE
 
 cd $REPO_PATH
 
+source ~/.bashrc
+
 module load cuda/12.1.0
 module load cudnn/9.0.0
 
