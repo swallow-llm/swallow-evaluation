@@ -44,7 +44,26 @@
 | `APPTAINER_CACHE` | APPTAINERのキャッシュを置く場所（J/HumanEvalやJA/EN MBPPの評価時に使用）。|
 | `QSUB_CMD`  | 評価のジョブを投げるコマンド：`qsub -g {グループ名} -p {優先度}`。`groups` コマンドで自分のグループ名を確認できる。優先度は`-3`が最大で`-5`がデフォルト。ただし課金額が変わるため優先度を上げる場合は必ず他の評価メンバーと相談すること。 | 
 
-## 2. 環境構築
+## 2. Pythonのバージョン設定
+
+pyenvを使って、`jalm_evaluation_private`以下のpythonのデフォルトのバージョンを3.10.14に設定する
+
+pyenvをインストールした後で、以下のコマンドを実行。
+
+全てのディレクトリのデフォルトのバージョンが3.10.14になって良い場合
+```bash
+pyenv global 3.10.14
+```
+
+`jalm_evaluation_private`以下のデフォルトのバージョンだけを3.10.14にしたい場合
+```bash
+cd /path/to/jalm_evaluation_private
+pyenv local 3.10.14
+```
+
+- [pyenvを使った設定方法の参考資料（tsubame 3.0の資料だが、tsubame 4.0にも適用可能)](https://rioyokotalab.github.io/python-supercomputer/)
+
+## 3. 環境構築
 
 「A.1 パスの編集」で `scripts/tsubame/environment/create_environment.sh` のパスを正しくハードコードし直した上で、以下のコードをログインノードで実行。
 ```bash
