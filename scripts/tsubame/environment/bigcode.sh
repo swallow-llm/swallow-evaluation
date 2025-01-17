@@ -39,4 +39,5 @@ cd $REPO_PATH
 
 apptainer pull docker://ghcr.io/bigcode-project/evaluation-harness
 apptainer shell evaluation-harness_latest.sif
-pip install --user -U datasets
+pip install --user datasets==2.21.0
+
