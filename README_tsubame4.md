@@ -46,22 +46,55 @@
 
 ## 2. Pythonのバージョン設定
 
-pyenvを使って、`jalm_evaluation_private`以下のpythonのデフォルトのバージョンを3.10.14に設定する
+pyenv を使って、`jalm_evaluation_private`以下のpythonのデフォルトのバージョンを3.10.14に設定する。
+pyenv を既にインストールしている場合は 2.1，2.2，2.3 をスキップして 2.4 から行うこと。
+なお、以下の手順はこちらを参考にした。
+- [pyenvを使った設定方法の参考資料（tsubame 3.0の資料だが、tsubame 4.0にも適用可能)](https://rioyokotalab.github.io/python-supercomputer/)
 
-pyenvをインストールした後で、以下のコマンドを実行。
+### 2.1 pyenv のインストール
+以下のコードをログインノード（`/home/0/{ユーザ名}`）で実行。
+```bash
+curl https://pyenv.run | bash
+```
 
-全てのディレクトリのデフォルトのバージョンが3.10.14になって良い場合
+### 2.2 環境変数の設定
+vim などを使うか、[TSUBAME OOD](https://www.t4.cii.isct.ac.jp/docs/ood/login/)から `~/.bashrc` を開いて以下のように export と eval から始まる三行を追記。
+```
+...
+
+# User specific environment
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+
+...
+```
+
+### 2.3 環境変数の反映
+以下のコードをコマンドラインで実行し、先に設定した環境変数の設定を反映する。
+```bash
+source ~/.bashrc
+```
+
+### 2.4 python のインストール
+以下のコードをコマンドラインで実行し、必要な python をインストールする。
+```bash
+pyenv install 3.10.14
+```
+
+### 2.5 python のバージョンを指定
+以下のいずれかの方法で先にインストールした python のバージョンが評価ディレクトリで使われる指定する。
+
+A) 全てのディレクトリのデフォルトのバージョンが3.10.14になって良い場合
 ```bash
 pyenv global 3.10.14
 ```
 
-`jalm_evaluation_private`以下のデフォルトのバージョンだけを3.10.14にしたい場合
+B) `jalm_evaluation_private`以下のデフォルトのバージョンだけを3.10.14にしたい場合(推奨)
 ```bash
 cd /path/to/jalm_evaluation_private
 pyenv local 3.10.14
 ```
-
-- [pyenvを使った設定方法の参考資料（tsubame 3.0の資料だが、tsubame 4.0にも適用可能)](https://rioyokotalab.github.io/python-supercomputer/)
 
 ## 3. 環境構築
 
@@ -76,7 +109,7 @@ bash scripts/tsubame/environment/create_environment.sh
 |`bigcode`|J/HumanEvalやJA/EN MBPP|
 |`fastchat`| MT-Bench |
 |`llm-jp-eval`| llmjp |
-|`lm-harness-en`| BBH, Math, MMLU, General(TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2) |
+|`lm-harness-en`| BBH, MATH, MMLU, GPQA, General(TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2) |
 |`lm-harness-jp` | MGSM, XL-SUM, WMT20-EN-JA, WMT20-JA-EN | の評価に使う環境の構築
 
 なお、各環境を以下のように個別に構築することもできる。
@@ -85,7 +118,7 @@ bash scripts/tsubame/environment/create_environment.sh
 ```bash
 REPO_PATH="/gs/fs/tga-okazaki/path/to/your/repo"
 PIP_CACHE="/gs/bs/tga-okazaki/path/to/your/pipcache"
-bash scripts/tsubame/environment/bigcode.sh
+bash scripts/tsubame/environment/bigcode.sh $REPO_PATH $PIP_CACHE
 ```
 
 各環境の詳細(ライブラリの構成など)は `scripts/tsubame/environment/` 以下のコードを参照されたい。
@@ -103,6 +136,16 @@ echo HF_TOKEN=hf_... >> .env
 
 
 ### うまく行かなかったら？
+- `scripts/tsubame/environment/logs` 以下のログを確かめる
+    - `No space left on device` と出る場合は quota(割当量) に size(使用量) が迫っている可能性あり。
+        - `t4-user-info disk group -g tga-okazaki` でグループ（`/gs/bs/tga-okazaki`、`/gs/fs/tga-okazaki`）の使用状況を確認できる。
+        - `t4-user-info disk home` で個人（`/home/0/{ユーザ名}`）の使用状況が確認できる。
+        - `b_quota` が足りなくなっているなら容量を減らす必要がある。
+            - `/gs/fs/tga-okazaki` か `/gs/bs/tga-okazaki/` 以下で `du -sh ./*` を実行するとユーザ毎の使用量を確認できる。
+        - `i_quota` が足りなくなっていたらファイル数を減らす必要がある。
+            - `/gs/fs/tga-okazaki` か `/gs/bs/tga-okazaki/` 以下で `find . -type f -printf '%h\n' | sort | uniq -c | sort -nr` を実行するとユーザ毎の使用ファイル数を確認できる。
+        - ただし、容量の反映には少しラグがあるため、表示されている容量やファイル数に余裕があっても `No space left on device` と出ることがある。
+
 - torchとcudaのバージョンが合っているかを確かめる
     - [PyTorch. "Get Started".](https://pytorch.org/get-started/locally/)
     - [TSUBAME4.0利用の手引き. "4. ソフトウェア環境".](https://www.t4.gsic.titech.ac.jp/docs/handbook.ja/software/)
@@ -119,7 +162,7 @@ echo HF_TOKEN=hf_... >> .env
 # 評価の実行
 
 ## 1. 評価するタスクの選択
-対応するスクリプトを直接編集し、評価したいベンチマーク**ではない**行を全てコメントアウトしておく。
+対応するスクリプトを直接編集し、評価**しない**ベンチマークの行は全てコメントアウトしておく。
 
 |モデルサイズ|vLLM|対応するスクリプト|
 | -- | -- | -- |
