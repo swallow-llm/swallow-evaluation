@@ -98,7 +98,7 @@ if [ ${DO_EVAL} = "true" ]; then
 
   python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
     --generation_path ${OUTDIR}/generation_humaneval-unstripped.json \
-    --metrics_path ${OUTDIR}/metrics.json
+    --metrics_path ${OUTDIR}/metrics.json \
     --task humaneval
 
   end_time=$(date +%s)
