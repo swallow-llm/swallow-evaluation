@@ -144,7 +144,8 @@ echo HF_TOKEN=hf_... >> .env
             - `/gs/fs/tga-okazaki` か `/gs/bs/tga-okazaki/` 以下で `du -sh ./*` を実行するとユーザ毎の使用量を確認できる。
         - `i_quota` が足りなくなっていたらファイル数を減らす必要がある。
             - `/gs/fs/tga-okazaki` か `/gs/bs/tga-okazaki/` 以下で `find . -type f -printf '%h\n' | sort | uniq -c | sort -nr` を実行するとユーザ毎の使用ファイル数を確認できる。
-        - ただし、容量の反映には少しラグがあるため、表示されている容量やファイル数に余裕があっても `No space left on device` と出ることがある。
+        - 容量の反映には少しラグがあるため、表示されている容量やファイル数に余裕があっても `No space left on device` と出ることがある。
+        - 容量に問題が無い（＝空きがある）場合、`create_environment.sh`を使わずに，ベンチマークごとに `bigcode.sh` 等を用いて個別に構築するとすんなり出来ることもある。
 
 - torchとcudaのバージョンが合っているかを確かめる
     - [PyTorch. "Get Started".](https://pytorch.org/get-started/locally/)
