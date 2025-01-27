@@ -53,7 +53,7 @@ echo "Generating: ${MMLU_TASK_NAME}"
 start_time=$(date +%s)
 echo $MMLU_TASK_NAME
 lm_eval --model hf \
-    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True" \
+    --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
     --batch_size 4 \
