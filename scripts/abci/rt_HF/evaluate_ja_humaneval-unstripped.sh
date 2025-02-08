@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 source ~/.bashrc
 source /etc/profile.d/modules.sh

@@ -1,6 +1,5 @@
 #!/bin/bash
-
-repo_path=$1
+set -e
 
 source ~/.bashrc
 source /etc/profile.d/modules.sh

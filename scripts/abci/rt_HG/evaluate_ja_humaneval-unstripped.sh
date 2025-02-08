@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 source ~/.bashrc
 source /etc/profile.d/modules.sh
@@ -41,26 +42,26 @@ fi
 
 mkdir -p $OUTDIR
 
-# # generate
-# echo "Generating"
-# start_time=$(date +%s)
-# python bigcode-evaluation-harness/main.py \
-#   --model ${MODEL_NAME_PATH} \
-#   --tasks jhumaneval-unstripped \
-#   --do_sample True \
-#   --n_samples ${NUM_SAMPLES} \
-#   --batch_size ${BATCH_SIZE} \
-#   --save_generations \
-#   --generation_only \
-#   --save_generations_path ${OUTDIR}/generation.json \
-#   --use_auth_token \
-#   --max_memory_per_gpu auto \
-#   --trust_remote_code \
-#   --max_length_generation 1024 \
-#   ${USE_FAST_TOKENIZER}
-# end_time=$(date +%s)
-# execution_time=$((end_time - start_time))
-# echo "Generation time: ${execution_time} seconds"
+# generate
+echo "Generating"
+start_time=$(date +%s)
+python bigcode-evaluation-harness/main.py \
+  --model ${MODEL_NAME_PATH} \
+  --tasks jhumaneval-unstripped \
+  --do_sample True \
+  --n_samples ${NUM_SAMPLES} \
+  --batch_size ${BATCH_SIZE} \
+  --save_generations \
+  --generation_only \
+  --save_generations_path ${OUTDIR}/generation.json \
+  --use_auth_token \
+  --max_memory_per_gpu auto \
+  --trust_remote_code \
+  --max_length_generation 1024 \
+  ${USE_FAST_TOKENIZER}
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Generation time: ${execution_time} seconds"
 
 # evaluate
 echo "Evaluating"
