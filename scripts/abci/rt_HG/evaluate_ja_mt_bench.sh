@@ -37,6 +37,7 @@ mkdir -p $OUTDIR
 cd fastchat/fastchat/llm_judge
 echo "Generating model answers"
 start_time=$(date +%s)
+
 python gen_model_answer.py \
   --model-path ${MODEL_NAME_PATH} \
   --model-id ${MODEL_NAME_PATH} \
@@ -44,6 +45,7 @@ python gen_model_answer.py \
   --num-choices 5 \
   --num-gpus-total $GPU_NUM \
   --num-gpus-per-model $GPU_NUM
+
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Generation model answers time: ${execution_time} seconds"
@@ -52,11 +54,13 @@ echo "Generation model answers time: ${execution_time} seconds"
 # evaluate
 echo "Generating judgements"
 start_time=$(date +%s)
+
 python gen_judgment.py \
   --model-list ${MODEL_NAME_PATH} \
   --bench-name japanese_mt_bench \
   --parallel 4 \
   --judge-model gpt-4o-2024-08-06
+
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Generation judgements time: ${execution_time} seconds"
