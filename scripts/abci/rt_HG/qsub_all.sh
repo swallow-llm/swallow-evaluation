@@ -1,6 +1,6 @@
-REPO_PATH="/home/acg16653re/github/jalm-evaluation-private_2412_update-saito_dev_abci"
+REPO_PATH="/home/{username}/jalm-evaluation-private_2412_update-saito_dev_abci"
 GROUP_ID="gag51395"
-HUGGINGFACE_CACHE="/groups/gag51395/share/saito/.cache"
+HUGGINGFACE_CACHE="/groups/gag51395/share/{name}/.cache"
 
 MODEL_NAME_PATH=$1
 
@@ -13,12 +13,16 @@ qsub -P $GROUP_ID -q rt_HG -l select=1 -l walltime=24:00:00 -N .SE_${MODEL_NAME_
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
 qsub -P $GROUP_ID -q rt_HG -l select=1 -l walltime=24:00:00 -N .SE_${MODEL_NAME_PATH//\//_}_JHumanEvalUnstriped -k oe -- "$REPO_PATH/scripts/abci/rt_HG/evaluate_ja_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-# mbpp-ja
+# jmbpp
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
 qsub -P $GROUP_ID -q rt_HG -l select=1 -l walltime=24:00:00 -N .SE_${MODEL_NAME_PATH//\//_}_JMBPP -k oe --  "$REPO_PATH/scripts/abci/rt_HG/evaluate_ja_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
 
 # English
+# humaneval-unstripped
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
+qsub -P $GROUP_ID -q rt_HG -l select=1 -l walltime=24:00:00 -N .SE_${MODEL_NAME_PATH//\//_}_HumanEvalUnstriped -k oe -- "$REPO_PATH/scripts/abci/rt_HG/evaluate_english_humaneval-unstripped.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
+
 # mbpp
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/"
 qsub -P $GROUP_ID -q rt_HG -l select=1 -l walltime=24:00:00 -N .SE_${MODEL_NAME_PATH//\//_}_MBPP -k oe --  "$REPO_PATH/scripts/abci/rt_HG/evaluate_english_mbpp.sh" $REPO_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH

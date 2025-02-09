@@ -1,6 +1,6 @@
-REPO_PATH="/home/acg16653re/github/jalm-evaluation-private_2412_update-saito_dev_abci"
-PIP_CACHEDIR="/home/acg16653re/.cache/pip"
-SINGULARITY_CACHEDIR="/home/acg16653re/.cache/singularity"
+REPO_PATH="/home/{username}/github/jalm-evaluation-private_2412_update-saito_dev_abci"
+PIP_CACHEDIR="/home/{username}/.cache/pip"
+SINGULARITY_CACHEDIR="/home/{username}/.cache/singularity"
 GROUP_ID="gag51395"
 mkdir -p logs
 
