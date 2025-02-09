@@ -74,7 +74,7 @@ export HF_HOME=$REPO_PATH/HF_HOME
 
 start_time=$(date +%s)
 singularity run \
-  -B ${OUTDIR}/generation_humaneval-unstripped.json:/app/generations_py.json \
+  -B ${OUTDIR}/generation_jhumaneval-unstripped.json:/app/generations_py.json \
   -B ${OUTDIR}/metrics.json:/app/metrics.json \
   --pwd /app \
   ${SINGULARITY_IMAGE} \
@@ -87,7 +87,7 @@ singularity run \
   --metric_output_path /app/metrics.json
 
 python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
-  --generation_path ${OUTDIR}/generation_humaneval-unstripped.json \
+  --generation_path ${OUTDIR}/generation_jhumaneval-unstripped.json \
   --metrics_path ${OUTDIR}/metrics.json \
   --task humaneval
 
