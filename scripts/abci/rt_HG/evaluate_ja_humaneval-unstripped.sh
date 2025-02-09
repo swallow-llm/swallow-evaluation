@@ -42,6 +42,7 @@ fi
 
 mkdir -p $OUTDIR
 
+
 # generate
 echo "Generating"
 start_time=$(date +%s)
@@ -62,6 +63,7 @@ python bigcode-evaluation-harness/main.py \
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Generation time: ${execution_time} seconds"
+
 
 # evaluate
 echo "Evaluating"
@@ -92,6 +94,7 @@ python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Evaluating time: ${execution_time} seconds"
+
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH

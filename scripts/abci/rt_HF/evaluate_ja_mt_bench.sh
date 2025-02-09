@@ -32,6 +32,8 @@ source .venv_fastchat/bin/activate
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
 mkdir -p $OUTDIR
 
+
+# generate
 cd fastchat/fastchat/llm_judge
 echo "Generating model answers"
 start_time=$(date +%s)
@@ -46,6 +48,8 @@ end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Generation model answers time: ${execution_time} seconds"
 
+
+# evaluate
 echo "Generating judgements"
 start_time=$(date +%s)
 python gen_judgment.py \
@@ -62,6 +66,7 @@ python show_result.py \
   --bench-name japanese_mt_bench \
   --output-file ${OUTDIR}/judge.json \
   --judge-model gpt-4o-2024-08-06
+
 
 # aggregate results
 cd ../../../

@@ -42,6 +42,7 @@ fi
 
 mkdir -p $OUTDIR
 
+
 # generate
 echo "Generating"
 start_time=$(date +%s)
@@ -61,6 +62,10 @@ python bigcode-evaluation-harness/main.py \
   --max_length_generation 2048 \
   --temperature 0.1 \
   ${USE_FAST_TOKENIZER}
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Generation time: ${execution_time} seconds"
+
 
 # evaluate
 echo "Evaluating"

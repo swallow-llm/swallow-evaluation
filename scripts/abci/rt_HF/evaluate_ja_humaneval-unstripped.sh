@@ -40,8 +40,8 @@ else
     USE_FAST_TOKENIZER='--use_fast_tokenizer'
 fi
 
-
 mkdir -p $OUTDIR
+
 
 # generate
 echo "Generating"
@@ -61,6 +61,10 @@ python bigcode-evaluation-harness/main.py \
   --trust_remote_code \
   --max_length_generation 1024 \
   ${USE_FAST_TOKENIZER}
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Generation time: ${execution_time} seconds"
+
 
 # evaluate
 echo "Evaluating"
@@ -90,6 +94,7 @@ python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
 end_time=$(date +%s)
 execution_time=$((end_time - start_time))
 echo "Evaluating time: ${execution_time} seconds"
+
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH
