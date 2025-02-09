@@ -1,3 +1,21 @@
+# 目次
+
+- [概要](#概要)
+- [A. 初回準備](#A-初回準備)
+    - [1. ABCIアカウントの発行](#1-ABCIアカウントの発行)
+    - [2. ABCIへのログイン](#2-ABCIへのログイン)
+    - [3. ローカルからABCIに接続するための準備](3-ローカルからABCIに接続するための準備)
+    - [4. ABCI上での操作](4-ABCI上での操作)
+- [B. 評価の実行](#B-評価の実行)
+    - [1. 評価するタスクの選択](#1-評価するタスクの選択)
+    - [2. 評価スクリプトの実行](#2-評価スクリプトの実行)
+    - [3. 評価状況の確認](#3-評価状況の確認)
+    - [4. 結果の確認](#4-結果の確認)
+- [C. 評価の詳細](#C-評価の詳細)
+    - [評価スクリプトとベンチマークの対応](#評価スクリプトとベンチマークの対応)
+    - [評価結果の表とベンチマークの対応](#評価結果の表とベンチマークの対応)
+
+
 # 概要
 
 - ABCIで評価を回す方法
@@ -6,26 +24,27 @@
 - 質問があれば大井までお願いします
 - 最終更新 (2025/02/09. 齋藤.)
 
+<br>
 
-# 初回だけやらなきゃいけない事
+# A. 初回準備
 
 ## 1. ABCIアカウントの発行
 ABCIのアカウントを発行してもらい，グループ(`gag51395`)に入れてもらう．
-> グループへの追加が上手くできていないと書き込み権限が付与されない
+> グループへの追加が上手くできていないと書き込み権限が付与されない．
 
 ## 2. ABCIへのログイン
 [ABCI利用者ポータル](https://portal.abci.ai/user/)からログインをする． \
-ログインが成功するとログインURLが記載されたメールが送信されるので，そのリンクからページにアクセスする．（注意：*1，*2）
+ログインが成功するとログインURLが記載されたメールが送信されるので，そのリンクからページにアクセスする．
 
-> *1: 迷惑メールに振り分けられることが多い \
-> *2: 初回はパスワードの設定も行うことになる
+> 迷惑メールに振り分けられることが多い．\
+> また，初回はパスワードの設定も行うことになる．
 
 ## 3. ローカルからABCIに接続するための準備
 公式のドキュメントである[ABCI 3.0 User Guide. "Proxy Jumpの使用".](https://docs.abci.ai/v3/ja/getting-started/#proxyjump)や，先輩が執筆された esa，["ABCIに圧倒的入門するためのページ"](https://nlp.esa.io/posts/2006)を参考にして，ローカルからABCIにsshで繋げるようにする． \
 正しく設定できるとターミナルやVSCodeから接続できるようになる，
 
 ### 3.1 ssh鍵の作成
-自分のパソコン上で ssh 鍵を作成する．（参考：*3，*4）\
+自分のパソコン上で ssh 鍵を作成する．\
 以下のコードをターミナルに打ち込めば良い．
 
 ```bash
@@ -34,16 +53,16 @@ ssh-keygen -t ed25519 -f id_rsa_abci3
 
 実行すると `~/.ssh/id_rsa_abci3`（秘密鍵：他の人に教えちゃいけない鍵）と `~/.ssh/id_rsa_abci3.pub`（公開鍵：接続する相手に教える鍵）が生成されるはずである．
 
-> *3: [note. "sshキー(秘密鍵・公開鍵)の作成と認証　流れ". @soma_sekimoto 
-(soma).](https://qiita.com/soma_sekimoto/items/35845495bc565c38ae9d) \
-> *4: [ITmedia. "【 ssh-keygen 】コマンド――SSHの公開鍵と秘密鍵を作成する"](https://atmarkit.itmedia.co.jp/ait/articles/1908/02/news015.html)
+- [note. "sshキー(秘密鍵・公開鍵)の作成と認証　流れ". @soma_sekimoto 
+(soma).](https://qiita.com/soma_sekimoto/items/35845495bc565c38ae9d)
+- [ITmedia. "【 ssh-keygen 】コマンド――SSHの公開鍵と秘密鍵を作成する"](https://atmarkit.itmedia.co.jp/ait/articles/1908/02/news015.html)
 
 
 ### 3.2 公開鍵の登録．
 3.1 で生成した ssh 鍵のうち，公開鍵（`~/.ssh/id_rsa_abci3.pub`）を登録する． \
-登録には abci3-qa@abci.ai まで連絡を取る必要がある．（参考：*5）
+登録には abci3-qa@abci.ai まで連絡を取る必要がある．
 
-> *5: [ABCI 3.0 User Guide. "前提".](https://docs.abci.ai/v3/ja/getting-started/#prerequisites)
+- [ABCI 3.0 User Guide. "前提".](https://docs.abci.ai/v3/ja/getting-started/#prerequisites)
 
 
 ### 3.3 ssh config の作成
@@ -66,35 +85,115 @@ Host as.v3.abci.ai
 
 ## 4. ABCI上での操作
 ### 4.1 ローカルからABCIに接続する
-`3.ローカルからABCIに接続するための準備`で設定したのを用いて `ssh abci` でABCIに接続する．
+`3.ローカルからABCIに接続するための準備`で設定した上で VSCode から ABCI3.0 に接続する．
 
 ### 4.2 cacheディレクトリの作成
-ログインノードで `mkdir -P /groups/gag51395/share/{your_name}/.cache` を実行し，自分用の cache ディレクトリを作成する． (*6)
+ログインノード（`/home/{ユーザ名}`）で `mkdir -P /groups/gag51395/share/{your_name}/.cache` を実行し，自分用の cache ディレクトリを作成する． (*6)
 > *6: ここで Permission Denide になってしまう場合，`1. ABCIアカウントの発行`でグループに正しく追加されていない可能性がある
 
-### 4.3 環境構築のためのパスの設定
+### 4.3 Pythonのバージョン設定
+pyenv を使って、`jalm_evaluation_private`以下のpythonのデフォルトのバージョンを3.10.14に設定する。
+pyenv を既にインストールしている場合は 4.3.1，4.3.2，4.3.3 をスキップして 4.4.4 から行うこと。
+なお、以下の手順はこちらを参考にした。
+- [pyenvを使った設定方法の参考資料（tsubame 3.0の資料だが、tsubame 4.0にも適用可能)](https://rioyokotalab.github.io/python-supercomputer/)
+
+#### 4.3.1 pyenv のインストール
+以下のコードをログインノード（`/home/{ユーザ名}`）で実行。
+```bash
+curl https://pyenv.run | bash
+```
+
+#### 4.3.2 環境変数の設定
+まず `.bash_profile` を用意する． \
+ログインノード（`/home/{ユーザ名}`）で以下を実行し `.bash_profile` を作成する．
+```bash
+vim .bash_profile
+```
+そのまま，開かれた画面で以下を追記する．
+```text
+if [ -f ~/.bashrc ] ; then
+    . ~/.bashrc
+fi
+```
+
+次に `.bashrc` を用意する． \
+```bash
+vim .bash_profile
+```
+そのまま，開かれた画面で以下を追記する．。
+```text
+# User specific environment
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+```
+
+#### 4.3.3 環境変数の反映
+以下のコードをコマンドラインで実行し、先に設定した環境変数の設定を反映する。
+```bash
+source ~/.bashrc
+```
+
+#### 4.3.4 python のインストール
+以下のコードをコマンドラインで実行し、必要な python をインストールする。
+```bash
+pyenv install 3.10.14
+```
+
+#### 4.3.5 python のバージョンを指定
+以下のいずれかの方法で先にインストールした python のバージョンが評価ディレクトリで使われる指定する。
+
+A) 全てのディレクトリのデフォルトのバージョンが3.10.14になって良い場合
+```bash
+pyenv global 3.10.14
+```
+
+B) `jalm_evaluation_private`以下のデフォルトのバージョンだけを3.10.14にしたい場合(推奨)
+```bash
+cd /path/to/jalm_evaluation_private
+pyenv local 3.10.14
+```
+
+### 4.4 パスの編集
 自分の`jalm-evaluation-private`まで移動する． \
-そこで `vim`などを用いて`scripts/abci/environment/qsub_create_environment.sh`にハードコーディングされている以下のパスを自分に合うように書き直す．
+そこで `vim`などを用いて以下のファイルにハードコーディングされているパスを自分に合うように書き直す．
 
-- `REPO_PATH`: 自分の`jalm-evaluation-private`までの絶対パス．
-- `PIP_CACHEDIR`: `pip install` で使われるキャッシュディレクトリまでのパス． 
-- `SINGULARITY_CACHEDIR`: コーディング系の評価ベンチマークを実行するために用いる仮想コンテナ Singularity で使われるキャッシュディレクトリまでのパス． 
-- `GROUP_ID`: ABCIのグループのID．（産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）
+- scripts/abci/environment/qsub_create_environment.sh
+- scripts/abci/rt_HF/qsub_all.sh
+- scripts/abci/rt_HG/qsub_all.sh
 
-### 4.4 環境構築スクリプトの実行
+| 変数名 | 役割 |
+| -- | -- |
+| `REPO_PATH` | `jalm-evaluation-private`の絶対パス。 |
+| `PIP_CACHEDIR` | `pip install`のキャッシュを置く場所（環境構築の際に使用）。|
+| `HUGGINGFACE_CACHE` | Huggingfaceのモデルの重みを置く場所（評価の際に使用）。|
+| `SINGULARITY_CACHEDIR` | SINGULARITYのキャッシュを置く場所（J/HumanEvalやJ/MBPPの評価時に使用）。|
+|`GROUP_ID`|ABCIのグループのID．（産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
+
+### 4.5 環境構築スクリプトの実行
 `bash scripts/abci/environment/qsub_create_environment.sh` を実行し，環境構築のためのジョブを投げる． \
-`qstat`でジョブの状況が確認できる．投げられたジョブが全て完了したら環境構築完了．
 
-### 4.5 評価実行のためのパスの設定
-- `scripts/abci/rt_HF/qsub_all.sh`
-- `scripts/abci/rt_HG/qsub_all.sh`
+これにより五つのジョブが流れ、以下の環境構築が行われる。
+| ジョブ(環境)の名前 | 対応する評価タスク|
+|--|--|
+|`bigcode`|J/HumanEvalやJA/EN MBPP|
+|`fastchat`| MT-Bench |
+|`llm-jp-eval`| llmjp |
+|`lm-harness-en`| BBH, MATH, MMLU, GPQA, General(TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2) |
+|`lm-harness-jp` | MGSM, XL-SUM, WMT20-EN-JA, WMT20-JA-EN | の評価に使う環境の構築
 
-にハードコーディングされている以下の変数を自分の環境に合わせて編集する
+なお、各環境を以下のように個別に構築することもできる。
 
-- `REPO_PATH`: 自分の`jalm-evaluation-private`までの絶対パス．
-- `GROUP_ID`: ABCIのグループのID．（産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）
-- `HUGGINGFACE_CACHE`: Huggingfaceのモデルの重みを置く場所． `/groups/gag51395/share/{Your Name}/.cache`というディレクトリを作り，それを使う．
-  - gag51395への書き込み権限がない場合，産総研のグループにアカウントが追加されていないので追加してもらうこと．
+`bigcode`の例：
+```bash
+REPO_PATH="/home/path/to/your/repo"
+PIP_CACHEDIR="/home/path/to/your/pipcache"
+SINGULARITY_CACHEDIR="/home/path/to/your/singularitycache"
+bash scripts/abci/environment/bigcode.sh $REPO_PATH $PIP_CACHEDIR $SINGULARITY_CACHEDIR
+```
+
+各環境の詳細(ライブラリの構成など)は `scripts/abci/environment/` 以下のコードを参照されたい。
+また、実行時のログについては `~/.SE_crtenv_bigcode` のように出力されるので必要な際は確認されたい。
 
 ### 4.6 tokyotech-llmへの参加
 Hugging Face にある東工大のllmグループ [tokyotech-llm](https://huggingface.co/tokyotech-llm) に参加申請を行い，参加する．
@@ -107,28 +206,37 @@ echo OPENAI_API_KEY=sk-... >> ${CACHE_DIR}/token
 echo HF_TOKEN=hf_... >> ${CACHE_DIR}/token
 ```
 
-# 評価の手順
+- [Qiita. "OpenAIのAPIキー取得方法|2024年7月最新版|料金体系や注意事項".](https://qiita.com/kurata04/items/a10bdc44cc0d1e62dad3)
+- [Edge HUB. "Hugging Faceの使い方！アクセストークン作成からログインまで".](https://highreso.jp/edgehub/machinelearning/huggingfacetoken.html)
 
-## 実行
+<br>
 
-ログインノードで以下のコマンドを実行
+# B. 評価の手順
+## 1. 評価するタスクの選択
+対応するスクリプトを直接編集し、評価**しない**ベンチマークの行は全てコメントアウトしておく。
 
-A100一枚で動くモデル（だいたい21B以下）の場合は
+|モデルサイズ|対応するスクリプト|
+| -- | -- |
+| 13B 以下 | `scripts/abci/rt_HG/qsub_all.sh` |
+| 13B 超 | `scripts/abci/rt_HF/qsub_all.sh` |
 
+## 2. 評価スクリプトの実行
+評価したいモデルを Huggingface の表記に従って `MODEL_NAME` に格納し、先に編集したスクリプトの引数に渡してキューを投げる。
+
+実行例 (`tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2`の場合)：
 ```bash
-MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/Swallow-7b-instruct-v0.1)
+MODEL_NAME=tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2
 bash scripts/abci/rt_HG/qsub_all.sh $MODEL_NAME
 ```
 
-それ以上のモデルの場合は
+## 3. 評価状況の確認（WIP）
+`scripts/abci/utils/save_and_check_qstat.sh` を実行することで評価の進捗状況を確認することができる。
 
+出力例：
 ```bash
-MODEL_NAME=評価したいモデルのhuggingfaceの名前 (e.g. tokyotech-llm/Swallow-70b-hf)
-bash scripts/abci/rt_HF/qsub_all.sh $MODEL_NAME
 ```
 
-## 結果の確認
-
+## 4. 結果の確認
 - 全体の結果は`results/{MODEL NAME}/aggregated_result.json`に書き込まれる
   - `overall`に載っているスコア（文字列）を評価結果を記入するスプレッドシートにコピペすればOKなはず
 - それぞれのベンチマークの結果は`results/{MODEL NAME}/`以下のそれぞれのディレクトリの中に書き込まれる
@@ -146,3 +254,77 @@ tokyotech-llm/Llama-3-70b-exp6-LR1.0e-5-MINLR1.0E-6-WD0.1-iter0002500,0.23403411
 ```
 
 これをコピーしてスプレッドシートに shift + cmd + V でペースト -> 「テキストを列に分割」 で簡単に結果の記入ができる
+
+
+# C. 評価の詳細
+## 評価スクリプトとベンチマークの対応
+
+|スクリプト|対応するベンチマーク|
+| -- | -- |
+| `evaluate_english_bbh.sh` | BBH (論理推論・算術推論)
+| `evaluate_english_general.sh` | TriviaQA (百科事典的知識・常識), GSM8K (算術推論), OpenBookQA (百科事典的知識・常識), Hellaswag (百科事典的知識・常識), XWINO(読解), SQuAD2(読解) |
+| `evaluate_english_humaneval-unstripped.sh` | HumanEval (コード生成)|
+| `evaluate_english_math.sh` | Math [hendrycksmath2021から、OpenAIの"Let's Verify Step by Step"に倣って500問をサンプリング] (算術推論) |
+| `evaluate_english_mbpp.sh` | MBPP (コード生成)|
+| `evaluate_english_mbpp.sh` | MMLU (一般教養)|
+| `evaluate_english_gpqa.sh` | GPQA（博士課程）|
+| `evaluate_english.sh` (現在は不使用) | Harness En 全て (BBH, Math, MMLU, TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2) |
+| `evaluate_ja_humaneval-unstripped.sh` | JHumanEval (コード生成)|
+| `evaluate_ja_llmjp.sh` | NIILC (百科事典的知識・常識), JCommonsenseQA (百科事典的知識・常識), JSQuAD (読解) |
+| `evaluate_ja_mbpp.sh` | JA MBPP (コード生成)|
+| `evaluate_ja_mbpp.sh` | JMMLU (一般教養)|
+| `evaluate_ja_mgsm.sh` | MGSM (算術推論) |
+| `evaluate_ja_mt_bench.sh` | MT-Bench (会話)|
+| `evaluate_ja_wmt20_enja.sh` | WMT20-en-ja (英日機械翻訳)|
+| `evaluate_ja_wmt20_jaen.sh` | WMT20-ja-en (日英機械翻訳)|
+| `evaluate_ja_xlsum.sh` | XL-SUM (要約)|
+
+## 評価結果の表とベンチマークの対応
+| 言語 | 大分類 | 小分類 |
+| -- | -- | -- |
+| EN | harness_en | gsm8k |
+||| squad2 |
+|||squad2_best_exact |
+||| triviaqa |
+||| hellaswag |
+||| openbookqa |
+||| xwinograd_en |
+||| bbh_cot |
+||| bbh_cot |
+||| mmlu |
+||| mmlu_social_sciences |
+||| mmlu_humanities |
+||| mmlu_stem |
+||| mmlu_other |
+||| math_500 |
+||| gpqa_main_meta_llama3_cot_zeroshot |
+|| humaneval | humaneval@1 |
+||| humaneval@10 |
+||| humaneval_answer@10 |
+| JA | humaneval | jhumaneval@1 |
+||| jhumaneval@10 |
+||| jhumaneval_answer@10 |
+|| llmjp| MC |
+||| NLI |
+||| QA |
+||| RC |
+||| jamp (NLI) |
+||| janli (NLI) |
+||| jcommonsenseqa |
+||| jemhopqa |
+||| jnli |
+||| jsem |
+||| jsick (NLI) |
+||| jsquad |
+||| jsts_pearson |
+||| jsts_spearman |
+||| niilc |
+||| jmmlu |
+||| jmmlu_social_sciences |
+||| jmmlu_humanities |
+||| jmmlu_stem |
+||| jmmlu_other |
+|| mgsm | MATH (mgsm_ja) |
+|| wml20_en_ja | wmt20_en_ja_bleu |
+|| wml20_ja_en | wmt20_ja_en_bleu |
+|| xlsum | XLSUM_ja_1shot |
