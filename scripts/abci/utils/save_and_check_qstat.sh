@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 
 # 現在のジョブ情報を取得（-f で詳細情報）
 qstat_output=$(qstat -f)
-old_jobs=$(cat qstat_history.out 2>/dev/null)
+old_jobs=$(cat .qstat_history.out 2>/dev/null)
 
 # どちらも空の場合は終了
 if [[ -z "$qstat_output" && -z "$old_jobs" ]]; then
@@ -13,7 +13,7 @@ if [[ -z "$qstat_output" && -z "$old_jobs" ]]; then
 fi
 
 # qstat の出力を一時ファイルに保存
-echo "$qstat_output" > current_qstat.out
+echo "$qstat_output" > .current_qstat.out
 
 results=""
 declare -A current_job_map
@@ -42,17 +42,17 @@ while IFS= read -r -d '' job_block; do
        current_job_map["$job_id"]="${state} ${node_kind} ${task_kind} ${model_name}"
     fi
 
-done < <(awk -v RS='' '{print $0 "\0"}' current_qstat.out)
+done < <(awk -v RS='' '{print $0 "\0"}' .current_qstat.out)
 
 # 出力ヘッダーの表示（不要な情報を削除した形）
-printf "%-15s %-8s %-8s %-35s %-100s\n" "job_ID" "state" "node" "task" "model name"
-echo "----------------------------------------------------------------------------------------------------------------------"
+printf "%-15s %-8s %-8s %-20s %-100s\n" "job_ID" "state" "node" "task" "model name"
+printf '%*s\n' 131 '' | tr ' ' '-'
 
 # 前回の情報（old_jobs）と比較し、現在存在しないジョブは「done」として表示
 if [ -n "$old_jobs" ]; then
   while read -r old_job_id old_state old_node_kind old_task_kind old_model_name; do
     if [[ -z "${current_job_map[$old_job_id]}" ]]; then
-      printf "%-15s %-8s %-8s %-35s %-100s\n" "$old_job_id" "done" "$old_node_kind" "$old_task_kind" "$old_model_name"
+      printf "%-15s %-8s %-8s %-20s %-100s\n" "$old_job_id" "done" "$old_node_kind" "$old_task_kind" "$old_model_name"
     fi
   done < <(echo -e "$old_jobs")
 fi
@@ -65,7 +65,7 @@ echo -e "$results" | while IFS=$'\t' read -r job_id state node_kind task_kind mo
 done
 
 # 現在のジョブ情報を保存（次回比較用）
-echo -e "$results" > qstat_history.out
+echo -e "$results" > .qstat_history.out
 
 # 一時ファイルを削除
-rm current_qstat.out
+rm .current_qstat.out
