@@ -4,6 +4,12 @@ HUGGINGFACE_CACHE="/groups/gag51395/share/{name}/.cache"
 
 MODEL_NAME_PATH=$1
 
+# Ensure MODEL_NAME_PATH is set.
+if [ -z "$MODEL_NAME_PATH" ]; then
+  echo "Error: MODEL_NAME_PATH is not set."
+  exit 1
+fi
+
 # Japanese
 # mt_bench
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/"
