@@ -141,7 +141,7 @@ pyenv install 3.10.14
 ```
 
 #### 4.3.5 python のバージョンを指定
-以下のいずれかの方法で先にインストールした python のバージョンが評価ディレクトリで使われる指定する。
+以下のいずれかの方法で先にインストールした python のバージョンが評価ディレクトリで使われるように指定する。
 
 A) 全てのディレクトリのデフォルトのバージョンが3.10.14になって良い場合
 ```bash
@@ -154,7 +154,33 @@ cd /path/to/jalm_evaluation_private
 pyenv local 3.10.14
 ```
 
-### 4.4 パスの編集
+### 4.4 評価で用いる環境変数の設定
+評価で用いる環境変数を`~/.bashrc`に登録する。
+
+```bash
+vim ~/.bash_profile
+```
+そのまま，開かれた画面で以下を追記する．
+```text
+export SWALLOW_EVAL_ROOT=(`jalm-evaluation-private`の絶対パス。, 例: /home/{username}/jalm-evaluation-private)
+export SWALLOW_EVAL_PIP_CACHE=(`pip install`のキャッシュを置く場所（環境構築の際に使用）。, 例: /home/{username}/.cache/pip)
+export SWALLOW_EVAL_SINGULARITY_CACHE=(Singularityのキャッシュを置く場所（評価の際に使用）。, 例: /home/{username}/.cache/singularity)
+export SWALLOW_EVAL_HUGGINGFACE_CACHE=(Huggingfaceのモデルの重みを置く場所（評価の際に使用）。, 例: /home/{username}/.cache/huggingface)
+```
+
+環境変数を登録したくない場合は、自身で以下のファイルの環境変数を用いる部分をハードコーディングすれば良い。
+
+- scripts/abci/environment/qsub_create_environment.sh
+- scripts/abci/rt_HF/qsub_all.sh
+- scripts/abci/rt_HG/qsub_all.sh
+
+
+追記が終わったら、以下のコードをコマンドラインで実行し、先に設定した環境変数の設定を反映する。
+```bash
+source ~/.bashrc
+```
+
+### 4.5 パスの編集
 自分の`jalm-evaluation-private`まで移動する． \
 そこで `vim`などを用いて以下のファイルにハードコーディングされているパスを自分に合うように書き直す．
 
@@ -163,14 +189,9 @@ pyenv local 3.10.14
 - scripts/abci/rt_HG/qsub_all.sh
 
 | 変数名 | 役割 |
-| -- | -- |
-| `REPO_PATH` | `jalm-evaluation-private`の絶対パス。 |
-| `PIP_CACHEDIR` | `pip install`のキャッシュを置く場所（環境構築の際に使用）。|
-| `HUGGINGFACE_CACHE` | Huggingfaceのモデルの重みを置く場所（評価の際に使用）。|
-| `SINGULARITY_CACHEDIR` | SINGULARITYのキャッシュを置く場所（J/HumanEvalやJ/MBPPの評価時に使用）。|
-|`GROUP_ID`|ABCIのグループのID．（産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
+|`GROUP_ID`|ABCIのグループのID．（基本的には産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
 
-### 4.5 環境構築スクリプトの実行
+### 4.6 環境構築スクリプトの実行
 `bash scripts/abci/environment/qsub_create_environment.sh` を実行し，環境構築のためのジョブを投げる． \
 
 これにより五つのジョブが流れ、以下の環境構築が行われる。
