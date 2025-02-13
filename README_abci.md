@@ -163,9 +163,9 @@ vim ~/.bashrc
 # Swallow-Evaluation environment
 export SWALLOW_EVAL_ROOT="/home/{username}/jalm-evaluation-private"
 export SWALLOW_EVAL_CACHEDIR="/home/{username}/.cache/"
-export SWALLOW_EVAL_PIP_CACHEDIR="${SWALLOW_EVAL_CACHE}/pip"
-export SWALLOW_EVAL_HUGGINGFACE_CACHEDIR="${SWALLOW_EVAL_CACHE}/huggingface"
-export SWALLOW_EVAL_SINGULARITY_CACHEDIR="${SWALLOW_EVAL_CACHE}/singularity"
+export SWALLOW_EVAL_PIP_CACHEDIR="${SWALLOW_EVAL_CACHEDIR}/pip"
+export SWALLOW_EVAL_HUGGINGFACE_CACHEDIR="${SWALLOW_EVAL_CACHEDIR}/huggingface"
+export SWALLOW_EVAL_SINGULARITY_CACHEDIR="${SWALLOW_EVAL_CACHEDIR}/singularity"
 ```
 また，各評価者にとって管理しやすいパスがある場合には，上記の例に合う形でなくとも良い．
 
@@ -291,7 +291,7 @@ Hugging Face にある東工大のllmグループ [tokyotech-llm](https://huggin
 echo OPENAI_API_KEY=sk-... >> ${SWALLOW_EVAL_ROOT}/.env
 echo HF_TOKEN=hf_... >> ${SWALLOW_EVAL_ROOT}/.env
 
-echo hf_... >> ${SWALLOW_EVAL_CACHE}/token
+echo hf_... >> ${SWALLOW_EVAL_CACHEDIR}/token
 ```
 
 - [Qiita. "OpenAIのAPIキー取得方法|2024年7月最新版|料金体系や注意事項".](https://qiita.com/kurata04/items/a10bdc44cc0d1e62dad3)
