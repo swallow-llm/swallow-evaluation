@@ -133,10 +133,66 @@ cd /home{ユーザ名}/github
 git clone -b {指定されたブランチ名} {4.3.1で得たURL}
 ```
 
+### 4.4 評価で用いる変数の設定
+#### 4.4.1 環境変数への登録
+評価で用いるパスは環境変数として登録する． \
+ただし，ABCI3.0 のログインノード（`/home/{ユーザ名}`）には， `.bash_profile` と `.bashrc` がデフォルトでは作られていない．
+そこでそれらを用意する必要がある．
 
-### 4.4 パスの編集
-自分の`jalm-evaluation-private`まで移動する． \
-そこで `vim`などを用いて以下のファイルにハードコーディングされているパスを自分に合うように書き直す．
+まず `.bash_profile` を用意する． \
+ログインノード（`/home/{ユーザ名}`）で以下を実行し `.bash_profile` を作成する．
+```bash
+vim .bash_profile
+```
+そのまま，開かれた画面で以下を追記する．
+```text
+if [ -f ~/.bashrc ] ; then
+    . ~/.bashrc
+fi
+```
+
+編集画面を `:` と `qw` で上書きした上で終了する． \
+次に評価で用いる環境変数を`~/.bashrc`に登録する。
+
+```bash
+vim ~/.bashrc
+```
+そのまま，開かれた画面で以下を追記する． \
+なお，`{username}` は評価者によって異なる．
+```text
+# Swallow-Evaluation environment
+export SWALLOW_EVAL_ROOT="/home/{username}/jalm-evaluation-private"
+export SWALLOW_EVAL_CACHEDIR="/home/{username}/.cache/"
+export SWALLOW_EVAL_PIP_CACHEDIR="${SWALLOW_EVAL_CACHE}/pip"
+export SWALLOW_EVAL_HUGGINGFACE_CACHEDIR="${SWALLOW_EVAL_CACHE}/huggingface"
+export SWALLOW_EVAL_SINGULARITY_CACHEDIR="${SWALLOW_EVAL_CACHE}/singularity"
+```
+また，各評価者にとって管理しやすいパスがある場合には，上記の例に合う形でなくとも良い．
+
+| 変数名 | 役割 |
+| -- | -- |
+| `SWALLOW_EVAL_ROOT` | `jalm-evaluation-private`の絶対パス。 |
+| `SWALLOW_EVAL_PIP_CACHEDIR` | `pip install`のキャッシュを置く場所（環境構築の際に使用）。|
+| `SWALLOW_EVAL_HUGGINGFACE_CACHEDIR` | Huggingfaceのモデルの重みを置く場所（評価の際に使用）。|
+| `SWALLOW_EVAL_SINGULARITY_CACHEDIR` | SINGULARITYのキャッシュを置く場所（J/HumanEvalやJ/MBPPの評価時に使用）。|
+
+環境変数を登録したくない場合は、自身で以下のファイルの環境変数を用いる部分をハードコーディングすれば良い。
+
+- scripts/abci/environment/qsub_create_environment.sh
+- scripts/abci/rt_HF/qsub_all.sh
+- scripts/abci/rt_HG/qsub_all.sh
+
+追記が終わったら、以下のコードをコマンドラインで実行し、先に設定した環境変数の設定を反映する。
+```bash
+source ~/.bashrc
+```
+
+#### 4.4.2 ハードコーディングされた変数の修正
+評価に用いる変数のうち， `GROUP_ID` はお金に関わる重要な項目なので，
+環境変数への登録はせず，ハードコーディングを適宜修正する形を採用している．
+
+まず，自分の`jalm-evaluation-private`まで移動する． \
+そこで `vim`などを用いて以下のファイルにハードコーディングされている `GROUP_ID` を自分に合うように書き直す．
 
 - scripts/abci/environment/qsub_create_environment.sh
 - scripts/abci/rt_HF/qsub_all.sh
@@ -144,11 +200,7 @@ git clone -b {指定されたブランチ名} {4.3.1で得たURL}
 
 | 変数名 | 役割 |
 | -- | -- |
-| `REPO_PATH` | `jalm-evaluation-private`の絶対パス。 |
-| `PIP_CACHEDIR` | `pip install`のキャッシュを置く場所（環境構築の際に使用）。|
-| `HUGGINGFACE_CACHE` | Huggingfaceのモデルの重みを置く場所（評価の際に使用）。|
-| `SINGULARITY_CACHEDIR` | SINGULARITYのキャッシュを置く場所（J/HumanEvalやJ/MBPPの評価時に使用）。|
-|`GROUP_ID`|ABCIのグループのID．（産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
+|`GROUP_ID`|ABCIのグループのID．（基本的には産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
 
 
 ### 4.5 Pythonのバージョン設定
@@ -165,25 +217,10 @@ curl https://pyenv.run | bash
 ```
 
 
-#### 4.5.2 環境変数の設定
-ABCI3.0 のログインノード（`/home/{ユーザ名}`）には， `.bash_profile` と `.bashrc` がデフォルトでは作られていない．
-そこでそれらを用意する必要がある．
-
-まず `.bash_profile` を用意する． \
-ログインノード（`/home/{ユーザ名}`）で以下を実行し `.bash_profile` を作成する．
+#### 4.5.2 環境変数の登録
+pyenvに必要な環境変数を登録する．
 ```bash
-vim .bash_profile
-```
-そのまま，開かれた画面で以下を追記する．
-```text
-if [ -f ~/.bashrc ] ; then
-    . ~/.bashrc
-fi
-```
-
-次に `.bashrc` を用意する． \
-```bash
-vim .bash_profile
+vim .bashrc
 ```
 そのまま，開かれた画面で以下を追記する．。
 ```text
@@ -221,43 +258,6 @@ cd /path/to/your/jalm_evaluation_private
 pyenv local 3.10.14
 ```
 
-### 4.4 評価で用いる環境変数の設定
-評価で用いる環境変数を`~/.bashrc`に登録する。
-
-```bash
-vim ~/.bash_profile
-```
-そのまま，開かれた画面で以下を追記する．
-```text
-export SWALLOW_EVAL_ROOT=(`jalm-evaluation-private`の絶対パス。, 例: /home/{username}/jalm-evaluation-private)
-export SWALLOW_EVAL_PIP_CACHE=(`pip install`のキャッシュを置く場所（環境構築の際に使用）。, 例: /home/{username}/.cache/pip)
-export SWALLOW_EVAL_SINGULARITY_CACHE=(Singularityのキャッシュを置く場所（評価の際に使用）。, 例: /home/{username}/.cache/singularity)
-export SWALLOW_EVAL_HUGGINGFACE_CACHE=(Huggingfaceのモデルの重みを置く場所（評価の際に使用）。, 例: /home/{username}/.cache/huggingface)
-```
-
-環境変数を登録したくない場合は、自身で以下のファイルの環境変数を用いる部分をハードコーディングすれば良い。
-
-- scripts/abci/environment/qsub_create_environment.sh
-- scripts/abci/rt_HF/qsub_all.sh
-- scripts/abci/rt_HG/qsub_all.sh
-
-
-追記が終わったら、以下のコードをコマンドラインで実行し、先に設定した環境変数の設定を反映する。
-```bash
-source ~/.bashrc
-```
-
-### 4.5 パスの編集
-自分の`jalm-evaluation-private`まで移動する． \
-そこで `vim`などを用いて以下のファイルにハードコーディングされているパスを自分に合うように書き直す．
-
-- scripts/abci/environment/qsub_create_environment.sh
-- scripts/abci/rt_HF/qsub_all.sh
-- scripts/abci/rt_HG/qsub_all.sh
-
-| 変数名 | 役割 |
-|`GROUP_ID`|ABCIのグループのID．（基本的には産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
-
 ### 4.6 環境構築スクリプトの実行
 `bash scripts/abci/environment/qsub_create_environment.sh` を実行し，環境構築のためのジョブを投げる． \
 
@@ -274,10 +274,7 @@ source ~/.bashrc
 
 `bigcode`の例：
 ```bash
-REPO_PATH="/home/{username}/github/jalm-evaluation-private"
-PIP_CACHEDIR="/home/{username}/.cache/pip"
-SINGULARITY_CACHEDIR="/home/{username}/.cache/singularity"
-bash scripts/abci/environment/bigcode.sh $REPO_PATH $PIP_CACHEDIR $SINGULARITY_CACHEDIR
+bash scripts/abci/environment/bigcode.sh $SWALLOW_EVAL_ROOT $SWALLOW_EVAL_PIP_CACHEDIR $SWALLOW_EVAL_SINGULARITY_CACHEDIR
 ```
 
 各環境の詳細(ライブラリの構成など)は `scripts/abci/environment/` 以下のコードを参照されたい。
@@ -291,12 +288,10 @@ Hugging Face にある東工大のllmグループ [tokyotech-llm](https://huggin
 ### 4.8 HuggingFace と OpenAI の Token 登録
 モデルのアクセスのために HuggingFace と OpenAI の Token が必要になるので登録しておく．
 ```bash
-REPO_PATH="/home/{username}/github/jalm-evaluation-private"
-echo OPENAI_API_KEY=sk-... >> ${REPO_PATH}/.env
-echo HF_TOKEN=hf_... >> ${REPO_PATH}/.env
+echo OPENAI_API_KEY=sk-... >> ${SWALLOW_EVAL_ROOT}/.env
+echo HF_TOKEN=hf_... >> ${SWALLOW_EVAL_ROOT}/.env
 
-CACHE_DIR="/groups/gag51395/share/{Your Name}/.cache"
-echo hf_... >> ${CACHE_DIR}/token
+echo hf_... >> ${SWALLOW_EVAL_CACHE}/token
 ```
 
 - [Qiita. "OpenAIのAPIキー取得方法|2024年7月最新版|料金体系や注意事項".](https://qiita.com/kurata04/items/a10bdc44cc0d1e62dad3)
@@ -307,8 +302,7 @@ echo hf_... >> ${CACHE_DIR}/token
 ABCI3.0 では評価スクリプトにユーザへの実行権限を付加する必要がある． \
 具体的には以下のコードでそれを実現できる．
 ```bash
-cd /path/to/your/jalm_evaluation_private
-chmod u+x scripts/abci/rt_H*/evaluate_*.sh
+chmod u+x ${SWALLOW_EVAL_ROOT}/scripts/abci/rt_H*/evaluate_*.sh
 ```
 
 なお，実行権限が正しく付与されたかどうかは `ls -l` を使って確かめることができる．
@@ -334,10 +328,10 @@ chmod u+x scripts/abci/rt_H*/evaluate_*.sh
 実行例 (`tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2`の場合)：
 ```bash
 MODEL_NAME=tokyotech-llm/Llama-3.1-Swallow-8B-Instruct-v0.2
-bash scripts/abci/rt_HG/qsub_all.sh $MODEL_NAME
+bash ${SWALLOW_EVAL_ROOT}/scripts/abci/rt_HG/qsub_all.sh $MODEL_NAME
 ```
 
-## 3. 評価状況の確認（WIP）
+## 3. 評価状況の確認
 `scripts/abci/utils/save_and_check_qstat.sh` を実行することで評価の進捗状況を確認することができる。
 
 出力サンプル：
@@ -382,7 +376,7 @@ tokyotech-llm/Llama-3-70b-exp6-LR1.0e-5-MINLR1.0E-6-WD0.1-iter0002500,0.23403411
 実行例（`.venv_bigcode`を選んだ場合）：
 ```bash
 source .venv_bigcode/bin/activate
-pip install huggingface-cli
+pip install huggingface-cli --cache-dir ${SWALLOW_EVAL_PIP_CACHEDIR}
 ```
 
 
@@ -402,8 +396,7 @@ huggingface-cli login
 評価時間の短縮につながる．
 ```bash
 MODEL_NAME=...
-HUGGINGFACE_CACHEDIR=...
-huggingface-cli download $MODEL_NAME --cache-dir $HUGGINGFACE_CACHEDIR
+huggingface-cli download $MODEL_NAME --cache-dir $SWALLOW_EVAL_HUGGINGFACE_CACHEDIR
 ```
 
 

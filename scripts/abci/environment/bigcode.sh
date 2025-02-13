@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-REPO_PATH=$1
+ROOT_PATH=$1
 PIP_CACHEDIR=$2
 SINGULARITY_CACHEDIR=$3
 
 ####
 
-cd $REPO_PATH
+cd $ROOT_PATH
 
 source ~/.bashrc
 source /etc/profile.d/modules.sh
@@ -28,7 +28,7 @@ pip install vllm==v0.6.3.post1 --cache-dir ${PIP_CACHEDIR}
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121 --cache-dir ${PIP_CACHEDIR}
 deactivate
 
-cd $REPO_PATH
+cd $ROOT_PATH
 
 # singularity set-up　(takes at most 30 minutes)
 export SINGULARITY_CACHEDIR=$SINGULARITY_CACHEDIR

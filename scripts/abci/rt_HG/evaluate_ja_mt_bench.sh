@@ -7,7 +7,7 @@ source /etc/profile.d/modules.sh
 module load cuda/12.1/12.1.1
 module load cudnn/9.5/9.5.1 
 
-REPO_PATH=$1
+ROOT_PATH=$1
 HUGGINGFACE_CACHE=$2
 MODEL_NAME_PATH=$3
 GPU_NUM=$4
@@ -25,11 +25,11 @@ else
 fi
 echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
-cd $REPO_PATH
+cd $ROOT_PATH
 
 source .venv_fastchat/bin/activate
 
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
+OUTDIR="${ROOT_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
 mkdir -p $OUTDIR
 
 

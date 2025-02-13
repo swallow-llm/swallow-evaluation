@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-REPO_PATH=$1
+ROOT_PATH=$1
 PIP_CACHEDIR=$2
 
 ####
 
-cd $REPO_PATH
+cd $ROOT_PATH
 
 source ~/.bashrc
 source /etc/profile.d/modules.sh
@@ -26,5 +26,5 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121 --ca
 pip install markdown beautifulsoup4 --cache-dir ${PIP_CACHEDIR}
 deactivate
 
-cd $REPO_PATH
+cd $ROOT_PATH
 echo Make sure to write your OPENAI API KEY in .env to generate judgements with OpenAI API.

@@ -1,9 +1,11 @@
 #!/bin/bash
-REPO_PATH=
 
-# REPO_PATH が設定されているかチェック
-if [ -z "$REPO_PATH" ]; then
-  echo "Error: REPO_PATH environment variable is not set."
+# スクリプトのあるディレクトリに移動
+cd "$(dirname "$0")"
+
+# SWALLOW_EVAL_ROOT が設定されているかチェック
+if [ -z "$SWALLOW_EVAL_ROOT" ]; then
+  echo "Error: SWALLOW_EVAL_ROOT environment variable is not set."
   exit 1
 fi
 
@@ -58,7 +60,7 @@ for file in "$HOME"/.SE_*; do
     fi
 
     # 移動先ディレクトリを作成し，ファイルを移動
-    dest="$REPO_PATH/results/${owner}/${model_name}/${dir}"
+    dest="$SWALLOW_EVAL_ROOT/results/${owner}/${model_name}/${dir}"
     if [ -d "$dest"]; then
       echo "Warning: No such dir named '$dest'. Skipping file '$filename'."
       continue
