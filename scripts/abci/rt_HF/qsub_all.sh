@@ -3,8 +3,19 @@ source ~/.bashrc
 GROUP_ID="gag51395"
 
 ROOT_PATH=$SWALLOW_EVAL_ROOT
-HUGGINGFACE_CACHE=$SWALLOW_EVAL_HUGGINGFACE_CACHE
+HUGGINGFACE_CACHE=$SWALLOW_EVAL_HUGGINGFACE_CACHEDIR
 MODEL_NAME_PATH=$1
+
+# 環境変数がセットされているか確認
+if [ -z "$SWALLOW_EVAL_ROOT" ]; then
+  echo "Error: SWALLOW_EVAL_ROOT environment variable is not set."
+  exit 1
+fi
+
+if [ -z "$SWALLOW_EVAL_HUGGINGFACE_CACHEDIR" ]; then
+  echo "Error: SWALLOW_EVAL_HUGGINGFACE_CACHEDIR environment variable is not set."
+  exit 1
+fi
 
 # Ensure MODEL_NAME_PATH is set.
 if [ -z "$MODEL_NAME_PATH" ]; then
