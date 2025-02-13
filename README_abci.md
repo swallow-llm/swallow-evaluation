@@ -26,11 +26,12 @@
 
 <br>
 
-# A. 初回準備
 
+# A. 初回準備
 ## 1. ABCIアカウントの発行
 ABCIのアカウントを発行してもらい，グループ(`gag51395`)に入れてもらう．
 > グループへの追加が上手くできていないと書き込み権限が付与されない．
+
 
 ## 2. ABCIへのログイン
 [ABCI利用者ポータル](https://portal.abci.ai/user/)からログインをする． \
@@ -39,16 +40,18 @@ ABCIのアカウントを発行してもらい，グループ(`gag51395`)に入�
 > 迷惑メールに振り分けられることが多い．\
 > また，初回はパスワードの設定も行うことになる．
 
+
 ## 3. ローカルからABCIに接続するための準備
 公式のドキュメントである[ABCI 3.0 User Guide. "Proxy Jumpの使用".](https://docs.abci.ai/v3/ja/getting-started/#proxyjump)や，先輩が執筆された esa，["ABCIに圧倒的入門するためのページ"](https://nlp.esa.io/posts/2006)を参考にして，ローカルからABCIにsshで繋げるようにする． \
 正しく設定できるとターミナルやVSCodeから接続できるようになる，
+
 
 ### 3.1 ssh鍵の作成
 自分のパソコン上で ssh 鍵を作成する．\
 以下のコードをターミナルに打ち込めば良い．
 
 ```bash
-ssh-keygen -t ed25519 -f id_rsa_abci3
+ssh-keygen -f id_rsa_abci3
 ```
 
 実行すると `~/.ssh/id_rsa_abci3`（秘密鍵：他の人に教えちゃいけない鍵）と `~/.ssh/id_rsa_abci3.pub`（公開鍵：接続する相手に教える鍵）が生成されるはずである．
@@ -87,23 +90,85 @@ Host as.v3.abci.ai
 ### 4.1 ローカルからABCIに接続する
 `3.ローカルからABCIに接続するための準備`で設定した上で VSCode から ABCI3.0 に接続する．
 
+
 ### 4.2 cacheディレクトリの作成
 ログインノード（`/home/{ユーザ名}`）で `mkdir -P /groups/gag51395/share/{your_name}/.cache` を実行し，自分用の cache ディレクトリを作成する． (*6)
 > *6: ここで Permission Denide になってしまう場合，`1. ABCIアカウントの発行`でグループに正しく追加されていない可能性がある
 
-### 4.3 Pythonのバージョン設定
+
+### 4.3 `jalm_evaluation_private`のクローン
+#### 4.3.1 GitHub への公開鍵登録 (WIP)
+GitHub からのクローンを行うために，ABIC上で作成した ssh 鍵のうち，公開鍵をGitHub へ登録する必要がある． \
+鍵の生成には「A.3.1 ssh鍵の作成」で用いたものと同様のコードを用いれば良い． \
+なお，名前の設定`-f`は任意である．
+```bash
+ssh-keygen
+```
+
+こうして生成した鍵のうち，公開鍵の方(`~/.ssh/id_rsa.pub`)を GitHub に登録しておく． \
+登録は [GitHub](https://github.com/) → 右上のアイコン → Settings → SSH and GPG keys → New SSH key からできる．
+
+- [GitHub Docs. "GitHub アカウントへの新しい SSH キーの追加".](https://docs.github.com/ja/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+
+
+
+#### 4.3.2 URLの入手
+[レポジトリ](https://github.com/nlp-titech/jalm-evaluation-private)から本評価フレームワークをクローンするためのURLを入手する． \
+左上にある緑色の`<> Code`というボタンをクリックし，`HTTPS`タブで表示されているURLをコピーする．
+
+
+#### 4.3.3 自分のディレクトリへのクローン
+ログインノード（`/home/{ユーザ名}`）以下の好きな場所に本評価フレームワークをクローンする． \
+もし他の実験のために他のレポジトリもクローンすることが考えられる場合は，`/home{ユーザ名}/github`というディレクトリを作り，その中でクローンすると良いだろう．
+
+具体的なクローンのコマンドは以下の通りだ．
+```bash
+cd /home{ユーザ名}/github
+git clone {4.3.1で得たURL}
+```
+
+もし，特定のブランチ（バージョン）を指定されていた場合は，以下のコマンドを実行すれば良い．
+```bash
+cd /home{ユーザ名}/github
+git clone -b {指定されたブランチ名} {4.3.1で得たURL}
+```
+
+
+### 4.4 パスの編集
+自分の`jalm-evaluation-private`まで移動する． \
+そこで `vim`などを用いて以下のファイルにハードコーディングされているパスを自分に合うように書き直す．
+
+- scripts/abci/environment/qsub_create_environment.sh
+- scripts/abci/rt_HF/qsub_all.sh
+- scripts/abci/rt_HG/qsub_all.sh
+
+| 変数名 | 役割 |
+| -- | -- |
+| `REPO_PATH` | `jalm-evaluation-private`の絶対パス。 |
+| `PIP_CACHEDIR` | `pip install`のキャッシュを置く場所（環境構築の際に使用）。|
+| `HUGGINGFACE_CACHE` | Huggingfaceのモデルの重みを置く場所（評価の際に使用）。|
+| `SINGULARITY_CACHEDIR` | SINGULARITYのキャッシュを置く場所（J/HumanEvalやJ/MBPPの評価時に使用）。|
+|`GROUP_ID`|ABCIのグループのID．（産総研のグループIDを指定すること．間違えて岡崎研のIDにすると岡崎研のお金を使ってしまう．）|
+
+
+### 4.5 Pythonのバージョン設定
 pyenv を使って、`jalm_evaluation_private`以下のpythonのデフォルトのバージョンを3.10.14に設定する。
-pyenv を既にインストールしている場合は 4.3.1，4.3.2，4.3.3 をスキップして 4.4.4 から行うこと。
+pyenv を既にインストールしている場合は 4.5.1，4.5.2，4.5.3 をスキップして 4.5.4 から行うこと。
 なお、以下の手順はこちらを参考にした。
 - [pyenvを使った設定方法の参考資料（tsubame 3.0の資料だが、tsubame 4.0にも適用可能)](https://rioyokotalab.github.io/python-supercomputer/)
 
-#### 4.3.1 pyenv のインストール
+
+#### 4.5.1 pyenv のインストール
 以下のコードをログインノード（`/home/{ユーザ名}`）で実行。
 ```bash
 curl https://pyenv.run | bash
 ```
 
-#### 4.3.2 環境変数の設定
+
+#### 4.5.2 環境変数の設定
+ABCI3.0 のログインノード（`/home/{ユーザ名}`）には， `.bash_profile` と `.bashrc` がデフォルトでは作られていない．
+そこでそれらを用意する必要がある．
+
 まず `.bash_profile` を用意する． \
 ログインノード（`/home/{ユーザ名}`）で以下を実行し `.bash_profile` を作成する．
 ```bash
@@ -128,13 +193,15 @@ export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 ```
 
-#### 4.3.3 環境変数の反映
+
+#### 4.5.3 環境変数の反映
 以下のコードをコマンドラインで実行し、先に設定した環境変数の設定を反映する。
 ```bash
 source ~/.bashrc
 ```
 
-#### 4.3.4 python のインストール
+
+#### 4.5.4 python のインストール
 以下のコードをコマンドラインで実行し、必要な python をインストールする。
 ```bash
 pyenv install 3.10.14
@@ -150,7 +217,7 @@ pyenv global 3.10.14
 
 B) `jalm_evaluation_private`以下のデフォルトのバージョンだけを3.10.14にしたい場合(推奨)
 ```bash
-cd /path/to/jalm_evaluation_private
+cd /path/to/your/jalm_evaluation_private
 pyenv local 3.10.14
 ```
 
@@ -207,28 +274,47 @@ source ~/.bashrc
 
 `bigcode`の例：
 ```bash
-REPO_PATH="/home/path/to/your/repo"
-PIP_CACHEDIR="/home/path/to/your/pipcache"
-SINGULARITY_CACHEDIR="/home/path/to/your/singularitycache"
+REPO_PATH="/home/{username}/github/jalm-evaluation-private"
+PIP_CACHEDIR="/home/{username}/.cache/pip"
+SINGULARITY_CACHEDIR="/home/{username}/.cache/singularity"
 bash scripts/abci/environment/bigcode.sh $REPO_PATH $PIP_CACHEDIR $SINGULARITY_CACHEDIR
 ```
 
 各環境の詳細(ライブラリの構成など)は `scripts/abci/environment/` 以下のコードを参照されたい。
 また、実行時のログについては `~/.SE_crtenv_bigcode` のように出力されるので必要な際は確認されたい。
 
-### 4.6 tokyotech-llmへの参加
+
+### 4.7 tokyotech-llmへの参加
 Hugging Face にある東工大のllmグループ [tokyotech-llm](https://huggingface.co/tokyotech-llm) に参加申請を行い，参加する．
 
-### 4.7 HuggingFace と OpenAI の Token 登録
+
+### 4.8 HuggingFace と OpenAI の Token 登録
 モデルのアクセスのために HuggingFace と OpenAI の Token が必要になるので登録しておく．
 ```bash
+REPO_PATH="/home/{username}/github/jalm-evaluation-private"
+echo OPENAI_API_KEY=sk-... >> ${REPO_PATH}/.env
+echo HF_TOKEN=hf_... >> ${REPO_PATH}/.env
+
 CACHE_DIR="/groups/gag51395/share/{Your Name}/.cache"
-echo OPENAI_API_KEY=sk-... >> ${CACHE_DIR}/token
-echo HF_TOKEN=hf_... >> ${CACHE_DIR}/token
+echo hf_... >> ${CACHE_DIR}/token
 ```
 
 - [Qiita. "OpenAIのAPIキー取得方法|2024年7月最新版|料金体系や注意事項".](https://qiita.com/kurata04/items/a10bdc44cc0d1e62dad3)
 - [Edge HUB. "Hugging Faceの使い方！アクセストークン作成からログインまで".](https://highreso.jp/edgehub/machinelearning/huggingfacetoken.html)
+
+
+### 4.9 評価スクリプトへの実行権限付加
+ABCI3.0 では評価スクリプトにユーザへの実行権限を付加する必要がある． \
+具体的には以下のコードでそれを実現できる．
+```bash
+cd /path/to/your/jalm_evaluation_private
+chmod u+x scripts/abci/rt_H*/evaluate_*.sh
+```
+
+なお，実行権限が正しく付与されたかどうかは `ls -l` を使って確かめることができる．
+
+- [note. "Linuxの権限確認と変更(chmod)（超初心者向け）". Masashi Hirano.](https://qiita.com/shisama/items/5f4c4fa768642aad9e06)
+
 
 <br>
 
@@ -240,6 +326,7 @@ echo HF_TOKEN=hf_... >> ${CACHE_DIR}/token
 | -- | -- |
 | 13B 以下 | `scripts/abci/rt_HG/qsub_all.sh` |
 | 13B 超 | `scripts/abci/rt_HF/qsub_all.sh` |
+
 
 ## 2. 評価スクリプトの実行
 評価したいモデルを Huggingface の表記に従って `MODEL_NAME` に格納し、先に編集したスクリプトの引数に渡してキューを投げる。
@@ -253,13 +340,18 @@ bash scripts/abci/rt_HG/qsub_all.sh $MODEL_NAME
 ## 3. 評価状況の確認（WIP）
 `scripts/abci/utils/save_and_check_qstat.sh` を実行することで評価の進捗状況を確認することができる。
 
-出力例：
-```bash
+出力サンプル：
+```txt
+job_ID       state    node     task          model name                                                                                          
+---------------------------------------------------------------------------------------------------
+80329.pbs1   R        rt_HG    HumanEval     tokyotech-llm_Llama-3.1-Swallow-8B-Instruct-v0.2  
+80330.pbs1   R        rt_HG    JHumanEval    tokyotech-llm_Llama-3.1-Swallow-8B-Instruct-v0.2  
+80331.pbs1   done     rt_HG    MBPP          tokyotech-llm_Llama-3.1-Swallow-8B-Instruct-v0.2                    
 ```
 
 ## 4. 結果の確認
 - 全体の結果は`results/{MODEL NAME}/aggregated_result.json`に書き込まれる
-  - `overall`に載っているスコア（文字列）を評価結果を記入するスプレッドシートにコピペすればOKなはず
+  - `overall`に載っているスコア（文字列）を評価結果を記入するスプレッドシートにそのままコピペすればOK
 - それぞれのベンチマークの結果は`results/{MODEL NAME}/`以下のそれぞれのディレクトリの中に書き込まれる
 - `scripts/show_results.py`を使うと複数モデルの結果を一気にコピペできる
 
@@ -277,8 +369,66 @@ tokyotech-llm/Llama-3-70b-exp6-LR1.0e-5-MINLR1.0E-6-WD0.1-iter0002500,0.23403411
 これをコピーしてスプレッドシートに shift + cmd + V でペースト -> 「テキストを列に分割」 で簡単に結果の記入ができる
 
 
-# C. 評価の詳細
-## 評価スクリプトとベンチマークの対応
+## C. 状況に応じて必要になる追加の操作
+### 1. huggingface-cli
+- モデルを評価が開始される前にロードしておきたい．
+- モデルが正しくロードできるか試したい．
+
+以上のような場合，`huggingface-cli`（コマンドライン用の huggingface） を使うことで目的を叶えることができる．
+
+#### 1.1 huggignface-cli のインストール
+適当な pyenv を選び，その中で huggingface-cli をインストールする．
+
+実行例（`.venv_bigcode`を選んだ場合）：
+```bash
+source .venv_bigcode/bin/activate
+pip install huggingface-cli
+```
+
+
+#### 1.2 huggingface へのログイン
+以下のコマンドで huggingface へのログインを行う． \
+hugginface の token が必要になる．
+
+```bash
+huggingface-cli login
+```
+
+なお，途中で `Add token as git credential?` と訊かれるが，これは `n`（No）で良い．
+
+
+#### 1.3 モデルの事前ダウンロード
+以下のコマンドで評価に先立ってモデルを特定のキャッシュにダウンロードすることができる． \
+評価時間の短縮につながる．
+```bash
+MODEL_NAME=...
+HUGGINGFACE_CACHEDIR=...
+huggingface-cli download $MODEL_NAME --cache-dir $HUGGINGFACE_CACHEDIR
+```
+
+
+### 2. Git 情報の登録
+本フレームワークをアップデートするにあたり，その修正後の版をリモートに `push` することがあるだろう． \
+その際に `Please tell me who you are.` と訊かれることがある． \
+これを解決するには Git 情報の登録が必要となる．
+
+#### 2.1 メールアドレスの登録
+以下のコマンドから Git の　log に表示するメールアドレスを登録する． \
+GitHub に登録しているものと同じで良い．
+```bash
+git config --global user.email "your@email.com"
+```
+
+#### 2.2 ユーザ名の登録
+以下のコマンドから Git の　log に表示するユーザ名を登録する． \
+GitHub に登録しているものと同じで良い．
+```bash
+git config --global user.name "yourname"
+````
+
+
+# D. 評価の詳細
+## 1. 評価スクリプトとベンチマークの対応
 
 |スクリプト|対応するベンチマーク|
 | -- | -- |
@@ -300,7 +450,7 @@ tokyotech-llm/Llama-3-70b-exp6-LR1.0e-5-MINLR1.0E-6-WD0.1-iter0002500,0.23403411
 | `evaluate_ja_wmt20_jaen.sh` | WMT20-ja-en (日英機械翻訳)|
 | `evaluate_ja_xlsum.sh` | XL-SUM (要約)|
 
-## 評価結果の表とベンチマークの対応
+## 2. 評価結果の表とベンチマークの対応
 | 言語 | 大分類 | 小分類 |
 | -- | -- | -- |
 | EN | harness_en | gsm8k |
