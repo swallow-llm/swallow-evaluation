@@ -21,7 +21,7 @@ mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
 
 # GPUモニタリングをバックグラウンドで実行
-python3 "$REPO_PATH/scripts/monitor_gpu.py --output_path ~/.SE_${MODEL_NAME_PATH//\//_}_GPU_USAGE_GROUP_2.csv" > /dev/stdout 2>/dev/null &
+python3 "$REPO_PATH/scripts/monitor_gpu.py" --output_path ~/.SE_${MODEL_NAME_PATH//\//_}_GPU_USAGE_GROUP_2.csv > /dev/stdout 2>/dev/null &
 MONITOR_PID=$!   # ここでPIDを取得しておく
 
 
