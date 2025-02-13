@@ -18,7 +18,7 @@ export HF_HOME=$HUGGINGFACE_CACHE
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
 
 # GPUモニタリングをバックグラウンドで実行
-python3 "$REPO_PATH/scripts/monitor_gpu.py" > /dev/stdout 2>/dev/null &
+python3 "$REPO_PATH/scripts/monitor_gpu.py --output_path ~/.SE_${MODEL_NAME_PATH//\//_}_GPU_USAGE_GROUP_3.csv" > /dev/stdout 2>/dev/null &
 MONITOR_PID=$!   # ここでPIDを取得しておく
 
 

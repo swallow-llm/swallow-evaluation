@@ -6,10 +6,10 @@ GROUP_ID="gag51395"
 
 MODEL_NAME_PATH=$1
 
-# group_1: llmjp, wmt20enja, wmt20jaen, xlsum
+# group_1: llmjp, wmt20enja, wmt20jaen, mt_bench
 qsub -P $GROUP_ID -q rt_HF -l select=1 -l walltime=12:00:00 -N .SE_${MODEL_NAME_PATH//\//_}_GROUP_1 -k oe -- "$ROOT_PATH/scripts/abci/rt_HF/groups/evaluate_group_1.sh" $ROOT_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
-# group_2: mgsm, mt_bench, jhumaneval-unstripped, mbpp-ja
+# group_2: mgsm, xlsum, jhumaneval-unstripped, mbpp-ja
 qsub -P $GROUP_ID -q rt_HF -l select=1 -l walltime=12:00:00 -N .SE_${MODEL_NAME_PATH//\//_}_GROUP_2 -k oe -- "$ROOT_PATH/scripts/abci/rt_HF/groups/evaluate_group_2.sh" $ROOT_PATH $HUGGINGFACE_CACHE $MODEL_NAME_PATH
 
 # group_3: en_general, mmlu, bbh, math
