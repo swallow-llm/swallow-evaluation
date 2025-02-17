@@ -53,7 +53,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $BBH_TASK_NAME \
     --num_fewshot $BBH_NUM_FEWSHOT \
-    --batch_size 8 \
+    --batch_size 48 \
     --device cuda \
     --write_out \
     --output_path "$BBH_OUTDIR" \

@@ -53,7 +53,7 @@ lm_eval --model hf \
     --model_args "pretrained=$MODEL_NAME_PATH,parallelize=True,trust_remote_code=True,use_fast_tokenizer=$USE_FAST_TOKENIZER" \
     --tasks $MMLU_TASK_NAME \
     --num_fewshot $MMLU_NUM_FEWSHOT \
-    --batch_size 4 \
+    --batch_size 24 \
     --device cuda \
     --write_out \
     --output_path "$MMLU_OUTDIR" \
