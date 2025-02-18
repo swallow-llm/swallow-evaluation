@@ -19,11 +19,6 @@ mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/"
 
-# GPUモニタリングをバックグラウンドで実行
-python3 "$REPO_PATH/scripts/monitor_gpu.py" --output_path ~/.SE_${MODEL_NAME_PATH//\//_}_GPU_USAGE_GROUP_4.csv > /dev/stdout 2>/dev/null &
-MONITOR_PID=$!   # ここでPIDを取得しておく
-
-
 # 並列処理でスクリプトを実行
 CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_gpqa.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
@@ -43,6 +38,3 @@ CUDA_VISIBLE_DEVICES=4,5 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_mb
 
 # すべてのジョブが終了するまで待つ
 wait
-
-# GPUモニタリングを停止
-kill "$MONITOR_PID"
