@@ -60,7 +60,7 @@ fi
 # 現在のジョブ情報を表示
 echo -e "$results" | while IFS=$'\t' read -r job_id state node_kind task_kind model_name; do
   if [[ -n "$job_id" ]]; then
-    printf "%-15s %-8s %-8s %-35s %-100s\n" "$job_id" "$state" "$node_kind" "$task_kind" "$model_name"
+    printf "%-15s %-8s %-8s %-20s %-100s\n" "$job_id" "$state" "$node_kind" "$task_kind" "$model_name"
   fi
 done
 
