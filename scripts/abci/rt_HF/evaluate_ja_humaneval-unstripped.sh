@@ -29,7 +29,7 @@ cd $ROOT_PATH
 source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
-BATCH_SIZE=4
+BATCH_SIZE=20
 OUTDIR="${ROOT_PATH}/results/${MODEL_NAME_PATH}/ja/humaneval-unstripped"
 SINGULARITY_IMAGE="evaluation-harness_latest.sif"
 

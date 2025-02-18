@@ -53,7 +53,7 @@ python lm-evaluation-harness-jp/main.py \
     --model_args "pretrained=$MODEL_NAME_PATH,use_accelerate=True,trust_remote_code=True,use_fast=$USE_FAST_TOKENIZER,add_special_tokens=$ADD_SPECIAL_TOKENS" \
     --tasks "wmt20-en-ja" \
     --num_fewshot $NUM_FEWSHOT \
-    --batch_size 2 \
+    --batch_size 12 \
     --verbose \
     --device cuda \
     --output_path ${OUTDIR}/score_wmt20_en_ja.json \

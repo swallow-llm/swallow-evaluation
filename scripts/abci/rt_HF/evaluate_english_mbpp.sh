@@ -29,7 +29,7 @@ cd $ROOT_PATH
 source .venv_bigcode/bin/activate
 
 NUM_SAMPLES=10
-BATCH_SIZE=5
+BATCH_SIZE=24
 OUTDIR="${ROOT_PATH}/results/${MODEL_NAME_PATH}/en/mbpp"
 SINGULARITY_IMAGE="evaluation-harness_latest.sif"
 
