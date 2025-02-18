@@ -21,15 +21,15 @@ mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
 
 # 並列処理でスクリプトを実行
-CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_mgsm.sh" \
+CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_mmlu.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
-    >  "${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mgsm/${PBS_JOBID}.o" \
-    2> "${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mgsm/${PBS_JOBID}.e" &
+    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/mmlu_${PBS_JOBID}.o" \
+    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/mmlu_${PBS_JOBID}.e" &
 
-CUDA_VISIBLE_DEVICES=2,3 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_xlsum.sh" \
+CUDA_VISIBLE_DEVICES=2,3 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_mbpp.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
-    >  "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/${PBS_JOBID}.o" \
-    2> "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/${PBS_JOBID}.e" &
+    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/bbh_${PBS_JOBID}.o" \
+    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/bbh_${PBS_JOBID}.e" &
 
 CUDA_VISIBLE_DEVICES=4,5 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_humaneval-unstripped.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
@@ -40,6 +40,7 @@ CUDA_VISIBLE_DEVICES=6,7 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_mbpp.sh
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
     >  "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/${PBS_JOBID}.o" \
     2> "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/${PBS_JOBID}.e" &
+
 
 # すべてのジョブが終了するまで待つ
 wait

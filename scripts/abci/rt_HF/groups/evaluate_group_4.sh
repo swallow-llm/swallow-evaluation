@@ -20,20 +20,25 @@ mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/"
 
 # 並列処理でスクリプトを実行
-CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_gpqa.sh" \
+CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_llmjp.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
-    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/gpqa_${PBS_JOBID}.o" \
-    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/gpqa_${PBS_JOBID}.e" &
+    >  "${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/llmjp/${PBS_JOBID}.o" \
+    2> "${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/llmjp/${PBS_JOBID}.e" &
 
-CUDA_VISIBLE_DEVICES=2,3 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_humaneval-unstripped.sh" \
+CUDA_VISIBLE_DEVICES=2,3 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_general.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
-    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/${PBS_JOBID}.o" \
-    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/${PBS_JOBID}.e" &
+    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/general_${PBS_JOBID}.o" \
+    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/general_${PBS_JOBID}.e" &
 
-CUDA_VISIBLE_DEVICES=4,5 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_mbpp.sh" \
+CUDA_VISIBLE_DEVICES=4,5 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_bbh.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
-    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/bbh_${PBS_JOBID}.o" \
-    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/bbh_${PBS_JOBID}.e" &
+    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/bbh_${PBS_JOBID}.o" \
+    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/bbh_${PBS_JOBID}.e" &
+
+CUDA_VISIBLE_DEVICES=6,7 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_mt_bench.sh" \
+    "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" 2 \
+    >  "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/${PBS_JOBID}.o" \
+    2> "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/${PBS_JOBID}.e" &
 
 
 # すべてのジョブが終了するまで待つ
