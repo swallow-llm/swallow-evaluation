@@ -28,8 +28,8 @@ CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_mm
 
 CUDA_VISIBLE_DEVICES=2,3 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_english_mbpp.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
-    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/${PBS_JOBID}.o" \
-    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/${PBS_JOBID}.e" &
+    >  "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/bbh_${PBS_JOBID}.o" \
+    2> "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/bbh_${PBS_JOBID}.e" &
 
 CUDA_VISIBLE_DEVICES=4,5 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_humaneval-unstripped.sh" \
     "$REPO_PATH" "$HUGGINGFACE_CACHE" "$MODEL_NAME_PATH" \
