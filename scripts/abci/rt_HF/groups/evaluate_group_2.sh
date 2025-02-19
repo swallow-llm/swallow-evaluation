@@ -15,8 +15,8 @@ CUDA_BLOCKING=${4:-}
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
 
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/"
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/xlsum/"
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/harness_en/"
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/mbpp/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/humaneval-unstripped/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mbpp/"
 

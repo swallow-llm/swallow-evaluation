@@ -15,10 +15,10 @@ CUDA_BLOCKING=${4:-}
 export HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_CACHE
 export HF_HOME=$HUGGINGFACE_CACHE
 
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/llmjp/"
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/mgsm/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_en_ja/"
 mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/wmt20_ja_en/"
-mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/ja/ja_mt_bench/"
+mkdir -p "$REPO_PATH/results/$MODEL_NAME_PATH/en/humaneval-unstripped/"
 
 # 並列処理でスクリプトを実行
 CUDA_VISIBLE_DEVICES=0,1 bash "$REPO_PATH/scripts/abci/rt_HF/evaluate_ja_mgsm.sh" \
