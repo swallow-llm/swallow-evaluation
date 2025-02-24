@@ -2709,6 +2709,16 @@ class Phi3Adapter(BaseModelAdapter):
         return get_conv_template("phi-3")
 
 
+class LLMJp3Adapter(BaseModelAdapter):
+    """The model adapter for llm-jp-3"""
+
+    def match(self, model_path: str):
+        return "llm-jp-3" in model_path.lower()
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("llm-jp-3")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
 register_model_adapter(JapaneseStableLMBetaAdapter)
@@ -2822,6 +2832,7 @@ register_model_adapter(SmaugChatAdapter)
 register_model_adapter(GrokAdapter)
 register_model_adapter(KarakuriAdapter)
 register_model_adapter(TanukiAdapter)
+register_model_adapter(LLMJp3Adapter)
 register_model_adapter(NoSystemAdapter)
 
 # After all adapters, try the default base adapter.
