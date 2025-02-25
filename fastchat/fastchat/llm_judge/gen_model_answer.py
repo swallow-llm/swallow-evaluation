@@ -173,6 +173,8 @@ def get_model_answers(
 
                     if conv.name == "xgen" and output.startswith("Assistant:"):
                         output = output.replace("Assistant:", "", 1).strip()
+                    if conv.name == "deepseek-r1" and "</think>" in output:
+                        output = output.split("</think>")[1].strip()
                 except RuntimeError as e:
                     print("ERROR question ID: ", question["question_id"])
                     output = "ERROR"
@@ -343,6 +345,8 @@ def get_model_answers_vllm(
                             "Assistant:"
                         ):
                             output = output.replace("Assistant:", "", 1).strip()
+                        if convs[question_id].name == "deepseek-r1" and "<\\think>" in output:
+                            output = output.split("<\\think>")[1]
                         convs[question_id].update_last_message(output)
                         turns[question_id].append(output)
                 except RuntimeError as e:

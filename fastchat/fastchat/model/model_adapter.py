@@ -2709,8 +2709,19 @@ class Phi3Adapter(BaseModelAdapter):
         return get_conv_template("phi-3")
 
 
+class DeepSeekR1Adapter(BaseModelAdapter):
+    """The model adapter for DeepSeek-R1"""
+
+    def match(self, model_path: str):
+        return "deepseek-r1" in model_path.lower()
+    
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        return get_conv_template("deepseek-r1")
+
+
 # Note: the registration order matters.
 # The one registered earlier has a higher matching priority.
+register_model_adapter(DeepSeekR1Adapter)
 register_model_adapter(JapaneseStableLMBetaAdapter)
 register_model_adapter(Phi3Adapter)
 register_model_adapter(ELYZAJapaneseLlama2Adapter)

@@ -46,6 +46,7 @@ class SeparatorStyle(IntEnum):
     STABLELM_GAMMA = auto()
     KARAKURI = auto()
     PHI3 = auto()
+    DEEPSEEK_R1 = auto()
 
 
 IMAGE_PLACEHOLDER_STR = "$$<image>$$"
@@ -405,6 +406,15 @@ class Conversation:
                     ret += self.sep + role + self.sep2 + message
                 else:
                     ret += self.sep + role + self.sep2
+            return ret
+        elif self.sep_style ==SeparatorStyle.DEEPSEEK_R1:
+            seps = ["", self.sep]
+            ret = system_prompt
+            for i, (role, message) in enumerate(self.messages):
+                if message:
+                    ret += role + message + seps[i % 2]
+                else:
+                    ret += role
             return ret
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
@@ -2536,6 +2546,19 @@ register_conv_template(
     )
 )
 
+# DeepSeek-R1
+# reference: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B/blob/main/tokenizer_config.json
+register_conv_template(
+    Conversation(
+        name="deepseek-r1",
+        system_message="<｜begin▁of▁sentence｜>",  # must add a bos token before first message
+        roles=("<｜User｜>", "<｜Assistant｜>"),
+        sep_style=SeparatorStyle.DEEPSEEK_R1,
+        sep="<｜end▁of▁sentence｜>",
+        stop_str="<｜end▁of▁sentence｜>",
+    )
+)
+
 
 if __name__ == "__main__":
     from fastchat.conversation import get_conv_template
@@ -2606,5 +2629,13 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[0], "I am going to Paris, what should I see?")
     conv.append_message(conv.roles[1], "Paris, the capital of France.")
     conv.append_message(conv.roles[0], "What is so great about #1?")
+    conv.append_message(conv.roles[1], None)
+    print(conv.get_prompt())
+
+    print("DeepSeek-R1 template:")
+    conv = get_conv_template("deepseek-r1")
+    conv.append_message(conv.roles[0], "Hello, how are you?")
+    conv.append_message(conv.roles[1], "I'm doing great. How can I help you today?")
+    conv.append_message(conv.roles[0], "I'd like to show off how chat templating works!")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
