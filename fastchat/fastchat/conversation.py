@@ -45,6 +45,7 @@ class SeparatorStyle(IntEnum):
     CALM3 = auto()
     STABLELM_GAMMA = auto()
     KARAKURI = auto()
+    LLMJP3 = auto()
     PHI3 = auto()
     DEEPSEEK_R1 = auto()
 
@@ -2556,6 +2557,20 @@ register_conv_template(
         sep_style=SeparatorStyle.DEEPSEEK_R1,
         sep="<｜end▁of▁sentence｜>",
         stop_str="<｜end▁of▁sentence｜>",
+    )
+)
+
+
+# llm-jp-3-instruct template
+# ref: https://huggingface.co/llm-jp/llm-jp-3-13b-instruct/blob/main/tokenizer_config.json
+register_conv_template(
+    Conversation(
+        name="llm-jp-3",
+        system_message="<s>以下は、タスクを説明する指示です。要求を適切に満たす応答を書きなさい。",
+        roles=("### 指示", "### 応答"),
+        sep_style=SeparatorStyle.ADD_COLON_TWO_NEW_LINE,
+        sep="\n\n",
+        sep2="</s>\n\n",
     )
 )
 
