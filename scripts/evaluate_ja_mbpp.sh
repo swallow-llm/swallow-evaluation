@@ -1,11 +1,18 @@
 #!/bin/bash
-
 source .venv_bigcode/bin/activate
 
+# This script is used to evaluate
+# mbpp ja
+# to evaluate with all testcases, set NUM_TESTCASE=None
+
 MODEL_NAME_PATH=$1
-CUDA_BLOCKING=${2:-}
+DO_GENERATION=$2
+DO_EVAL=$3
+CUDA_BLOCKING=${4:-}
+
 NUM_SAMPLES=10
-BATCH_SIZE=1
+BATCH_SIZE=10
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mbpp"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -16,8 +23,6 @@ else
 fi
 echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
-OUTDIR="results/${MODEL_NAME_PATH}/ja/mbpp"
-
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
     USE_FAST_TOKENIZER=''
@@ -27,28 +32,56 @@ fi
 
 mkdir -p $OUTDIR
 
-# generate
+if [ ${DO_GENERATION} = "true" ]; then
+ echo "Generating"
+ start_time=$(date +%s)
+ python bigcode-evaluation-harness/main.py \
+   --model ${MODEL_NAME_PATH} \
+   --tasks mbpp_ja \
+   --do_sample True \
+   --n_samples ${NUM_SAMPLES} \
+   --batch_size ${BATCH_SIZE} \
+   --save_generations \
+   --generation_only \
+   --save_generations_path ${OUTDIR}/generation.json \
+   --use_auth_token \
+   --max_memory_per_gpu auto \
+   --trust_remote_code \
+   --max_length_generation 2048 \
+   --temperature 0.1 \
+   ${USE_FAST_TOKENIZER}
+ end_time=$(date +%s)
+ execution_time=$((end_time - start_time))
+ echo "Generation time: ${execution_time} seconds"
+fi
 
-python bigcode-evaluation-harness/main.py \
-  --model ${MODEL_NAME_PATH} \
-  --tasks mbpp \
-  --do_sample True \
-  --n_samples ${NUM_SAMPLES} \
-  --batch_size ${BATCH_SIZE} \
-  --allow_code_execution \
-  --save_generations \
-  --generation_only \
-  --save_generations_path ${OUTDIR}/generation.json \
-  --use_auth_token \
-  --max_memory_per_gpu auto \
-  --trust_remote_code \
-  --max_length_generation 2048 \
-  --temperature 0.1 \
-  ${USE_FAST_TOKENIZER}
+if [ ${DO_EVAL} = "true" ]; then
+  echo "Evaluating"
+  echo "Generated codes should be placed at ${OUTDIR}/generation_mbpp_ja.json ."
+  touch ${OUTDIR}/metrics.json
+  export HF_HOME=$REPO_PATH/HF_HOME
 
-# evaluate
-curl -X POST -F "model_name=${MODEL_NAME_PATH}" -F "file=@${OUTDIR}/generation_mbpp.json" -F "task=mbpp" http://localhost:5001/api > ${OUTDIR}/metrics.json
-python bigcode-evaluation-harness/bigcode_eval/custom_utils.py --generation_path ${OUTDIR}/generation_mbpp.json --metrics_path ${OUTDIR}/metrics.json --task mbpp
+  start_time=$(date +%s)
+  docker run \
+    -v $(pwd)/${OUTDIR}/generation_mbpp_ja.json:/app/generations_py.json \
+    -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json \
+    -it evaluation-harness python3 main.py \
+    --model ${MODEL_NAME_PATH} \
+    --tasks mbpp \
+    --load_generations_path /app/generations_py.json \
+    --allow_code_execution \
+    --n_samples 10 \
+    --metric_output_path /app/metrics.json
+
+  python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
+    --generation_path ${OUTDIR}/generation_mbpp_ja.json \
+    --metrics_path ${OUTDIR}/metrics.json \
+    --task mbpp
+
+  end_time=$(date +%s)
+  execution_time=$((end_time - start_time))
+  echo "Evaluation time: ${execution_time} seconds"
+fi
 
 # aggregate results
 python scripts/aggregate_result.py --model $MODEL_NAME_PATH

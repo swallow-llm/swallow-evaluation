@@ -1,15 +1,17 @@
 #!/bin/bash
-
-# running llm-jp-eval for basic japanese task
 source .venv_llm_jp_eval/bin/activate
 
+# This script is used to evaluate
+# jamp, janli, jemhopqa, jcommonsenseqa, jnli\, jsem, jsick, jsquad, jsts, niilc, jmmlu
+# to evaluate with all testcases, set NUM_TESTCASE=None
+
 MODEL_NAME_PATH=$1
-TOKENIZER_NAME_PATH=$2
-CUDA_BLOCKING=${3:-}
-DATASET_DIR="llm-jp-eval/dataset/1.3.0/evaluation/test"
+CUDA_BLOCKING=${2:-}
+
 NUM_TESTCASE=-1
 GENERAL_NUM_FEWSHOT=4
 JMMLU_NUM_FEWSHOT=5
+OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/llmjp"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -20,9 +22,6 @@ else
 fi
 echo CUDA_LAUNCH_BLOCKING=$CUDA_BLOCKING
 
-GENERAL_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${GENERAL_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
-JMMLU_OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp/${JMMLU_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
-
 # MODEL_NAME_PATHにsarashina2が含まれているとき,use_fast_tokenizer=Falseが指定される
 if [[ $MODEL_NAME_PATH == *"sarashina2"* ]]; then
     USE_FAST_TOKENIZER=False
@@ -30,12 +29,18 @@ else
     USE_FAST_TOKENIZER=True
 fi
 
+mkdir -p ${OUTDIR}
+DATASET_DIR="llm-jp-eval/dataset/1.3.0/evaluation/test"
+GENERAL_OUTDIR="${OUTDIR}/${GENERAL_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+JMMLU_OUTDIR="${OUTDIR}/${JMMLU_NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+
 mkdir -p $GENERAL_OUTDIR
 mkdir -p $JMMLU_OUTDIR
 
+start_time=$(date +%s)
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
-  tokenizer.pretrained_model_name_or_path=$TOKENIZER_NAME_PATH \
+  tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.use_fast=$USE_FAST_TOKENIZER \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="[\"jamp\", \"janli\", \"jemhopqa\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
@@ -43,10 +48,14 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   dataset_dir=$DATASET_DIR \
   log_dir=$GENERAL_OUTDIR \
   wandb.run_name=llm_jp_eval_general
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Evaluation General time: ${execution_time} seconds"
 
+start_time=$(date +%s)
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
-  tokenizer.pretrained_model_name_or_path=$TOKENIZER_NAME_PATH \
+  tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.use_fast=$USE_FAST_TOKENIZER \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="jmmlu" \
@@ -54,6 +63,9 @@ python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   dataset_dir=$DATASET_DIR \
   log_dir=$JMMLU_OUTDIR \
   wandb.run_name=llm_jp_eval_jmmlu
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
+echo "Evaluation JMMLU time: ${execution_time} seconds"
 
 python llm-jp-eval/scripts/jmmlu_statistics.py --pred_path $JMMLU_OUTDIR
 
