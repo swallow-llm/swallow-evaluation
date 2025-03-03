@@ -42,10 +42,10 @@
 * ライセンス: Apache License Version 2.0 ([LICENSE](fastchat/LICENSE))
 * 主な変更点:
   * MT-Benchに関して、以下 4 点の変更を行いました。
-    * 審判（judge）を gpt-4o-2024-08-06 に変更しました。
-    * 設問をNejumi最新版に更新しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。。
-    * 模範解答は、 mtbench_ja_referenceanswer:v2 を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。
-    * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました。
+    * 審判（judge）を gpt-4o-2024-08-06 に変更しました([リンク](./scripts/evaluate_ja_mt_bench.sh ))。
+    * 設問をNejumi最新版に更新しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。
+    * 模範解答は、 mtbench_ja_referenceanswer:v2 を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl ))。
+    * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py ))。
 
 ### Code Generation LM Evaluation Harness
 
@@ -54,7 +54,7 @@
 * 主な変更点:
   * MBPP の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp.py))。
   * MBPP-Ja の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
-    * MBPP-Ja タスクは、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています。([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))
+    * MBPP-Ja は、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています。([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))
 
 #### JHumanEval (Code Generation LM Evaluation Harnessで使用)
 
