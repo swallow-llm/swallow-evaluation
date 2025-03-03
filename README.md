@@ -1,13 +1,68 @@
-# 概要
+# Swallowプロジェクト 大規模言語モデル 評価スクリプト Ver. 202503
 
-**バージョン**: 2024/12アップデート
+* このリポジトリでは[Swallowプロジェクト](https://swallow-llm.github.io/index.ja.html)による大規模言語モデル；Swallowシリーズのリリースに用いた評価スクリプトを公開しています。
+  再現実験などにご利用ください。
+* 本文書では評価スクリプトの実行方法のみを説明します。評価方法や結果はSwallowプロジェクトの[評価ページ](https://swallow-llm.github.io/evaluation/about.ja.html)や論文発表を参照ください。
+* 評価スクリプトは，基本的には [llm-jp-eval](https://github.com/llm-jp/llm-jp-eval) などの既存のLLM評価フレームワークを使用しています。
+  この場をお借りしてフレームワーク開発者の皆様にお礼申し上げます。
 
-英語の事前学習済み大規模言語モデルから継続学習されたモデルの評価。
+## 注意事項
 
-評価軸：
+* **実行環境の違いにより、異なる評価結果になる場合があります。**
+* 評価がうまくいかないなど問題があればIssueまでお願いします。
 
-* 日本語能力が改善されるか？
-* 英語能力が維持されるか？
+## 評価スクリプトが使用するLLM評価フレームワークおよびそれらのライセンス・変更点
+
+### llm-jp-eval
+
+* バージョン: [llm-jp-eval v1.3.0](https://github.com/llm-jp/llm-jp-eval/releases/tag/v1.3.0) [Han+, ANLP24]
+* ライセンス: Copyright 2023 LLM-jp,  Apache License Version 2.0 ([LICENSE](llm-jp-eval/LICENSE))
+* 主な変更点:
+  * なし
+
+### Language Model Evaluation Harness
+
+* バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
+* ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
+* 主な変更点: 
+  * SQuAD v2.0 を「回答不能」も考慮した評価指標に変更しました。([リンク](./lm-evaluation-harness-en/lm_eval/tasks/squadv2/task.py))
+  * 博士課程レベルの教養ベンチマークである GPQA の評価を行えるようにしました。([リンク](./lm-evaluation-harness-en/lm_eval/tasks/gpqa/README.md))
+  * 数学のベンチマークである MATH の評価を行えるようにしました。([リンク](./lm-evaluation-harness-en/lm_eval/tasks/math_500/README.md))
+
+### JP Language Model Evaluation Harness
+
+* バージョン: [Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41) [Gao+, 22]
+* ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-jp/LICENSE.md))
+* 主な変更点:
+  * なし
+
+### FastChat
+
+* バージョン: [FastChat](https://github.com/lm-sys/FastChat) (commit #e86e70d0)
+* ライセンス: Apache License Version 2.0 ([LICENSE](fastchat/LICENSE))
+* 主な変更点:
+  * MT-Benchに関して、以下 4 点の変更を行いました。
+    * 審判（judge）を gpt-4o-2024-08-06 に変更しました。
+    * 設問をNejumi最新版に更新しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。。
+    * 模範解答は、 mtbench_ja_referenceanswer:v2 を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。
+    * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました。
+
+### Code Generation LM Evaluation Harness
+
+* バージョン: [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) (commit #0261c52)
+* ライセンス: Apache License Version 2.0 ([LICENSE](bigcode-evaluation-harness/LICENSE))
+* 主な変更点:
+  * MBPP の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp.py))。
+  * MBPP-Ja の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
+    * MBPP-Ja タスクは、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています。([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))
+
+#### JHumanEval (Code Generation LM Evaluation Harnessで使用)
+
+* バージョン: [jhuman-eval](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
+* ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
+* 主な変更点: なし
+
+----
 
 # FAQ
 [こちら](MEMO.md)
