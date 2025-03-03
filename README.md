@@ -1,6 +1,6 @@
 # 概要
 
-**バージョン**: 2024/08アップデート
+**バージョン**: 2024/12アップデート
 
 英語の事前学習済み大規模言語モデルから継続学習されたモデルの評価。
 
@@ -16,7 +16,7 @@
 
 各フレームワークに対し、別々の仮想環境を用意することを推奨します。
 
-Pythonのバージョンは3.10を使ってください。
+Pythonのバージョンは3.10.14を使ってください。
 
 ```bash
 python -m venv .venv_llm_jp_eval
@@ -26,6 +26,12 @@ python -m venv .venv_bigcode
 python -m venv .venv_fastchat
 ```
 
+なお，以下の環境構築コードは，我々の計算環境においては動作検証をしておりますが， \
+利用される計算環境によってはバージョンが合わないことが考えられます． \
+その際は適宜適当なバージョンに置き換えてください．
+
+## llm-jp-eval (llmjp)
+
 `jalm-evaluation-private/`にて
 
 ```bash
@@ -33,11 +39,13 @@ source .venv_llm_jp_eval/bin/activate
 cd llm-jp-eval
 pip install --upgrade pip
 pip install -e .
-pip install protobuf
-pip install sentencepiece
+pip install protobuf sentencepiece
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
+pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
+## harness-jp (MGSM, XL-SUM, WMT20-EN-JA, WMT20-JA-EN)
 
 `jalm-evaluation-private/`にて
 
@@ -46,13 +54,13 @@ source .venv_harness_jp/bin/activate
 cd lm-evaluation-harness-jp
 pip install --upgrade pip
 pip install -e ".[ja]"
-pip install sacrebleu
-pip install sentencepiece
-pip install protobuf
-pip install nagisa
+pip install sacrebleu sentencepiece protobuf nagisa
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
+pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
+## harness-en (BBH, MATH, MMLU, GPQA, General(TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2))
 
 `jalm-evaluation-private/`にて
 
@@ -60,12 +68,15 @@ torchのバージョンがcudaに合わない場合は、torchを入れ直して
 source .venv_harness_en/bin/activate
 cd lm-evaluation-harness-en
 pip install --upgrade pip
-pip install -e .
-pip install sentencepiece
-pip install protobuf
+pip install -e  ".[math]"
+pip install sentencepiece==0.2.0 protobuf==5.28.3 transformers==4.46.2
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
+pip install vllm==v0.6.3.post1
+pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
+## bigcode (J/HumanEval, JA/EN MBPP)
 
 `jalm-evaluation-private/`にて
 
@@ -74,14 +85,16 @@ source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
 pip install --upgrade pip
 pip install -e .
-# For Llama
-pip install sentencepiece
-pip install protobuf
+pip install sentencepiece==0.2.0 protobuf==5.28.3 transformers==4.46.2
+pip install 'accelerate>=0.26.0'
+pip install datasets==2.21.0
+pip install vllm==v0.6.3.post1
+pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
-
 bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
+
+## fastchat (MT-Bench)
 
 `jalm-evaluation-private/`にて
 
@@ -89,14 +102,14 @@ bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode
 source .venv_fastchat/bin/activate
 cd fastchat
 pip install --upgrade pip
-pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 pip install python-dotenv pandas
 pip install -e ".[model_worker,llm_judge]"
-pip install vllm
+pip install vllm==v0.6.3.post1
+pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
+pip install markdown beautifulsoup4
 ```
 
-torchのバージョンがcudaに合わない場合は、torchを入れ直してください。
-
+モデルの生成文を gpt-4o-2024-08-06 を用いて評価する（LLM-as-a-judge）ので \
 `jalm-evaluation-private/.env`ファイルを作成し、OpenAIのAPIキーを入力する。
 
 ```txt
@@ -130,9 +143,7 @@ cd ../
 llm-jp-evalのタスクで評価
 
 ```bash
-bash scripts/evaluate_ja_llmjp.sh \
-$MODEL_PATH \
-$TOKENIZER_PATH \
+bash scripts/evaluate_ja_llmjp.sh $MODEL_PATH
 ```
 
 fewshot数は
@@ -202,7 +213,7 @@ few-shot数: 4
 `results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
 に保存される。
 
-## Humanevalのタスクで評価
+## JHumaneval/MBPP Jaのタスクで評価
 
 * データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
 * few-shot数: 10
@@ -211,40 +222,22 @@ few-shot数: 4
 ### 出力と評価を同時に行う場合
 
 ```bash
-bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH true true
+bash scripts/evaluate_ja_{humaneval,mbpp}.sh $MODEL_PATH true true
 ```
 
 ### 出力だけを行う場合
 
 ```bash
-bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH true false
+bash scripts/evaluate_ja_{humaneval,mbpp}.sh $MODEL_PATH true false
 ```
 
 ### 評価だけを行う場合
 
 ```bash
-bash scripts/evaluate_ja_humaneval.sh $MODEL_PATH false true
+bash scripts/evaluate_ja_{humaneval,mbpp}.sh $MODEL_PATH false true
 ```
 
-#### Singularityを使う場合
-```
-cd bigcode-evaluation-harness
-singularity pull docker://ghcr.io/bigcode-project/evaluation-harness:latest
-```
-でimageをpullしてください。
-その後
-```
-singularity exec --bind jalm-evaluation-private/results/MODELPATH/ja/humaneval_10NUM_SAMPLES_1BATCH_SIZE/generation_jhumaneval.json:/app/generations_py.json evaluation-harness_latest.sif python3 main.py --model $MODELPATH --tasks jhumaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10
-```
-で実行してください。
-
-## mbpp_jaのタスクで評価
-
-```bash
-bash scripts/evaluate_ja_mbpp.sh $MODEL_PATH
-```
-
-* 評価部分は岡崎研内で採点APIを叩く仕様になっているので、横田研で使用する場合はdocker/singularityなどを使って評価してください。すみませんが未実装です。
+few-shot数: 0 (JHumanEval), 3 (MBPP Ja)
 
 ## fastchat(mt_bench)の評価の実行
 
@@ -260,6 +253,8 @@ few-shot数: 0 (zero-shot)
 
 **GPT-4を呼び出すためAPI料金がかかるので注意が必要。**
 
+<br> <br>
+
 # 英語の評価
 
 ## `llm-evaluation-harness`での評価
@@ -267,56 +262,40 @@ few-shot数: 0 (zero-shot)
 * `llm-evaluation-harness` を採用
   * 常識推論: HellaSwag, WinoGrande, OpenBookQA
   * 世界知識: TriviaQA
-  * 文書読解: SQuAD
-  * 数学: GSM8K
+  * 文書読解: SQuAD2
+  * 数学: GSM8K, MATH
   * 一般教養・学術知識: MMLU
+  * 博士課程: GPQA
+
+本フレームワークでは評価時間の削減（評価の並列化）のために以下のようにスクリプトを分けている．
+
+* `evaluate_english_general.sh` - TriviaQA, GSM8K, OpenBookQA, HellaSwag,WinoGrande, SQuAD2
+* `evaluate_english_bbh.sh` - BBH
+* `evaluate_english_gpqa.sh` - GPQA
+* `evaluate_english_mmlu.sh` - MMLU
 
 `jalm-evaluation-private/`にて
 
 ```bash
-bash scripts/evaluate_english.sh $MODEL_PATH
+bash scripts/evaluate_english_{general,bbh,gpqa,mmlu}.sh $MODEL_PATH
 ```
 
-## Humanevalのタスクで評価
+## Humaneval, MBPP のタスクで評価
 
 ### 出力と評価を同時に行う場合
 
 ```bash
-bash scripts/evaluate_english_humaneval.sh $MODEL_PATH true true
+bash scripts/evaluate_english_{humaneval,mbpp}.sh $MODEL_PATH true true
 ```
 
 ### 出力だけを行う場合
 
 ```bash
-bash scripts/evaluate_english_humaneval.sh $MODEL_PATH true false
+bash scripts/evaluate_english_{humaneval,mbpp}.sh $MODEL_PATH true false
 ```
 
 ### 評価だけを行う場合
 
 ```bash
-bash scripts/evaluate_english_humaneval.sh $MODEL_PATH false true
+bash scripts/evaluate_english_{humaneval,mbpp}.sh $MODEL_PATH false true
 ```
-
-#### Singularityを使う場合
-
-```
-cd bigcode-evaluation-harness
-singularity pull docker://ghcr.io/bigcode-project/evaluation-harness:latest
-```
-
-でimageをpullしてください。
-その後
-
-```
-singularity exec --bind jalm-evaluation-private/results/MODELPATH/en/humaneval_10NUM_SAMPLES_1BATCH_SIZE/generation_humaneval.json:/app/generations_py.json evaluation-harness_latest.sif python3 main.py --model $MODELPATH --tasks humaneval --load_generations_path /app/generations_py.json --allow_code_execution --n_samples 10
-```
-
-で実行してください。
-
-## mbppのタスクで評価
-
-```bash
-bash scripts/evaluate_english_mbpp.sh $MODEL_PATH
-```
-
-* 評価部分は岡崎研内で採点APIを叩く仕様になっているので、横田研で使用する場合はdocker/singularityなどを使って評価してください。すみませんが未実装です。
