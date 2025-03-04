@@ -7,12 +7,11 @@ source .venv_llm_jp_eval/bin/activate
 
 MODEL_NAME_PATH=$1
 CUDA_BLOCKING=${2:-}
-REPO_PATH=$(pwd)
 
 NUM_TESTCASE=-1
 GENERAL_NUM_FEWSHOT=4
 JMMLU_NUM_FEWSHOT=5
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/llmjp"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/llmjp"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)

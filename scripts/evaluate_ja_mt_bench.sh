@@ -8,9 +8,8 @@ source .venv_fastchat/bin/activate
 MODEL_NAME_PATH=$1
 GPU_NUM=$2
 CUDA_BLOCKING=${3:-}
-REPO_PATH=$(pwd)
 
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)

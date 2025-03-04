@@ -70,7 +70,7 @@ if [ ${DO_EVAL} = "true" ]; then
     --allow_code_execution \
     --n_samples 10 \
     --metric_output_path /app/metrics.json
-
+    
   python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
     --generation_path $(pwd)/${OUTDIR}/generation_jhumaneval.json \
     --metrics_path $(pwd)/${OUTDIR}/metrics.json \

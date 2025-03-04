@@ -9,11 +9,10 @@ MODEL_NAME_PATH=$1
 DO_GENERATION=$2
 DO_EVAL=$3
 CUDA_BLOCKING=${4:-}
-REPO_PATH=$(pwd)
 
 NUM_SAMPLES=10
 BATCH_SIZE=10
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/mbpp"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/mbpp"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
