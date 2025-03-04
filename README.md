@@ -297,7 +297,7 @@ few-shot数: 0 (JHumanEval), 3 (MBPP Ja)
 ## fastchat(mt_bench)の評価の実行
 
 ```bash
-bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
+bash scripts/evaluate_ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
 few-shot数: 0 (zero-shot)
