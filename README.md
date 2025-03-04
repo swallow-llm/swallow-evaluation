@@ -62,7 +62,7 @@
 * ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
 * 主な変更点: なし
 
-----
+
 
 # FAQ
 [こちら](MEMO.md)
@@ -133,8 +133,7 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 ## bigcode (J/HumanEval, JA/EN MBPP)
 
-`jalm-evaluation-private/`にて
-
+1. `jalm-evaluation-private/`にて 
 ```bash
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
@@ -147,7 +146,7 @@ pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
+2. bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
 ## fastchat (MT-Bench)
 
@@ -179,9 +178,10 @@ OPENAI_API_KEY=...
 
 ## llm-jp-eval データセットの前処理
 
-* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする
+[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従い、以下のコマンドを実行してデータセットをダウンロードする
 
 ```bash
+source .venv_llm_jp_eval/bin/activate
 cd llm-jp-eval
 
 python scripts/preprocess_dataset.py  \
