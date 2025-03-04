@@ -7,6 +7,7 @@ source .venv_harness_jp/bin/activate
 
 MODEL_NAME_PATH=$1
 CUDA_BLOCKING=${2:-}
+REPO_PATH=$(pwd)
 
 NUM_FEWSHOT=4
 NUM_TESTCASE="all"

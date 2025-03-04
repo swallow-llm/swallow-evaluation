@@ -8,6 +8,7 @@ source .venv_fastchat/bin/activate
 MODEL_NAME_PATH=$1
 GPU_NUM=$2
 CUDA_BLOCKING=${3:-}
+REPO_PATH=$(pwd)
 
 OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
 

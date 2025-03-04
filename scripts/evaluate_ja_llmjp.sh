@@ -7,6 +7,7 @@ source .venv_llm_jp_eval/bin/activate
 
 MODEL_NAME_PATH=$1
 CUDA_BLOCKING=${2:-}
+REPO_PATH=$(pwd)
 
 NUM_TESTCASE=-1
 GENERAL_NUM_FEWSHOT=4

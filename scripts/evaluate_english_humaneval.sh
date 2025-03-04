@@ -2,7 +2,7 @@
 source .venv_bigcode/bin/activate
 
 # This script is used to evaluate
-# jhumaneval (unstripped)
+# humaneval (unstripped)
 # to evaluate with all testcases, set NUM_TESTCASE=None
 
 MODEL_NAME_PATH=$1
@@ -12,7 +12,7 @@ CUDA_BLOCKING=${4:-}
 
 NUM_SAMPLES=10
 BATCH_SIZE=10
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/humaneval-unstripped"
+OUTDIR="results/${MODEL_NAME_PATH}/en/humaneval"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -37,7 +37,7 @@ if [ ${DO_GENERATION} = "true" ]; then
   start_time=$(date +%s)
   python bigcode-evaluation-harness/main.py \
     --model ${MODEL_NAME_PATH} \
-    --tasks jhumaneval-unstripped \
+    --tasks humaneval \
     --do_sample True \
     --n_samples ${NUM_SAMPLES} \
     --batch_size ${BATCH_SIZE} \
@@ -56,12 +56,12 @@ fi
 
 if [ ${DO_EVAL} = "true" ]; then
   echo "Evaluating"
-  echo "Generated codes should be placed at ${OUTDIR}/generation_jhumaneval-unstripped.json ."
+  echo "Generated codes should be placed at ${OUTDIR}/generation_humaneval.json ."
   touch ${OUTDIR}/metrics.json
-
+  
   start_time=$(date +%s)
-    docker run \
-    -v $(pwd)/${OUTDIR}/generation_jhumaneval.json:/app/generations_py.json \
+  docker run \
+    -v $(pwd)/${OUTDIR}/generation_humaneval.json:/app/generations_py.json \
     -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json \
     -it evaluation-harness python3 main.py \
     --model ${MODEL_NAME_PATH} \
@@ -72,7 +72,7 @@ if [ ${DO_EVAL} = "true" ]; then
     --metric_output_path /app/metrics.json
 
   python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
-    --generation_path $(pwd)/${OUTDIR}/generation_jhumaneval.json \
+    --generation_path $(pwd)/${OUTDIR}/generation_humaneval.json \
     --metrics_path $(pwd)/${OUTDIR}/metrics.json \
     --task humaneval
 
