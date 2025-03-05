@@ -26,11 +26,14 @@
 * バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
 * 主な変更点: 
-  * 博士課程レベルの教養ベンチマークである GPQA の評価を行えるようにしました。詳細は後述。
-  * 数学のベンチマークである MATH の評価を行えるようにしました。詳細は後述。
+  * 博士課程レベルの教養ベンチマークである GPQA の評価を行えるようにしました。
+    * 
+  * 数学のベンチマークである MATH の評価を行えるようにしました。
+    * テストセットは Hendrycksらによるオリジナル[hendrycks/competition_math]; [Hendrycks+, NeurIPS21](https://openreview.net/forum?id=7Bywt2mQsCe) のtest split 5,000問ではなく、後続研究[Lightman+, ICLR24](https://openreview.net/forum?id=v8L0pN6EOi)で作成されたtest split 500問を使用しています。
+    * 回答文生成は貪欲法で、停止条件に `I hope it is correct` を追加したほか、生成トークン数の上限を 1024 に変更しています。
+    * 回答スパンの抽出方法は、デフォルト実装の `The final answer is(.*?).` だけでなく `\\boxed{}` も併用する方法に変更しました。
 
 ### JP Language Model Evaluation Harness
-
 * バージョン: [Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41) [Gao+, 22]
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-jp/LICENSE.md))
 * 主な変更点:
@@ -39,7 +42,6 @@
   * huggingface tokenizerを読み込む際に`trust_remote_code`に渡す値を指定できるようにしました。
 
 ### FastChat
-
 * バージョン: [FastChat](https://github.com/lm-sys/FastChat) (commit #e86e70d0)
 * ライセンス: Apache License Version 2.0 ([LICENSE](fastchat/LICENSE))
 * 主な変更点:
@@ -63,30 +65,22 @@
 
 ## 評価フレームワークに追加したベンチマークの詳細およびそれらのライセンス・変更点
 
-#### GPQA (Language Model Evaluation Harnessで使用)
+### GPQA (Language Model Evaluation Harnessで使用)
 * バージョン: [gpqa](https://github.com/idavidrein/gpqa/tree/main)
 * ライセンス: Copyright (c) 2022 I. David Rein, MIT License ([LICENSE](https://github.com/idavidrein/gpqa/blob/main/LICENSE))
 * 主な変更点: なし
 
-#### MATH (Language Model Evaluation Harnessで使用)
-
-* バージョン: [HuggingFaceH4/MATH-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500)
-  Hendrycksによるオリジナルのデータセット[hendrycks/competition_math], []ではなく、後続研究[Lightman+, ICLR24](https://openreview.net/forum?id=v8L0pN6EOi)で作成されたtest split 500問を使用しています。  
+### MATH (Language Model Evaluation Harnessで使用)
+* バージョン: [HuggingFaceH4/MATH-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500), [オリジナル](https://github.com/hendrycks/math/tree/main)
 * ライセンス: Copyright (c) 2021 Dan Hendrycks , MIT License ([LICENSE](https://github.com/hendrycks/math/blob/main/LICENSE))
-* 主な変更点: 
-  * 設問数は "Let's Verify Step by Step" ([Lightman+, ICLR24](https://openreview.net/forum?id=v8L0pN6EOi)) で使われた test split 500問に変更をしています。
-  * 回答トークン数の上限を 1024 に変更しました。
-  * 回答の抽出は実装されている `The final answer is(.*?).` だけでなく `\\boxed{}` も併用する方法に変更しました。
-  * 文生成の停止条件に `I hope it is correct` を追加しました。
+* 主な変更点: なし
 
 #### JHumanEval (Code Generation LM Evaluation Harnessで使用)
-
 * バージョン: [jhuman-eval](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
 * ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
 * 主な変更点: なし
 
 #### MBPP-Ja (Code Generation LM Evaluation Harnessで使用)
-
 * 取得元: [llm-jp/mbpp-ja]([https://github.com/KuramitsuLab/jhuman-eval/tree/main](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * ライセンス: Copyright (c) 2024 LLM-jp, CC BY 4.0 ([LICENSE](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * 主な変更点: なし
