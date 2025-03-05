@@ -26,8 +26,8 @@
 * バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
 * 主な変更点: 
-  * 博士課程レベルの教養ベンチマークである GPQA の評価を追加しました([リンク](./lm-evaluation-harness-en/lm_eval/tasks/gpqa/README.md))。実装の変更はありません。
-  * 数学のベンチマークである MATH の評価を行えるようにしました([リンク](./lm-evaluation-harness-en/lm_eval/tasks/math_500/README.md))。
+  * 博士課程レベルの教養ベンチマークである GPQA の評価を行えるようにしました。詳細は後述。
+  * 数学のベンチマークである MATH の評価を行えるようにしました。詳細は後述。
 
 ### JP Language Model Evaluation Harness
 
@@ -48,8 +48,8 @@
   * OpenAIのAPIを呼び出す際のretryの処理を改善しました。
   * 審判（judge）を gpt-4o-2024-08-06 に変更しました([リンク](./scripts/evaluate_ja_mt_bench.sh ))。
   * 設問をNejumi最新版([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))に更新しました。
-  * 模範解答は、 mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2 ))を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl ))。
-  * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py ))。
+  * coding/math/reasoningの模範解答は、mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2 ))をもとに、Swallowチームで独自に校閲・修正したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl))。
+  * 応答文の日本語文字率 を計算する関数を追加しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py))。
 
 ### Code Generation LM Evaluation Harness
 
@@ -58,19 +58,20 @@
 * 主な変更点:
   * JHumanEvalの評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/humaneval.py))。
     * HumanEval / JHumanEval タスクにおける、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
-  * MBPP の評価を追加しました([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp.py))。実装の変更はありません。
   * MBPP-Ja の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
     * MBPP-Ja は、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
 
-#### GPQA (Language Model Evaluation Harnessで使用)
+## 評価フレームワークに追加したベンチマークの詳細およびそれらのライセンス・変更点
 
+#### GPQA (Language Model Evaluation Harnessで使用)
 * バージョン: [gpqa](https://github.com/idavidrein/gpqa/tree/main)
 * ライセンス: Copyright (c) 2022 I. David Rein, MIT License ([LICENSE](https://github.com/idavidrein/gpqa/blob/main/LICENSE))
 * 主な変更点: なし
 
 #### MATH (Language Model Evaluation Harnessで使用)
 
-* バージョン: [math](https://github.com/hendrycks/math/tree/main)
+* バージョン: [HuggingFaceH4/MATH-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500)
+  Hendrycksによるオリジナルのデータセット[hendrycks/competition_math], []ではなく、後続研究[Lightman+, ICLR24](https://openreview.net/forum?id=v8L0pN6EOi)で作成されたtest split 500問を使用しています。  
 * ライセンス: Copyright (c) 2021 Dan Hendrycks , MIT License ([LICENSE](https://github.com/hendrycks/math/blob/main/LICENSE))
 * 主な変更点: 
   * 設問数は "Let's Verify Step by Step" ([Lightman+, ICLR24](https://openreview.net/forum?id=v8L0pN6EOi)) で使われた test split 500問に変更をしています。
@@ -84,15 +85,9 @@
 * ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
 * 主な変更点: なし
 
-#### MBPP (Code Generation LM Evaluation Harnessで使用)
+#### MBPP-Ja (Code Generation LM Evaluation Harnessで使用)
 
-* バージョン: [mbpp](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
-* ライセンス: Apache License Version 2.0 ([LICENSE](https://github.com/google-research/google-research/blob/master/LICENSE))
-* 主な変更点: なし
-
-#### JMBPP (Code Generation LM Evaluation Harnessで使用)
-
-* バージョン: [jmbpp](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
+* 取得元: [llm-jp/mbpp-ja]([https://github.com/KuramitsuLab/jhuman-eval/tree/main](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * ライセンス: Copyright (c) 2024 LLM-jp, CC BY 4.0 ([LICENSE](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * 主な変更点: なし
 
