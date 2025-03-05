@@ -70,10 +70,10 @@
 #### 主な変更点
 * JHumanEvalの評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/humaneval.py))。
   * プロンプト末尾の改行 `n` を削除しない、いわゆる "unstripped" を使用しています。
-  * HumanEval / JHumanEval について、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
 * MBPP-Ja の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
   * テストセットは、llm-jp-eval v1.4.0 と同一です([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。
     ただしMBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
+* HumanEval / JHumanEval について、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
 
 ## 評価フレームワークに追加したベンチマークのライセンス・変更点
 
