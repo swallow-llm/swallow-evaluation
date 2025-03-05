@@ -47,7 +47,7 @@
   * 一つの事例に対して複数回の応答文の生成と評価を行えるようにしました。
   * OpenAIのAPIを呼び出す際のretryの処理を改善しました。
   * 審判（judge）を gpt-4o-2024-08-06 に変更しました([リンク](./scripts/evaluate_ja_mt_bench.sh ))。
-  * 設問をNejumi最新版に更新しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。
+  * 設問をNejumi最新版([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))に更新しました。
   * 模範解答は、 mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2 ))を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl ))。
   * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py ))。
 
@@ -60,7 +60,7 @@
     * HumanEval / JHumanEval タスクにおける、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
   * MBPP の評価を追加しました([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp.py))。実装の変更はありません。
   * MBPP-Ja の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
-    * MBPP-Ja は、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています。([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))
+    * MBPP-Ja は、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
 
 #### GPQA (Language Model Evaluation Harnessで使用)
 
