@@ -31,7 +31,7 @@
 
 * 数学のベンチマークである MATH の評価を行えるようにしました。
   * プロンプトは [minerva_math](https://github.com/EleutherAI/lm-evaluation-harness/tree/v0.4.2/lm_eval/tasks/minerva_math)の 4-shot CoT プロンプトを使用しています。
-  * テストセットは Hendrycksらによるオリジナル[hendrycks/competition_math]; [Hendrycks+, NeurIPS21] のtest split 5,000問ではなく、Lightmanらによる後続研究[Lightman+, ICLR24]で作成されたtest split 500問（いわゆる"MATH-500"）を使用しています。
+  * テストセットは Hendrycksら [Hendrycks+, NeurIPS21] によるオリジナルのtest split 5,000問ではなく、Lightmanらによる後続研究[Lightman+, ICLR24]で作成されたtest split 500問（いわゆる"MATH-500"）を使用しています。
   * 回答文生成は貪欲法で、停止条件に `I hope it is correct` を追加したほか、生成トークン数の上限を 1024 に変更しています。
   * 回答スパンの抽出方法は、デフォルト実装の `The final answer is(.*?).` だけでなく `\\boxed{}` も併用する方法に変更しました。
 * 博士課程レベルの科学的知識や能力のベンチマークである GPQA の評価を行えるようにしました。
@@ -57,8 +57,8 @@
 * 一つの事例に対して複数回の応答文の生成と評価を行えるようにしました。
 * OpenAIのAPIを呼び出す際のretryの処理を改善しました。
 * 審判（judge）を gpt-4o-2024-08-06 に変更しました([リンク](./scripts/evaluate_ja_mt_bench.sh ))。
-* 設問をNejumi最新版([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))に更新しました。
-* coding/math/reasoningの模範解答は、mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2 ))をもとに、Swallowチームで独自に校閲・修正したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl))。
+* 設問は Nejumi Leaderboard v3 の mtbench_ja_question:v4 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/)) を使用しています。  
+  ただし coding/math/reasoning の模範解答は、mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2))をもとに、Swallowチームで独自に校閲・修正したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl))。  
 * 応答文の日本語文字率を計算する関数を追加しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py))。
 
 ### Code Generation LM Evaluation Harness
@@ -76,14 +76,14 @@
 
 ## 評価フレームワークに追加したベンチマークのライセンス・変更点
 
-### GPQA (Language Model Evaluation Harnessで使用)
-* バージョン: [idavidrein/gpqa](https://github.com/idavidrein/gpqa/tree/main)
-* ライセンス: Copyright (c) 2022 I. David Rein, MIT License ([LICENSE](https://github.com/idavidrein/gpqa/blob/main/LICENSE))
-* 主な変更点: なし
-
 ### MATH (Language Model Evaluation Harnessで使用)
 * バージョン: [HuggingFaceH4/MATH-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500), [オリジナル](https://github.com/hendrycks/math/tree/main)
 * ライセンス: Copyright (c) 2021 Dan Hendrycks , MIT License ([LICENSE](https://github.com/hendrycks/math/blob/main/LICENSE))
+* 主な変更点: なし
+
+### GPQA (Language Model Evaluation Harnessで使用)
+* バージョン: [idavidrein/gpqa](https://github.com/idavidrein/gpqa/tree/main)
+* ライセンス: Copyright (c) 2022 I. David Rein, MIT License ([LICENSE](https://github.com/idavidrein/gpqa/blob/main/LICENSE))
 * 主な変更点: なし
 
 #### JHumanEval (Code Generation LM Evaluation Harnessで使用)
@@ -165,7 +165,7 @@ pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-## bigcode (J/HumanEval, JA/EN MBPP)
+## bigcode (J/HumanEval, MBPP, MBPP-Ja)
 
 `jalm-evaluation-private/`にて
 
@@ -352,7 +352,8 @@ few-shot数: 0 (zero-shot)
   * 常識推論: HellaSwag, WinoGrande, OpenBookQA
   * 世界知識: TriviaQA
   * 文書読解: SQuAD2
-  * 数学: GSM8K, MATH
+  * 算術推論: GSM8K
+  * 数学: MATH
   * 一般教養・学術知識: MMLU
   * 博士課程: GPQA
 
