@@ -87,12 +87,12 @@
 * ライセンス: Copyright (c) 2022 I. David Rein, MIT License ([LICENSE](https://github.com/idavidrein/gpqa/blob/main/LICENSE))
 * 主な変更点: なし
 
-#### JHumanEval (Code Generation LM Evaluation Harnessで使用)
+### JHumanEval (Code Generation LM Evaluation Harnessで使用)
 * バージョン: [jhuman-eval](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
 * ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
 * 主な変更点: なし
 
-#### MBPP-Ja (Code Generation LM Evaluation Harnessで使用)
+### MBPP-Ja (Code Generation LM Evaluation Harnessで使用)
 * 取得元: [llm-jp/mbpp-ja]([https://github.com/KuramitsuLab/jhuman-eval/tree/main](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * ライセンス: Copyright (c) 2024 LLM-jp, CC BY 4.0 ([LICENSE](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * 主な変更点: なし
