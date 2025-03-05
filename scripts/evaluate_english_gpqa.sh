@@ -45,8 +45,8 @@ lm_eval --model hf \
     --batch_size $GPQA_BATCH_SIZE \
     --device cuda \
     --write_out \
-    --output_path "$GPQA_OUTDIR" \
-    --use_cache "$GPQA_OUTDIR" \
+    --output_path "../$GPQA_OUTDIR" \
+    --use_cache "../$GPQA_OUTDIR" \
     --log_samples \
     --seed 42
 end_time=$(date +%s)
