@@ -59,7 +59,7 @@ if [ ${DO_EVAL} = "true" ]; then
   echo "Evaluating"
   echo "Generated codes should be placed at ${OUTDIR}/generation_mbpp_ja.json ."
   touch ${OUTDIR}/metrics.json
-  export HF_HOME=$REPO_PATH/HF_HOME
+  export HF_HOME=$(pwd)/HF_HOME
 
   start_time=$(date +%s)
   docker run \
