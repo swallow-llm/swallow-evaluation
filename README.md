@@ -35,8 +35,8 @@
   * 回答文生成は貪欲法で、停止条件に `I hope it is correct` を追加したほか、生成トークン数の上限を 1024 に変更しています。
   * 回答スパンの抽出方法は、デフォルト実装の `The final answer is(.*?).` だけでなく `\\boxed{}` も併用する方法に変更しました。
 * 博士課程レベルの科学的知識や能力のベンチマークである GPQA の評価を行えるようにしました。
-    * プロンプトは、Meta社によるLlama3.1評価再現用のリファレンス実装 [meta-llama/Llama-3.1-8B-Instruct-evals](https://huggingface.co/datasets/meta-llama/Llama-3.1-8B-Instruct-evals)の zero-shot CoT プロンプトを使用しています。
-      またプロンプトと整合するように回答選択肢を抽出する正規表現を調整しました([リンク](./lm-eval-harness-en/lm_eval/tasks/gpqa/cot_zeroshot/gpqa_main_cot_zeroshot_meta_llama3_wo_chat.yaml))。  
+    * プロンプトは、Meta社によるLlama3.1評価再現用のリファレンス実装 [meta-llama/Llama-3.1-8B-Instruct-evals](https://huggingface.co/datasets/meta-llama/Llama-3.1-8B-Instruct-evals) の zero-shot CoT プロンプトを使用しています。
+      またプロンプトと整合するように回答選択肢を抽出する正規表現を調整しました([リンク](./lm-evaluation-harness-en/lm_eval/tasks/gpqa/cot_zeroshot/gpqa_main_cot_zeroshot_meta_llama3_wo_chat.yaml))。  
     * テストセットは "main" subset の448問を使用しています。
     * 回答文生成は貪欲法で、生成トークン数の上限を 2048 にしています。
 
