@@ -1,4 +1,4 @@
-# Swallowプロジェクト 大規模言語モデル 評価スクリプト Ver. 202503
+# Swallowプロジェクト 大規模言語モデル 評価スクリプト Ver. 202411
 
 * このリポジトリでは[Swallowプロジェクト](https://swallow-llm.github.io/index.ja.html)による大規模言語モデル；Swallowシリーズのリリースに用いた評価スクリプトを公開しています。
   再現実験などにご利用ください。
