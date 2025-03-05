@@ -18,48 +18,82 @@
 * バージョン: [llm-jp-eval v1.3.0](https://github.com/llm-jp/llm-jp-eval/releases/tag/v1.3.0) [Han+, ANLP24]
 * ライセンス: Copyright 2023 LLM-jp,  Apache License Version 2.0 ([LICENSE](llm-jp-eval/LICENSE))
 * 主な変更点:
-  * なし
+  * モデルの応答を生成する際に貪欲デコーディングを強制するようにconfigを追加しました（[リンク](./llm-jp-eval/configs/config_no-sample.yaml))。
+  * JMMLUの結果をカテゴリごとに算出するスクリプトを追加しました ([リンク](./llm-jp-eval/scripts/jmmlu_statistics.py))。
 
 ### Language Model Evaluation Harness
 
 * バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
 * 主な変更点: 
-  * SQuAD v2.0 を「回答不能」も考慮した評価指標に変更しました。([リンク](./lm-evaluation-harness-en/lm_eval/tasks/squadv2/task.py))
-  * 博士課程レベルの教養ベンチマークである GPQA の評価を行えるようにしました。([リンク](./lm-evaluation-harness-en/lm_eval/tasks/gpqa/README.md))
-  * 数学のベンチマークである MATH の評価を行えるようにしました。([リンク](./lm-evaluation-harness-en/lm_eval/tasks/math_500/README.md))
+  * 博士課程レベルの教養ベンチマークである GPQA の評価を追加しました([リンク](./lm-evaluation-harness-en/lm_eval/tasks/gpqa/README.md))。実装の変更はありません。
+  * 数学のベンチマークである MATH の評価を行えるようにしました([リンク](./lm-evaluation-harness-en/lm_eval/tasks/math_500/README.md))。
 
 ### JP Language Model Evaluation Harness
 
 * バージョン: [Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41) [Gao+, 22]
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-jp/LICENSE.md))
 * 主な変更点:
-  * なし
+  * TER (Translation Error Rate) をブートストラップ統計量から除外しました。
+  * 評価結果のキャッシュの保存先を指定できるようにしました。
+  * huggingface tokenizerを読み込む際に`trust_remote_code`に渡す値を指定できるようにしました。
 
 ### FastChat
 
 * バージョン: [FastChat](https://github.com/lm-sys/FastChat) (commit #e86e70d0)
 * ライセンス: Apache License Version 2.0 ([LICENSE](fastchat/LICENSE))
 * 主な変更点:
-  * MT-Benchに関して、以下 4 点の変更を行いました。
-    * 審判（judge）を gpt-4o-2024-08-06 に変更しました([リンク](./scripts/evaluate_ja_mt_bench.sh ))。
-    * 設問をNejumi最新版に更新しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。
-    * 模範解答は、 mtbench_ja_referenceanswer:v2 を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl ))。
-    * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py ))。
+  * 新しいモデルに対応するために、それぞれのモデルに対応するChatTemplateの追加をしました ([リンク](./fastchat/fastchat/conversation.py))。
+  * 一つの事例に対して複数回の応答文の生成と評価を行えるようにしました。
+  * OpenAIのAPIを呼び出す際のretryの処理を改善しました。
+  * 審判（judge）を gpt-4o-2024-08-06 に変更しました([リンク](./scripts/evaluate_ja_mt_bench.sh ))。
+  * 設問をNejumi最新版に更新しました([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/ ))。
+  * 模範解答は、 mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2 ))を使用し、Swallowチームで独自に校閲したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl ))。
+  * MT-Bench補助評価指標である"応答文の日本語文字率" を、Markdown修飾を除外したものに変更しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py ))。
 
 ### Code Generation LM Evaluation Harness
 
 * バージョン: [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) (commit #0261c52)
 * ライセンス: Apache License Version 2.0 ([LICENSE](bigcode-evaluation-harness/LICENSE))
 * 主な変更点:
-  * MBPP の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp.py))。
+  * JHumanEvalの評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/humaneval.py))。
+    * HumanEval / JHumanEval タスクにおける、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
+  * MBPP の評価を追加しました([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp.py))。実装の変更はありません。
   * MBPP-Ja の評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))。
     * MBPP-Ja は、 llm-jp-eval v1.4.0 と同じものです([MBPP-Ja](https://huggingface.co/datasets/llm-jp/mbpp-ja))。 ただし英語MBPPの test split に合わせて task_id = 11--510 の設問のみを使用しています。([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/mbpp_ja.py))
+
+#### GPQA (Language Model Evaluation Harnessで使用)
+
+* バージョン: [gpqa](https://github.com/idavidrein/gpqa/tree/main)
+* ライセンス: Copyright (c) 2022 I. David Rein, MIT License ([LICENSE](https://github.com/idavidrein/gpqa/blob/main/LICENSE))
+* 主な変更点: なし
+
+#### MATH (Language Model Evaluation Harnessで使用)
+
+* バージョン: [math](https://github.com/hendrycks/math/tree/main)
+* ライセンス: Copyright (c) 2021 Dan Hendrycks , MIT License ([LICENSE](https://github.com/hendrycks/math/blob/main/LICENSE))
+* 主な変更点: 
+  * 設問数は "Let's Verify Step by Step" ([Lightman+, ICLR24](https://openreview.net/forum?id=v8L0pN6EOi)) で使われた test split 500問に変更をしています。
+  * 回答トークン数の上限を 1024 に変更しました。
+  * 回答の抽出は実装されている `The final answer is(.*?).` だけでなく `\\boxed{}` も併用する方法に変更しました。
+  * 文生成の停止条件に `I hope it is correct` を追加しました。
 
 #### JHumanEval (Code Generation LM Evaluation Harnessで使用)
 
 * バージョン: [jhuman-eval](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
 * ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
+* 主な変更点: なし
+
+#### MBPP (Code Generation LM Evaluation Harnessで使用)
+
+* バージョン: [mbpp](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
+* ライセンス: Apache License Version 2.0 ([LICENSE](https://github.com/google-research/google-research/blob/master/LICENSE))
+* 主な変更点: なし
+
+#### JMBPP (Code Generation LM Evaluation Harnessで使用)
+
+* バージョン: [jmbpp](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
+* ライセンス: Copyright (c) 2024 LLM-jp, CC BY 4.0 ([LICENSE](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * 主な変更点: なし
 
 ----
