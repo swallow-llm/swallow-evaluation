@@ -12,7 +12,7 @@ CUDA_BLOCKING=${4:-}
 
 NUM_SAMPLES=10
 BATCH_SIZE=10
-OUTDIR="results/${MODEL_NAME_PATH}/ja/humaneval"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/humaneval-unstripped"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -56,7 +56,7 @@ fi
 
 if [ ${DO_EVAL} = "true" ]; then
   echo "Evaluating"
-  echo "Generated codes should be placed at ${OUTDIR}/generation_jhumaneval.json ."
+  echo "Generated codes should be placed at ${OUTDIR}/generation_jhumaneval-unstripped.json ."
   touch ${OUTDIR}/metrics.json
 
   start_time=$(date +%s)
