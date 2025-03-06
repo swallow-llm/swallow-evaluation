@@ -50,7 +50,7 @@ echo "Generation judgements time: ${execution_time} seconds"
 python show_result.py \
   --model-list ${MODEL_NAME_PATH} \
   --bench-name japanese_mt_bench \
-  --output-file ${OUTDIR}/judge.json \
+  --output-file ../../../${OUTDIR}/judge.json \
   --judge-model gpt-4o-2024-08-06
 
 # aggregate results
