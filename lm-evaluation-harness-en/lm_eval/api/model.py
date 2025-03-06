@@ -305,8 +305,12 @@ class TemplateLM(LM):
             whole_enc = self.tok_encode(context + continuation)
             context_enc = self.tok_encode(context)
 
-            context_enc_len = len(context_enc)
-            continuation_enc = whole_enc[context_enc_len:]
+            # added conditional branch (ref: https://github.com/EleutherAI/lm-evaluation-harness/issues/1297)
+            if len(whole_enc) == len(context_enc):
+                continuation_enc = self.tok_encode(continuation)
+            else:
+                context_enc_len = len(context_enc)
+                continuation_enc = whole_enc[context_enc_len:]
 
         return context_enc, continuation_enc
 
