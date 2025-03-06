@@ -61,7 +61,7 @@ if [ ${DO_EVAL} = "true" ]; then
 
   start_time=$(date +%s)
     docker run \
-    -v $(pwd)/${OUTDIR}/generation_jhumaneval.json:/app/generations_py.json \
+    -v $(pwd)/${OUTDIR}/generation_jhumaneval-unstripped.json:/app/generations_py.json \
     -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json \
     -it evaluation-harness python3 main.py \
     --model ${MODEL_NAME_PATH} \
@@ -72,7 +72,7 @@ if [ ${DO_EVAL} = "true" ]; then
     --metric_output_path /app/metrics.json
     
   python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
-    --generation_path $(pwd)/${OUTDIR}/generation_jhumaneval.json \
+    --generation_path $(pwd)/${OUTDIR}/generation_jhumaneval-unstripped.json \
     --metrics_path $(pwd)/${OUTDIR}/metrics.json \
     --task humaneval
 
