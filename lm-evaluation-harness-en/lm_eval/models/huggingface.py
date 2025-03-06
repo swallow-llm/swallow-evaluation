@@ -746,7 +746,12 @@ class HFLM(TemplateLM):
                 ).logits
             else:
                 assert self.AUTO_MODEL_CLASS == transformers.AutoModelForCausalLM
-                return self.model(inps).logits
+                # Set 'use_cache' to False when evaluating gemma-2 variants.
+                if any(pattern in self._model.name_or_path.lower() for pattern in ['gemma-2', 'gemma2']):
+                    eval_logger.info("Pass 'use_cache=False' to args of self.model() since the model is a gemma-2 variant.")
+                    return self.model(inps, use_cache=False).logits
+                else:
+                    return self.model(inps).logits
 
     def _model_generate(self, context, max_length, stop, **generation_kwargs):
         # temperature = 0.0 if not set

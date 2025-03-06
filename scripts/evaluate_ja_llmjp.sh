@@ -40,8 +40,10 @@ mkdir -p $JMMLU_OUTDIR
 start_time=$(date +%s)
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
+  model.trust_remote_code=True \
   tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.use_fast=$USE_FAST_TOKENIZER \
+  tokenizer.trust_remote_code=True \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="[\"jamp\", \"janli\", \"jemhopqa\", \"jcommonsenseqa\", \"jnli\", \"jsem\", \"jsick\", \"jsquad\", \"jsts\", \"niilc\"]" \
   metainfo.num_few_shots=$GENERAL_NUM_FEWSHOT \
@@ -55,8 +57,10 @@ echo "Evaluation General time: ${execution_time} seconds"
 start_time=$(date +%s)
 python llm-jp-eval/scripts/evaluate_llm.py -cn config_no-sample.yaml \
   model.pretrained_model_name_or_path=$MODEL_NAME_PATH \
+  model.trust_remote_code=True \
   tokenizer.pretrained_model_name_or_path=$MODEL_NAME_PATH \
   tokenizer.use_fast=$USE_FAST_TOKENIZER \
+  tokenizer.trust_remote_code=True \
   metainfo.max_num_samples=$NUM_TESTCASE \
   target_dataset="jmmlu" \
   metainfo.num_few_shots=$JMMLU_NUM_FEWSHOT \
