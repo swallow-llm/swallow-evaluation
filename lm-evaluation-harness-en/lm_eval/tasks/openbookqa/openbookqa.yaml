@@ -1,6 +1,8 @@
 task: openbookqa
 dataset_path: openbookqa
 dataset_name: main
+dataset_kwargs:
+  trust_remote_code: true
 output_type: multiple_choice
 training_split: train
 validation_split: validation

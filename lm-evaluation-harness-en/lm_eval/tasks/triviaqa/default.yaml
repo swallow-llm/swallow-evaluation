@@ -1,6 +1,8 @@
 task: triviaqa
 dataset_path: trivia_qa
 dataset_name: rc.nocontext
+dataset_kwargs:
+  trust_remote_code: true
 output_type: generate_until
 training_split: train
 validation_split: validation
