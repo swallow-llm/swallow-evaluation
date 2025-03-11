@@ -166,8 +166,9 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 ## bigcode (J/HumanEval, MBPP, MBPP-Ja)
 
-1. `jalm-evaluation-private/`にて 
+`jalm-evaluation-private/`にて 
 ```bash
+docker build -t evaluation-harness-jalm-evaluation  .
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
 pip install --upgrade pip
@@ -178,8 +179,6 @@ pip install datasets==2.21.0
 pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
-
-2. bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
 ## fastchat (MT-Bench)
 

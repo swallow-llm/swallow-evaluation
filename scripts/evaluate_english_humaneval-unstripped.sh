@@ -63,7 +63,7 @@ if [ ${DO_EVAL} = "true" ]; then
   docker run \
     -v $(pwd)/${OUTDIR}/generation_humaneval-unstripped.json:/app/generations_py.json \
     -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json \
-    -it evaluation-harness python3 main.py \
+    -it evaluation-harness-jalm-evaluation python3 main.py \
     --model ${MODEL_NAME_PATH} \
     --tasks humaneval \
     --load_generations_path /app/generations_py.json \
