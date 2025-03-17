@@ -45,8 +45,8 @@ lm_eval --model hf \
     --batch_size $MMLU_BATCH_SIZE \
     --device cuda \
     --write_out \
-    --output_path "$MMLU_OUTDIR" \
-    --use_cache "$MMLU_OUTDIR" \
+    --output_path "../$MMLU_OUTDIR" \
+    --use_cache "../$MMLU_OUTDIR" \
     --log_samples \
     --seed 42
 end_time=$(date +%s)

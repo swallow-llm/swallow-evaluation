@@ -10,7 +10,7 @@ CUDA_BLOCKING=${2:-}
 
 NUM_FEWSHOT=1
 NUM_TESTCASE="all"
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/xlsum/xlsum_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)

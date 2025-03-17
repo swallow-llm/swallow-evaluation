@@ -44,8 +44,8 @@ lm_eval --model hf \
     --batch_size $GENERAL_BATCH_SIZE \
     --device cuda \
     --write_out \
-    --output_path "$GENERAL_OUTDIR" \
-    --use_cache "$GENERAL_OUTDIR" \
+    --output_path "../$GENERAL_OUTDIR" \
+    --use_cache "../$GENERAL_OUTDIR" \
     --log_samples \
     --seed 42
 end_time=$(date +%s)

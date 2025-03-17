@@ -9,7 +9,7 @@ MODEL_NAME_PATH=$1
 GPU_NUM=$2
 CUDA_BLOCKING=${3:-}
 
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
+OUTDIR="results/${MODEL_NAME_PATH}/ja/ja_mt_bench"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -50,7 +50,7 @@ echo "Generation judgements time: ${execution_time} seconds"
 python show_result.py \
   --model-list ${MODEL_NAME_PATH} \
   --bench-name japanese_mt_bench \
-  --output-file ${OUTDIR}/judge.json \
+  --output-file ../../../${OUTDIR}/judge.json \
   --judge-model gpt-4o-2024-08-06
 
 # aggregate results

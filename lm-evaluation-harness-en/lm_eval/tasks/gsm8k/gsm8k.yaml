@@ -3,6 +3,8 @@ group:
 task: gsm8k
 dataset_path: gsm8k
 dataset_name: main
+dataset_kwargs:
+  trust_remote_code: true
 output_type: generate_until
 training_split: train
 fewshot_split: train

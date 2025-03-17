@@ -3,7 +3,7 @@
 * このリポジトリでは[Swallowプロジェクト](https://swallow-llm.github.io/index.ja.html)による大規模言語モデル；Swallowシリーズのリリースに用いた評価スクリプトを公開しています。
   再現実験などにご利用ください。
 * 本文書では評価スクリプトの実行方法のみを説明します。評価方法や結果はSwallowプロジェクトの[評価ページ](https://swallow-llm.github.io/evaluation/about.ja.html)や論文発表を参照ください。
-* 評価スクリプトは，基本的には [llm-jp-eval](https://github.com/llm-jp/llm-jp-eval) などの既存のLLM評価フレームワークを使用しています。
+* 評価スクリプトは、基本的には [llm-jp-eval](https://github.com/llm-jp/llm-jp-eval) などの既存のLLM評価フレームワークを使用しています。
   この場をお借りしてフレームワーク開発者の皆様にお礼申し上げます。
 
 ## 注意事項
@@ -100,8 +100,6 @@
 * ライセンス: Copyright (c) 2024 LLM-jp, CC BY 4.0 ([LICENSE](https://huggingface.co/datasets/llm-jp/mbpp-ja))
 * 主な変更点: なし
 
-----
-
 # FAQ
 [こちら](MEMO.md)
 
@@ -119,9 +117,9 @@ python -m venv .venv_bigcode
 python -m venv .venv_fastchat
 ```
 
-なお，以下の環境構築コードは，我々の計算環境においては動作検証をしておりますが， \
-利用される計算環境によってはバージョンが合わないことが考えられます． \
-その際は適宜適当なバージョンに置き換えてください．
+なお、以下の環境構築コードは、我々の計算環境においては動作検証をしておりますが、 \
+利用される計算環境によってはバージョンが合わないことが考えられます。 \
+その際は適宜適当なバージョンに置き換えてください。
 
 ## llm-jp-eval (llmjp)
 
@@ -171,9 +169,9 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 ## bigcode (J/HumanEval, MBPP, MBPP-Ja)
 
-`jalm-evaluation-private/`にて
-
+`jalm-evaluation-private/`にて 
 ```bash
+docker build -t evaluation-harness-jalm-evaluation  .
 source .venv_bigcode/bin/activate
 cd bigcode-evaluation-harness
 pip install --upgrade pip
@@ -184,8 +182,6 @@ pip install datasets==2.21.0
 pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
-
-bigcode-evaluation-harnessの[指示](https://github.com/bigcode-project/bigcode-evaluation-harness/tree/main?tab=readme-ov-file#docker-containers)に従ってdockerイメージをビルドする。
 
 ## fastchat (MT-Bench)
 
@@ -217,9 +213,10 @@ OPENAI_API_KEY=...
 
 ## llm-jp-eval データセットの前処理
 
-* [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従って、データセットをダウンロードする
+[llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従い、以下のコマンドを実行してデータセットをダウンロードする
 
 ```bash
+source .venv_llm_jp_eval/bin/activate
 cd llm-jp-eval
 
 python scripts/preprocess_dataset.py  \
@@ -249,8 +246,8 @@ fewshot数は
 <summary> NLIタスクのbalanced accuracyを計算する</summary>
 
 * NLIタスクデータセット(`jamp,janli,jnli,jsem,jsick`)のbalanced accuracyを計算するには
-  `./scripts/re_evaluate_nli_task.py` に `llm-jp-eval` が出力した `output_eval.json` を渡してください．
-  計算結果はjson形式でstdoutに出力されます．
+  `./scripts/re_evaluate_nli_task.py` に `llm-jp-eval` が出力した `output_eval.json` を渡してください。
+  計算結果はjson形式でstdoutに出力されます。
 
 ```txt
 python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存先のjsonファイルパス}
@@ -265,10 +262,10 @@ python re_evaluate_nli_task.py --input="{output_eval.jsonのパス}" > {保存�
 }
 ```
 
-* 多数の`output_eval.json`を一括で処理する場合は `./scripts/batch_re_evaluate_nli_task.sh` を実行してください．
-  ただし find コマンドの対象パスをあなたのフォルダ構造に合わせて書き換えて使ってください．
-  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます．
-* ndjsonファイルをtsv形式に変換したい場合は jq を使うとよいでしょう．
+* 多数の`output_eval.json`を一括で処理する場合は `./scripts/batch_re_evaluate_nli_task.sh` を実行してください。
+  ただし find コマンドの対象パスをあなたのフォルダ構造に合わせて書き換えて使ってください。
+  計算結果はndjson形式で `ja_nli_task_dataset_scores.json` に出力されます。
+* ndjsonファイルをtsv形式に変換したい場合は jq を使うとよいでしょう。
 
 ```bash
 # ヘッダ行の生成
@@ -315,19 +312,19 @@ few-shot数: 4
 ### 出力と評価を同時に行う場合
 
 ```bash
-bash scripts/evaluate_ja_{humaneval,mbpp}.sh $MODEL_PATH true true
+bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true true
 ```
 
 ### 出力だけを行う場合
 
 ```bash
-bash scripts/evaluate_ja_{humaneval,mbpp}.sh $MODEL_PATH true false
+bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true false
 ```
 
 ### 評価だけを行う場合
 
 ```bash
-bash scripts/evaluate_ja_{humaneval,mbpp}.sh $MODEL_PATH false true
+bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false true
 ```
 
 few-shot数: 0 (JHumanEval), 3 (MBPP Ja)
@@ -335,7 +332,7 @@ few-shot数: 0 (JHumanEval), 3 (MBPP Ja)
 ## fastchat(mt_bench)の評価の実行
 
 ```bash
-bash scripts/ja_mt_bench.sh $MODEL_PATH $GPU_NUM
+bash scripts/evaluate_ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
 few-shot数: 0 (zero-shot)
@@ -361,7 +358,7 @@ few-shot数: 0 (zero-shot)
   * 一般教養・学術知識: MMLU
   * 博士課程: GPQA
 
-本フレームワークでは評価時間の削減（評価の並列化）のために以下のようにスクリプトを分けている．
+本フレームワークでは評価時間の削減（評価の並列化）のために以下のようにスクリプトを分けている。
 
 * `evaluate_english_general.sh` - TriviaQA, GSM8K, OpenBookQA, HellaSwag,WinoGrande, SQuAD2
 * `evaluate_english_bbh.sh` - BBH
@@ -379,17 +376,23 @@ bash scripts/evaluate_english_{general,bbh,gpqa,mmlu}.sh $MODEL_PATH
 ### 出力と評価を同時に行う場合
 
 ```bash
-bash scripts/evaluate_english_{humaneval,mbpp}.sh $MODEL_PATH true true
+bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true true
 ```
 
 ### 出力だけを行う場合
 
 ```bash
-bash scripts/evaluate_english_{humaneval,mbpp}.sh $MODEL_PATH true false
+bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true false
 ```
 
 ### 評価だけを行う場合
 
 ```bash
-bash scripts/evaluate_english_{humaneval,mbpp}.sh $MODEL_PATH false true
+bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false true
 ```
+
+## 結果の確認
+
+- 全体の結果は`results/$MODEL_NAME/aggregated_result.json`に書き込まれます。
+- 複数のモデルの結果を確認したい場合は、`tmp/model_list` ファイルを作成し、各モデル名を1行ずつ記入してください。その後、`scripts/show_results.py` を実行すると、複数モデルの結果を一覧表示できます。
+

@@ -12,7 +12,7 @@ CUDA_BLOCKING=${4:-}
 
 NUM_SAMPLES=10
 BATCH_SIZE=10
-OUTDIR="${REPO_PATH}/results/${MODEL_NAME_PATH}/en/mbpp"
+OUTDIR="results/${MODEL_NAME_PATH}/en/mbpp"
 
 # Set CUDA_LAUNCH_BLOCKING to prevent evaluation from stopping at a certain batch
 # (This setting should be done only if necessary because it might slow evaluation)
@@ -64,7 +64,7 @@ if [ ${DO_EVAL} = "true" ]; then
   docker run \
     -v $(pwd)/${OUTDIR}/generation_mbpp.json:/app/generations_py.json \
     -v $(pwd)/${OUTDIR}/metrics.json:/app/metrics.json \
-    -it evaluation-harness python3 main.py \
+    -it evaluation-harness-jalm-evaluation python3 main.py \
     --model ${MODEL_NAME_PATH} \
     --tasks mbpp \
     --load_generations_path /app/generations_py.json \
@@ -73,8 +73,8 @@ if [ ${DO_EVAL} = "true" ]; then
     --metric_output_path /app/metrics.json
 
   python bigcode-evaluation-harness/bigcode_eval/custom_utils.py \
-    --generation_path ${OUTDIR}/generation_mbpp.json \
-    --metrics_path ${OUTDIR}/metrics.json \
+    --generation_path $(pwd)/${OUTDIR}/generation_mbpp.json \
+    --metrics_path $(pwd)/${OUTDIR}/metrics.json \
     --task mbpp
 
   end_time=$(date +%s)
