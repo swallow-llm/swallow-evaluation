@@ -65,6 +65,7 @@ class HuggingFaceAutoLM(BaseLM):
     # Default max sequence length setting for when no `max_length` is provided
     # or no max length config setting is found in the model or tokenizer.
     _DEFAULT_MAX_LENGTH: int = 2048
+    ALLOW_SPECIAL_TOKEN_KEYS = ["gemma", "gemma-2"]
 
     def __init__(
         self,
@@ -165,8 +166,8 @@ class HuggingFaceAutoLM(BaseLM):
             # and labels/continuations are tokenized separately without special
             # tokens, concatenated, and then processed as inputs.
             assert (
-                not add_special_tokens
-            ), "Evaluating causal models with `add_special_tokens=True` is currently not supported."
+                not add_special_tokens or any(key in pretrained for key in self.ALLOW_SPECIAL_TOKEN_KEYS)
+            ), "Evaluating causal models with `add_special_tokens=True` is currently not supported, except for models with special token support: " + ", ".join(self.ALLOW_SPECIAL_TOKEN_KEYS)
 
         self._batch_size = batch_size  # TODO: Adaptive batch size
         self._max_gen_toks = max_gen_toks
@@ -324,7 +325,7 @@ class HuggingFaceAutoLM(BaseLM):
             pretrained if tokenizer is None else tokenizer,
             revision=revision + ("/" + subfolder if subfolder is not None else ""),
             use_fast=use_fast,
-            trust_remote_code = trust_remote_code,
+            trust_remote_code=trust_remote_code,
         )
         tokenizer.pad_token = tokenizer.eos_token
         return tokenizer

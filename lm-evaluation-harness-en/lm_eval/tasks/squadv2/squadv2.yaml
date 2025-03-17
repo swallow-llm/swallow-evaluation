@@ -1,2 +1,4 @@
 task: squadv2
+dataset_kwargs:
+  trust_remote_code: true
 class: !function task.SQuAD2

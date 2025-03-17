@@ -266,12 +266,12 @@ class HFLM(TemplateLM):
             else:
                 self.tokenizer.add_special_tokens({"pad_token": "<|pad|>"})
 
-        # TODO: override this for Gemma
+        # Override this for Gemma
         self.add_bos_token = add_bos_token
-        if getattr(self.config, "model_type", None) == "gemma":
+        if "gemma" in getattr(self.config, "model_type", ""):
             self.add_bos_token = True
             eval_logger.info(
-                f"Model type is '{self.config.model_type}', a BOS token will be used as Gemma underperforms without it."
+                f"Model type is '{self.config.model_type}', part of the Gemma family--a BOS token will be used as Gemma underperforms without it."
             )
 
         self._max_length = max_length
@@ -746,7 +746,12 @@ class HFLM(TemplateLM):
                 ).logits
             else:
                 assert self.AUTO_MODEL_CLASS == transformers.AutoModelForCausalLM
-                return self.model(inps).logits
+                # Set 'use_cache' to False when evaluating gemma-2 variants.
+                if any(pattern in self._model.name_or_path.lower() for pattern in ['gemma-2', 'gemma2']):
+                    eval_logger.info("Pass 'use_cache=False' to args of self.model() since the model is a gemma-2 variant.")
+                    return self.model(inps, use_cache=False).logits
+                else:
+                    return self.model(inps).logits
 
     def _model_generate(self, context, max_length, stop, **generation_kwargs):
         # temperature = 0.0 if not set

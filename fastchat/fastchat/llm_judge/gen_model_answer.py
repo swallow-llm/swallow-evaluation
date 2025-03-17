@@ -3,10 +3,10 @@
 Usage:
 python3 gen_model_answer.py --model-path lmsys/fastchat-t5-3b-v1.0 --model-id fastchat-t5-3b-v1.0
 """
+
 import argparse
 import json
 import os
-import random
 import time
 
 import shortuuid
@@ -14,8 +14,8 @@ import torch
 from tqdm import tqdm
 
 from fastchat.llm_judge.common import load_questions, temperature_config
-from fastchat.model import load_model, get_conversation_template
-from fastchat.utils import str_to_torch_dtype, set_seed
+from fastchat.model import get_conversation_template, load_model
+from fastchat.utils import set_seed, str_to_torch_dtype
 
 
 def run_eval(
@@ -32,10 +32,9 @@ def run_eval(
     max_gpu_memory,
     dtype,
     revision,
+    use_vllm,
 ):
     questions = load_questions(question_file, question_begin, question_end)
-    # random shuffle the questions to balance the loading
-    random.shuffle(questions)
 
     # Split the question file into `num_gpus` files
     assert num_gpus_total % num_gpus_per_model == 0
@@ -46,7 +45,10 @@ def run_eval(
             get_model_answers
         ).remote
     else:
-        get_answers_func = get_model_answers
+        if use_vllm:
+            get_answers_func = get_model_answers_vllm
+        else:
+            get_answers_func = get_model_answers
 
     chunk_size = len(questions) // (num_gpus_total // num_gpus_per_model)
     ans_handles = []
@@ -93,6 +95,7 @@ def get_model_answers(
         load_8bit=False,
         cpu_offloading=False,
         debug=False,
+        use_vllm=False,
     )
 
     for question in tqdm(questions):
@@ -170,6 +173,8 @@ def get_model_answers(
 
                     if conv.name == "xgen" and output.startswith("Assistant:"):
                         output = output.replace("Assistant:", "", 1).strip()
+                    if conv.name == "deepseek-r1" and "</think>" in output:
+                        output = output.split("</think>")[1].strip()
                 except RuntimeError as e:
                     print("ERROR question ID: ", question["question_id"])
                     output = "ERROR"
@@ -181,7 +186,7 @@ def get_model_answers(
 
         # Dump answers
         os.makedirs(os.path.dirname(answer_file), exist_ok=True)
-        with open(os.path.expanduser(answer_file), "a", encoding='utf-8') as fout:
+        with open(os.path.expanduser(answer_file), "a", encoding="utf-8") as fout:
             ans_json = {
                 "question_id": question["question_id"],
                 "answer_id": shortuuid.uuid(),
@@ -192,16 +197,197 @@ def get_model_answers(
             fout.write(json.dumps(ans_json, ensure_ascii=False) + "\n")
 
 
+@torch.inference_mode()
+def get_model_answers_vllm(
+    model_path,
+    model_id,
+    questions,
+    answer_file,
+    max_new_token,
+    num_choices,
+    num_gpus_per_model,
+    max_gpu_memory,
+    dtype,
+    revision,
+):
+    for question in questions:
+        if not question["category"] in temperature_config:
+            temperature_config[question["category"]] = 0.7
+    questions.sort(key=lambda question: temperature_config[question["category"]])
+    model, tokenizer = load_model(
+        model_path,
+        revision=revision,
+        device="cuda",
+        num_gpus=num_gpus_per_model,
+        max_gpu_memory=max_gpu_memory,
+        dtype=dtype,
+        load_8bit=False,
+        cpu_offloading=False,
+        debug=False,
+        use_vllm=True,
+    )
+
+    batched_questions = []
+    tmp_question = None
+    current_temperature = -1
+    tmp_temperature = -1
+    for k in tqdm(range(len(questions))):
+        question = questions[k]
+        if question["category"] in temperature_config:
+            temperature = temperature_config[question["category"]]
+        else:
+            temperature = 0.7
+
+        if tmp_question != None:
+            batched_questions = [tmp_question]
+            tmp_question = None
+            current_temperature = tmp_temperature
+        if current_temperature == temperature:
+            batched_questions.append(question)
+            if k != len(questions) - 1:
+                continue
+        else:
+            tmp_question = question
+            tmp_temperature = temperature
+            if k == 0:
+                continue
+
+        temperature = current_temperature
+
+        choices = {}
+        for question in batched_questions:
+            choices[question["question_id"]] = []
+        for i in range(num_choices):
+            torch.manual_seed(i)
+            convs = {}
+            turns = {}
+            prompts = {}
+            for question in batched_questions:
+                convs[question["question_id"]] = get_conversation_template(model_id)
+                turns[question["question_id"]] = []
+                prompts[question["question_id"]] = []
+            for j in range(
+                max([len(question["turns"]) for question in batched_questions])
+            ):
+                current_prompts = []
+                current_question_ids = []
+                for l in range(len(batched_questions)):
+                    question_id = batched_questions[l]["question_id"]
+                    if j < len(batched_questions[l]["turns"]):
+                        qs = batched_questions[l]["turns"][j]
+                        convs[question_id].append_message(
+                            convs[question_id].roles[0], qs
+                        )
+                        convs[question_id].append_message(
+                            convs[question_id].roles[1], None
+                        )
+                        prompt = convs[question_id].get_prompt()
+                        prompts[batched_questions[l]["question_id"]].append(prompt)
+                        current_prompts.append(prompt)
+                        current_question_ids.append(batched_questions[l]["question_id"])
+
+                # some models may error out when generating long outputs
+                try:
+                    import vllm
+
+                    sampling_params = vllm.SamplingParams(
+                        temperature=temperature, max_tokens=max_new_token
+                    )
+                    outputs = model.generate(
+                        current_prompts,
+                        sampling_params,
+                    )
+                    for l in range(len(outputs)):
+                        output_ids = outputs[l].outputs[0].token_ids
+                        question_id = current_question_ids[l]
+
+                        # be consistent with the template's stop_token_ids
+                        if convs[question_id].stop_token_ids:
+                            stop_token_ids_index = [
+                                i
+                                for i, id in enumerate(output_ids)
+                                if id in convs[question_id].stop_token_ids
+                            ]
+                            if len(stop_token_ids_index) > 0:
+                                output_ids = output_ids[: stop_token_ids_index[0]]
+
+                        output = tokenizer.decode(
+                            output_ids,
+                            spaces_between_special_tokens=False,
+                        )
+                        if convs[question_id].stop_str and isinstance(
+                            convs[question_id].stop_str, list
+                        ):
+                            stop_str_indices = sorted(
+                                [
+                                    output.find(stop_str)
+                                    for stop_str in convs[question_id].stop_str
+                                    if output.find(stop_str) > 0
+                                ]
+                            )
+                            if len(stop_str_indices) > 0:
+                                output = output[: stop_str_indices[0]]
+                        elif (
+                            convs[question_id].stop_str
+                            and output.find(convs[question_id].stop_str) > 0
+                        ):
+                            output = output[: output.find(convs[question_id].stop_str)]
+
+                        for special_token in tokenizer.special_tokens_map.values():
+                            if isinstance(special_token, list):
+                                for special_tok in special_token:
+                                    output = output.replace(special_tok, "")
+                            else:
+                                output = output.replace(special_token, "")
+                        output = output.strip()
+
+                        if convs[question_id].name == "xgen" and output.startswith(
+                            "Assistant:"
+                        ):
+                            output = output.replace("Assistant:", "", 1).strip()
+                        if convs[question_id].name == "deepseek-r1" and "<\\think>" in output:
+                            output = output.split("<\\think>")[1]
+                        convs[question_id].update_last_message(output)
+                        turns[question_id].append(output)
+                except RuntimeError as e:
+                    print("ERROR question ID: ", question["question_id"])
+                    output = "ERROR"
+
+            for question in batched_questions:
+                question_id = question["question_id"]
+                choices[question_id].append(
+                    {
+                        "index": i,
+                        "turns": turns[question_id],
+                        "prompts": prompts[question_id],
+                    }
+                )
+
+        # Dump answers
+        os.makedirs(os.path.dirname(answer_file), exist_ok=True)
+        with open(os.path.expanduser(answer_file), "a", encoding="utf-8") as fout:
+            for question in batched_questions:
+                question_id = question["question_id"]
+                ans_json = {
+                    "question_id": question_id,
+                    "answer_id": shortuuid.uuid(),
+                    "model_id": model_id,
+                    "choices": choices[question_id],
+                    "tstamp": time.time(),
+                }
+                fout.write(json.dumps(ans_json, ensure_ascii=False) + "\n")
+
+
 def reorg_answer_file(answer_file):
     """Sort by question id and de-duplication"""
     answers = {}
-    with open(answer_file, "r") as fin:
+    with open(answer_file, "r", encoding="utf-8") as fin:
         for l in fin:
             qid = json.loads(l)["question_id"]
             answers[qid] = l
 
     qids = sorted(list(answers.keys()))
-    with open(answer_file, "w") as fout:
+    with open(answer_file, "w", encoding="utf-8") as fout:
         for qid in qids:
             fout.write(answers[qid])
 
@@ -277,6 +463,9 @@ if __name__ == "__main__":
         default=14,
         help="Random seed for reproducibility.",
     )
+    parser.add_argument(
+        "--use-vllm", default=False, action="store_true", help="Use vllm"
+    )
 
     args = parser.parse_args()
 
@@ -312,6 +501,7 @@ if __name__ == "__main__":
         max_gpu_memory=args.max_gpu_memory,
         dtype=str_to_torch_dtype(args.dtype),
         revision=args.revision,
+        use_vllm=args.use_vllm,
     )
 
     reorg_answer_file(answer_file)

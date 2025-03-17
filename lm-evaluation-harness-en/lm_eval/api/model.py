@@ -297,16 +297,20 @@ class TemplateLM(LM):
             continuation = context[-n_spaces:] + continuation
             context = context[:-n_spaces]
 
-        if self.AUTO_MODEL_CLASS == transformers.AutoModelForCausalLM:
+        model_class = getattr(self, "AUTO_MODEL_CLASS", None)
+        if model_class == transformers.AutoModelForSeq2SeqLM:
+            context_enc = self.tok_encode(context)
+            continuation_enc = self.tok_encode(continuation, add_special_tokens=False)
+        else:
             whole_enc = self.tok_encode(context + continuation)
             context_enc = self.tok_encode(context)
 
-            context_enc_len = len(context_enc)
-            continuation_enc = whole_enc[context_enc_len:]
-
-        elif self.AUTO_MODEL_CLASS == transformers.AutoModelForSeq2SeqLM:
-            context_enc = self.tok_encode(context)
-            continuation_enc = self.tok_encode(continuation)
+            # added conditional branch (ref: https://github.com/EleutherAI/lm-evaluation-harness/issues/1297)
+            if len(whole_enc) == len(context_enc):
+                continuation_enc = self.tok_encode(continuation)
+            else:
+                context_enc_len = len(context_enc)
+                continuation_enc = whole_enc[context_enc_len:]
 
         return context_enc, continuation_enc
 

@@ -2,16 +2,12 @@
 Usage:
 python3 show_result.py --mode [single|pairwise-baseline|pairwise-all]
 """
-
 import argparse
 import pandas as pd
 import json
 import numpy as np
 
-
-CATEGORIES = ["Coding", "Extraction", "Humanities", "Math", "Reasoning", "Roleplay", "STEM", "Writing"]
-CATEGORIES_ordered = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
-
+from fastchat.llm_judge.custom_utils import CATEGORIES, CATEGORIES_ordered, calculate_japanese_character_ratio
 
 def calculate_averages(scores):
     # scores: [N, T], N: 設問数, T: 回答数(5)
@@ -22,6 +18,7 @@ def calculate_averages(scores):
     mu = np.mean(question_mean)
     sigma = np.std(question_mean, ddof=1)
     return mu, sigma
+
 
 def display_result_single(args):
     if args.input_file is None:
@@ -51,27 +48,42 @@ def display_result_single(args):
             df_cat = df[["model", "score", "turn"]]
         df_1 = df_cat[df_cat["turn"] == 1].groupby("model")["score"].apply(calculate_averages)
         print(df_1)
+
         for model_id in args.model_list:
             result[model_id][category] = dict()
             result[model_id][category]["first_turn"] = dict()
             result[model_id][category]["first_turn"]["score"] = float(df_1.loc[model_id][0])
-            result[model_id][category]["first_turn"]["new_variance"] = float(df_1.loc[model_id][1])
+            result[model_id][category]["first_turn"]["stdev"] = float(df_1.loc[model_id][1])
+
         if args.bench_name == "mt_bench" or args.bench_name == "japanese_mt_bench":
             df_2 = df_cat[df_cat["turn"] == 2].groupby("model")["score"].apply(calculate_averages)
             print(df_2)
             for model_id in args.model_list:
                 result[model_id][category]["second_turn"] = dict()
                 result[model_id][category]["second_turn"]["score"] = float(df_2.loc[model_id][0])
-                result[model_id][category]["second_turn"]["new_variance"] = float(df_2.loc[model_id][1])
+                result[model_id][category]["second_turn"]["stdev"] = float(df_2.loc[model_id][1])
+
             df_3 = df_cat.groupby("model")["score"].apply(calculate_averages)
             print(df_3)
             for model_id in args.model_list:
                 result[model_id][category]["average"] = dict()
                 result[model_id][category]["average"]["score"] = float(df_3.loc[model_id][0])
-                result[model_id][category]["average"]["new_variance"] = float(df_3.loc[model_id][1])
+                result[model_id][category]["average"]["stdev"] = float(df_3.loc[model_id][1])
 
+    # スコアの集計
     for category in ["overall"] + CATEGORIES_ordered:
         score_category(category)
+
+    # 応答文における日本語の割合の集計
+    for model_id in args.model_list:
+        output_path = f"data/{args.bench_name}/model_answer/{model_id}.jsonl"
+        model_output = []
+        with open(output_path, "r") as f:
+            for line in f:
+                model_output.append(json.loads(line))
+        char_rate_info = calculate_japanese_character_ratio(model_output)
+        for category_name, char_ratio in char_rate_info.items():
+            result[model_id][category_name]["average"]["japanese_char_ratio"] = char_ratio
 
     # 各モデルの各カテゴリのaverage scoreをカンマ区切りで"result"に文字列として追加
     for model_id in args.model_list:
@@ -81,8 +93,8 @@ def display_result_single(args):
             result[model_id]["result"][turn]["score"] = ",".join(
                 [f"{(result[model_id][category][turn]['score'] / 10):.4f}" for category in ["overall"] + CATEGORIES_ordered]
             )
-            result[model_id]["result"][turn]["new_variance"] = ",".join(
-                [f"{result[model_id][category][turn]['new_variance']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
+            result[model_id]["result"][turn]["stdev"] = ",".join(
+                [f"{result[model_id][category][turn]['stdev']:.4f}" for category in ["overall"] + CATEGORIES_ordered]
             )
 
     if args.output_file is not None:
@@ -171,7 +183,7 @@ if __name__ == "__main__":
         "--azure",
         action="store_true",
         help="Did you use Azure API instead of openai when generating the judgment?",
-        default=True,
+        default=False,
     )
     args = parser.parse_args()
 

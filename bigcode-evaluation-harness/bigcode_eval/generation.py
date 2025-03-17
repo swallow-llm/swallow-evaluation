@@ -51,6 +51,7 @@ def parallel_generations(
         save_every_k_tasks: int = -1,
         intermediate_generations: Optional[List[Optional[List[Optional[str]]]]] = None,
         intermediate_save_generations_path: Optional[str] = None,
+        use_vllm = False,
 ):
     if args.load_generations_path:
         # load generated code
@@ -78,17 +79,22 @@ def parallel_generations(
     if task.stop_words and tokenizer.eos_token:
         task.stop_words.append(tokenizer.eos_token)    
     if hasattr(task, "check_fn"):
-        stopping_criteria.append(
-            EndOfFunctionCriteria(0, task.stop_words, tokenizer, task.check_fn)
-        )
+        if not use_vllm:
+            stopping_criteria.append(
+                EndOfFunctionCriteria(0, task.stop_words, tokenizer, task.check_fn)
+            )
     elif task.stop_words:
-        stopping_criteria.append(
-            EndOfFunctionCriteria(0, task.stop_words, tokenizer)
-        )
+        if use_vllm:
+            gen_kwargs['stop'] = task.stop_words
+        else:
+            stopping_criteria.append(
+                EndOfFunctionCriteria(0, task.stop_words, tokenizer)
+            )
     if hasattr(task, "max_length_multiplier") and task.max_length_multiplier:
-        stopping_criteria.append(
-            TooLongFunctionCriteria(0, task.max_length_multiplier)
-        )
+        if not use_vllm:
+            stopping_criteria.append(
+                TooLongFunctionCriteria(0, task.max_length_multiplier)
+            )
     
     if stopping_criteria:
         gen_kwargs["stopping_criteria"] = StoppingCriteriaList(stopping_criteria)
@@ -154,6 +160,7 @@ def parallel_generations(
         save_every_k_tasks=save_every_k_tasks,
         intermediate_generations=intermediate_generations,
         intermediate_save_generations_path=intermediate_save_generations_path,
+        use_vllm = use_vllm,
         **gen_kwargs,
     )
     return generations

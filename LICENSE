@@ -41,3 +41,19 @@ Apache License Version 2.0
 
 # Code Generation LM Evaluation Harness
 Apache License Version 2.0
+
+# JHumanEval (Used in Code Generation LM Evaluation Harness)
+MIT License
+Copyright (c) 2023 Kimio Kuramitsu's Laboratory
+
+# MBPP-Ja (Used in Code Generation LM Evaluation Harness)
+CC BY 4.0
+Copyright (c) 2024 LLM-jp
+
+# GPQA (Used in Language Model Evaluation Harness)
+MIT License
+Copyright (c) 2022 I. David Rein
+
+# MATH (Used in Language Model Evaluation Harness)
+MIT License
+Copyright (c) 2021 Dan Hendrycks
