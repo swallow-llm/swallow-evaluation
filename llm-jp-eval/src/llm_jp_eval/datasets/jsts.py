@@ -19,13 +19,13 @@ class JSTSDatasetProcessor(BaseDatasetProcessor):
         raw_train_path: Path = self.raw_dir / f"{self.data_name}_train.json"
         if not raw_train_path.exists():
             urlretrieve(
-                "https://raw.githubusercontent.com/yahoojapan/JGLUE/main/datasets/jsts-v1.1/train-v1.1.json",
+                "https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jsts-v1.1/train-v1.1.json",
                 str(raw_train_path),
             )
         raw_test_path: Path = self.raw_dir / f"{self.data_name}_test.json"
         if not raw_test_path.exists():
             urlretrieve(
-                "https://raw.githubusercontent.com/yahoojapan/JGLUE/main/datasets/jsts-v1.1/valid-v1.1.json",
+                "https://raw.githubusercontent.com/yahoojapan/JGLUE/v1.1.0/datasets/jsts-v1.1/valid-v1.1.json",
                 str(raw_test_path),
             )
 
