@@ -407,11 +407,12 @@ bash scripts/evaluate_ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 * `evaluate_english_bbh.sh` - BBH
 * `evaluate_english_gpqa.sh` - GPQA
 * `evaluate_english_mmlu.sh` - MMLU
+* `evaluate_english_math.sh` - MATH
 
 `jalm-evaluation-private/`にて
 
 ```bash
-bash scripts/evaluate_english_{general,bbh,gpqa,mmlu}.sh $MODEL_PATH
+bash scripts/evaluate_english_{general,bbh,gpqa,mmlu,math}.sh $MODEL_PATH
 ```
 
 ## Humaneval, MBPP のタスクで評価
