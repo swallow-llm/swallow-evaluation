@@ -5,6 +5,7 @@
 * 本文書では評価スクリプトの実行方法のみを説明します。評価方法や結果はSwallowプロジェクトの[評価ページ](https://swallow-llm.github.io/evaluation/about.ja.html)や論文発表を参照ください。
 * 評価スクリプトは、基本的には [llm-jp-eval](https://github.com/llm-jp/llm-jp-eval) などの既存のLLM評価フレームワークを使用しています。
   この場をお借りしてフレームワーク開発者の皆様にお礼申し上げます。
+* 推論型モデルを含む事後学習済みモデルの評価をお考えの方は [swallow-evaluation-instruct](https://github.com/swallow-llm/swallow-evaluation-instruct) をご検討ください．
 
 ## 注意事項
 
