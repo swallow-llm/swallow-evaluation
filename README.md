@@ -172,11 +172,11 @@ python -m venv .venv_fastchat
 
 なお、以下の環境構築コードは、我々の計算環境においては動作検証をしておりますが、 \
 利用される計算環境によってはバージョンが合わないことが考えられます。 \
-その際は適宜適当なバージョンに置き換えてください。
+その際は適宜適当なバージョンに置き換えてください。 \
+
+以下、本リポジトリをクローンしたフォルダ（例： `/home/user/swallow-evaluation/` ）を作業ディレクトリとしてコマンドを示します。
 
 ## llm-jp-eval (llmjp)
-
-`jalm-evaluation-private/`にて
 
 ```bash
 source .venv_llm_jp_eval/bin/activate
@@ -191,8 +191,6 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 ## harness-jp (MGSM, XL-SUM, WMT20-EN-JA, WMT20-JA-EN)
 
-`swallow-evaluation/`にて
-
 ```bash
 source .venv_harness_jp/bin/activate
 cd lm-evaluation-harness-jp
@@ -205,8 +203,6 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
 ## harness-en (BBH, MATH, MMLU, GPQA, General(TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2))
-
-`swallow-evaluation/`にて
 
 ```bash
 source .venv_harness_en/bin/activate
@@ -222,7 +218,6 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 ## bigcode (J/HumanEval, MBPP, MBPP-Ja)
 
-`jalm-evaluation-private/`にて 
 ```bash
 docker build -t evaluation-harness-jalm-evaluation  .
 source .venv_bigcode/bin/activate
@@ -238,8 +233,6 @@ pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 ## fastchat (MT-Bench)
 
-`swallow-evaluation/`にて
-
 ```bash
 source .venv_fastchat/bin/activate
 cd fastchat
@@ -252,7 +245,7 @@ pip install markdown beautifulsoup4
 ```
 
 モデルの生成文を gpt-4o-2024-08-06 を用いて評価する（LLM-as-a-judge）ので \
-`jalm-evaluation-private/.env`ファイルを作成し、OpenAIのAPIキーを入力する。
+`./.env`ファイルを作成し、OpenAIのAPIキーを入力する。
 
 ```txt
 OPENAI_API_KEY=...
@@ -261,11 +254,10 @@ OPENAI_API_KEY=...
 ### 日本語の評価
 
 結果は
-`results/${MODEL_PATH}/ja/`
+`./results/${MODEL_PATH}/ja/`
 以下に保存されます。
 
 #### llm-jp-eval データセットの前処理
-
 
 [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従い、以下のコマンドを実行してデータセットをダウンロードする
 
@@ -281,8 +273,6 @@ cd ../
 ```
 
 #### llm-jp-evalのタスクで評価
-
-`swallow-evaluation/`にて
 
 ```bash
 bash scripts/evaluate_ja_llmjp.sh $MODEL_PATH
@@ -345,7 +335,7 @@ bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 #### JHumanevalのタスクで評価
 
 結果は
-`results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
+`./results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
 に保存される。
 
 ## JHumaneval/MBPP Jaのタスクで評価
@@ -410,8 +400,6 @@ bash scripts/evaluate_ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 * `evaluate_english_mmlu.sh` - MMLU
 * `evaluate_english_math.sh` - MATH
 
-`jalm-evaluation-private/`にて
-
 ```bash
 bash scripts/evaluate_english_{general,bbh,gpqa,mmlu,math}.sh $MODEL_PATH
 ```
@@ -438,6 +426,6 @@ bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false t
 
 ## 結果の確認
 
-- 全体の結果は`results/$MODEL_NAME/aggregated_result.json`に書き込まれます。
+- 全体の結果は`./results/$MODEL_NAME/aggregated_result.json`に書き込まれます。
 - 複数のモデルの結果を確認したい場合は、`tmp/model_list` ファイルを作成し、各モデル名を1行ずつ記入してください。その後、`scripts/show_results.py` を実行すると、複数モデルの結果を一覧表示できます。
 
