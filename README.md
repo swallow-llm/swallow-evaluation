@@ -341,7 +341,6 @@ bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 ## JHumaneval/MBPP Jaのタスクで評価
 
 * データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
-* few-shot数: 10
 * 評価を行うにはdockerイメージのビルドが必要
 
 ```bash
@@ -359,8 +358,6 @@ bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true false
 ```bash
 bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false true
 ```
-
-few-shot数: 0 (JHumanEval), 3 (MBPP Ja)
 
 ## fastchat(mt_bench)の評価の実行
 
