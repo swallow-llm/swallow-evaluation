@@ -66,7 +66,7 @@
   ただし coding/math/reasoning の模範解答は、mtbench_ja_referenceanswer:v2 ([リンク](https://wandb.ai/wandb-japan/llm-leaderboard/artifacts/dataset/mtbench_ja_referenceanswer/v2))をもとに、Swallowチームで独自に校閲・修正したものに変更しました([リンク](./fastchat/fastchat/llm_judge/data/japanese_mt_bench/reference_answer/gpt-4o-2024-08-06.jsonl))。  
 * 応答文の日本語文字率を計算する関数を追加しました([リンク](./fastchat/fastchat/llm_judge/custom_utils.py))。
 
-### Code Generation LM Evaluation Harness
+### Code Generation LM Evaluation Harness (BigCode)
 
 * バージョン: [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) (commit #0261c52)
 * ライセンス: Apache License Version 2.0 ([LICENSE](bigcode-evaluation-harness/LICENSE))
@@ -104,61 +104,15 @@
 # FAQ
 [こちら](MEMO.md)
 
-## 評価スクリプトが使用するLLM評価フレームワークおよびそれらのライセンス・変更点
-
-### llm-jp-eval
-
-* バージョン: [llm-jp-eval v1.3.0](https://github.com/llm-jp/llm-jp-eval/releases/tag/v1.3.0) [Han+, ANLP24]
-* ライセンス: Copyright 2023 LLM-jp,  Apache License Version 2.0 ([LICENSE](llm-jp-eval/LICENSE))
-* 主な変更点:
-  * モデルの応答を生成する際に貪欲デコーディングを強制するようにconfigを追加しました（[リンク](./llm-jp-eval/configs/config_no-sample.yaml))。
-  * JMMLUの結果をカテゴリごとに算出するスクリプトを追加しました ([リンク](./llm-jp-eval/scripts/jmmlu_statistics.py))。
-
-### Language Model Evaluation Harness
-
-* バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
-* ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
-* 主な変更点: なし
-
-### JP Language Model Evaluation Harness
-
-* バージョン: [Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41) [Gao+, 22]
-* ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-jp/LICENSE.md))
-* 主な変更点:
-  * TER (Translation Error Rate) をブートストラップ統計量から除外しました。
-  * 評価結果のキャッシュの保存先を指定できるようにしました。
-  * huggingface tokenizerを読み込む際に`trust_remote_code`に渡す値を指定できるようにしました。
-
-### FastChat
-
-* バージョン: [FastChat](https://github.com/lm-sys/FastChat) (commit #e86e70d0)
-* ライセンス: Apache License Version 2.0 ([LICENSE](fastchat/LICENSE))
-* 主な変更点:
-  * 新しいモデルに対応するために、それぞれのモデルに対応するChatTemplateの追加をしました ([リンク](./fastchat/fastchat/conversation.py))。
-  * 一つの事例に対して複数回の応答文の生成と評価を行えるようにしました。
-  * OpenAIのAPIを呼び出す際のretryの処理を改善しました。
-
-### Code Generation LM Evaluation Harness
-
-* バージョン: [bigcode-evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) (commit #0261c52)
-* ライセンス: Apache License Version 2.0 ([LICENSE](bigcode-evaluation-harness/LICENSE))
-* 主な変更点:
-  * JHumanEvalの評価を行えるようにしました ([リンク](./bigcode-evaluation-harness/bigcode_eval/tasks/humaneval.py))。
-  * HumanEval / JHumanEval タスクにおける、設問に対する回答率を計算する関数を追加しました ([リンク](./bigcode-evaluation-harness/bigcode_eval/custom_utils.py))。
-
-#### JHumanEval (Code Generation LM Evaluation Harnessで使用)
-
-* バージョン: [jhuman-eval](https://github.com/KuramitsuLab/jhuman-eval/tree/main)
-* ライセンス: Copyright (c) 2023 Kimio Kuramitsu's Laboratory, MIT License ([LICENSE](https://github.com/KuramitsuLab/jhuman-eval/blob/main/LICENSE))
-* 主な変更点: なし
-
 ----
 
 ## 評価スクリプトの実行方法
 
+以下、本リポジトリをクローンしたフォルダ（例： `/home/user/swallow-evaluation/` ）を作業ディレクトリとしてコマンドを示します。
+
 ### 準備：環境構築
 
-各フレームワークに対し、別々の仮想環境を用意します。
+各フレームワークに対して、別々の仮想環境を用意します。
 
 Pythonのバージョンは3.10.14を使ってください。
 
@@ -174,9 +128,7 @@ python -m venv .venv_fastchat
 利用される計算環境によってはバージョンが合わないことが考えられます。 \
 その際は適宜適当なバージョンに置き換えてください。 \
 
-以下、本リポジトリをクローンしたフォルダ（例： `/home/user/swallow-evaluation/` ）を作業ディレクトリとしてコマンドを示します。
-
-## llm-jp-eval (llmjp)
+### llm-jp-eval の環境構築
 
 ```bash
 source .venv_llm_jp_eval/bin/activate
@@ -189,7 +141,7 @@ pip install datasets==2.21.0
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-## harness-jp (MGSM, XL-SUM, WMT20-EN-JA, WMT20-JA-EN)
+### JP Language Model Evaluation Harness の環境構築
 
 ```bash
 source .venv_harness_jp/bin/activate
@@ -202,7 +154,7 @@ pip install datasets==2.21.0
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-## harness-en (BBH, MATH, MMLU, GPQA, General(TriviaQA, GSM8K, OpenBookQA, Hellaswag, XWINO, SQuAD2))
+### Language Model Evaluation Harness の環境構築
 
 ```bash
 source .venv_harness_en/bin/activate
@@ -216,7 +168,7 @@ pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-## bigcode (J/HumanEval, MBPP, MBPP-Ja)
+### Code Generation LM Evaluation Harness の環境構築
 
 ```bash
 docker build -t evaluation-harness-jalm-evaluation  .
@@ -231,7 +183,7 @@ pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
-## fastchat (MT-Bench)
+### FastChat の環境構築
 
 ```bash
 source .venv_fastchat/bin/activate
@@ -245,19 +197,19 @@ pip install markdown beautifulsoup4
 ```
 
 モデルの生成文を gpt-4o-2024-08-06 を用いて評価する（LLM-as-a-judge）ので \
-`./.env`ファイルを作成し、OpenAIのAPIキーを入力する。
+`./.env`ファイルを作成し、OpenAIのAPIキーを入力してください。
 
 ```txt
 OPENAI_API_KEY=...
 ```
 
-### 日本語の評価
+## 日本語タスクの評価
 
 結果は
 `./results/${MODEL_PATH}/ja/`
 以下に保存されます。
 
-#### llm-jp-eval データセットの前処理
+### llm-jp-eval データセットの前処理
 
 [llm-jp-evalのREADME.md](https://github.com/llm-jp/llm-jp-eval/tree/main)に従い、以下のコマンドを実行してデータセットをダウンロードする
 
@@ -272,14 +224,13 @@ python scripts/preprocess_dataset.py  \
 cd ../
 ```
 
-#### llm-jp-evalのタスクで評価
+### llm-jp-eval が対応するタスクの評価
+
+JEMHopQA, JCommonsenseQA, JSQuAD, NIILC, JMMLU, JSTS, NLIベンチマーク5種 (Jamp, JaNLI, JNLI, JSeM, JSICK) の評価が実行されます。
 
 ```bash
 bash scripts/evaluate_ja_llmjp.sh $MODEL_PATH
 ```
-
-jamp, janli, jemhopqa, jcommonsenseqa, jnli, jsem, jsick, jsquad, jsts, niilc, jmmluの評価が実行されます。
-
 
 <details>
 <summary> NLIタスクのbalanced accuracyを計算する</summary>
@@ -314,84 +265,60 @@ cat {ndjsonファイル} | jq -r '[.[]] | @tsv' >> output.tsv
 ```
 </details>
 
-## xlsum（自動要約）のタスクで評価
+### JP Language Model Evaluation Harness が対応するタスクの評価
+
+XL-Sum（自動要約）, MGSM（算術推論），WMT20（機械翻訳）の評価が実行されます。
 
 ```bash
 bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
-```
-
-#### mgsm（数学）のタスクで評価
-
-```bash
 bash scripts/evaluate_ja_mgsm.sh $MODEL_PATH
-```
-
-#### WMT20（機械翻訳）のタスクで評価
-
-```bash
 bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 ```
 
-#### JHumanevalのタスクで評価
+### Code Generation LM Evaluation Harness が対応するタスクの評価
+
+JHumanEval, MBPP-Ja の評価が実行されます。  
+
+評価を行うにはdockerイメージのビルドが必要です。
 
 結果は
 `./results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
-に保存される。
-
-## JHumaneval/MBPP Jaのタスクで評価
-
-* データは[JHumanEval](https://github.com/KuramitsuLab/jhuman-eval)を使用。
-* 評価を行うにはdockerイメージのビルドが必要
+に保存されます。
 
 ```bash
 bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true true
 ```
 
-#### 日本語MTBenchの評価
+### FastChat が対応するタスクの評価
 
-```bash
-bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true false
-```
-
-### 評価だけを行う場合
-
-```bash
-bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false true
-```
-
-## fastchat(mt_bench)の評価の実行
+日本語MT-Bench の評価が実行されます。
 
 ```bash
 bash scripts/evaluate_ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 ```
 
-### 英語の評価
-
+## 英語タスクの評価
 
 結果は
 `results/${MODEL_PATH}/en/`
 以下に保存されます。
 
-#### lm-evaluation-harness のタスクで評価
+### Language Model Evaluation Harness が対応するタスクの評価
 
-<br> <br>
+以下の評価が実行されます。
 
-# 英語の評価
+* 常識推論: HellaSwag, XWINO, OpenBookQA
+* 世界知識: TriviaQA
+* 文書読解: SQuAD v2
+* 算術推論: GSM8K
+* 論理推論: BBH (Big-Bench-Hard)
+* 数学: MATH
+* 一般教養・学術知識: MMLU
+* 博士レベルの科学: GPQA
 
-## `llm-evaluation-harness`での評価
+それぞれのベンチマークは、以下のシェルスクリプトで実行できます。
 
-* `llm-evaluation-harness` を採用
-  * 常識推論: HellaSwag, WinoGrande, OpenBookQA
-  * 世界知識: TriviaQA
-  * 文書読解: SQuAD2
-  * 算術推論: GSM8K
-  * 数学: MATH
-  * 一般教養・学術知識: MMLU
-  * 博士課程: GPQA
-
-本フレームワークでは評価時間の削減（評価の並列化）のために以下のようにスクリプトを分けている。
-
-* `evaluate_english_general.sh` - TriviaQA, GSM8K, OpenBookQA, HellaSwag,WinoGrande, SQuAD2
+* `evaluate_english_general.sh` - TriviaQA, GSM8K, OpenBookQA, HellaSwag, XWINO, SQuAD v2
 * `evaluate_english_bbh.sh` - BBH
 * `evaluate_english_gpqa.sh` - GPQA
 * `evaluate_english_mmlu.sh` - MMLU
@@ -401,23 +328,18 @@ bash scripts/evaluate_ja_mt_bench.sh $MODEL_PATH $GPU_NUM
 bash scripts/evaluate_english_{general,bbh,gpqa,mmlu,math}.sh $MODEL_PATH
 ```
 
-## Humaneval, MBPP のタスクで評価
+### Code Generation LM Evaluation Harness が対応するタスクの評価
 
-### 出力と評価を同時に行う場合
+HumanEval, MBPP の評価が実行されます。また、コード生成と採点を同時または別々に行うことができます。
 
 ```bash
+# コード生成と採点を同時に行う場合
 bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true true
-```
 
-### 出力だけを行う場合
-
-```bash
+# コード生成のみを行う場合
 bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true false
-```
 
-### 評価だけを行う場合
-
-```bash
+# 採点のみを行う場合
 bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false true
 ```
 
@@ -425,4 +347,3 @@ bash scripts/evaluate_english_{humaneval-unstripped,mbpp}.sh $MODEL_PATH false t
 
 - 全体の結果は`./results/$MODEL_NAME/aggregated_result.json`に書き込まれます。
 - 複数のモデルの結果を確認したい場合は、`tmp/model_list` ファイルを作成し、各モデル名を1行ずつ記入してください。その後、`scripts/show_results.py` を実行すると、複数モデルの結果を一覧表示できます。
-
