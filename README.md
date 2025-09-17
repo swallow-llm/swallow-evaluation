@@ -5,7 +5,7 @@
 * 本文書では評価スクリプトの実行方法のみを説明します。評価方法や結果はSwallowプロジェクトの[評価ページ](https://swallow-llm.github.io/evaluation/about.ja.html)や論文発表を参照ください。
 * 評価スクリプトは、基本的には [llm-jp-eval](https://github.com/llm-jp/llm-jp-eval) などの既存のLLM評価フレームワークを使用しています。
   この場をお借りしてフレームワーク開発者の皆様にお礼申し上げます。
-* 推論型モデルを含む事後学習済みモデルの評価をお考えの方は [swallow-evaluation-instruct](https://github.com/swallow-llm/swallow-evaluation-instruct) をご検討ください．
+* 推論型モデルを含む事後学習済みモデルの評価をお考えの方は [swallow-evaluation-instruct](https://github.com/swallow-llm/swallow-evaluation-instruct) をご検討ください。
 
 ## 注意事項
 
@@ -267,7 +267,7 @@ cat {ndjsonファイル} | jq -r '[.[]] | @tsv' >> output.tsv
 
 ### JP Language Model Evaluation Harness が対応するタスクの評価
 
-XL-Sum（自動要約）, MGSM（算術推論），WMT20（機械翻訳）の評価が実行されます。
+XL-Sum（自動要約）, MGSM（算術推論）、WMT20（機械翻訳）の評価が実行されます。
 
 ```bash
 bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
@@ -288,6 +288,20 @@ JHumanEval, MBPP-Ja の評価が実行されます。
 ```bash
 bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true true
 ```
+
+<details>
+  <summary>具体的なビルドの手順例</summary>
+  
+  [docker://ghcr.io/bigcode-project/evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) を `swallow-evaluation/evaluation-harness.sif` として \
+  pull を行う必要があります。 また、その用意したコンテナの中で datasets==2.21.0 をインストールする必要もあります。
+  
+  例：Apptainer を使う場合（Docker、Singularityの場合も同様）
+  ```
+  cd （cloneしたswallow-evaluationへのパス）
+  apptainer pull --name evaluation-harness.sif docker://ghcr.io/bigcode-project/evaluation-harness
+  apptainer exec evaluation-harness.sif pip install --user datasets==2.21.0
+  ```
+</details>
 
 ### FastChat が対応するタスクの評価
 
