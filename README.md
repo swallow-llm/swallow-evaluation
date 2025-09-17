@@ -28,7 +28,7 @@
 
 ### Language Model Evaluation Harness
 
-* バージョン: [JP Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2)
+* バージョン: [Language Model Evaluation Harness v0.4.2](https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.2) [[Sutawika+, 2024](https://zenodo.org/records/10829972)]
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-en/LICENSE.md))
 
 #### 主な変更点
@@ -45,7 +45,7 @@
     * 回答文生成は貪欲法で、生成トークン数の上限を 2048 にしています。
 
 ### JP Language Model Evaluation Harness
-* バージョン: [Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41) [Gao+, 22]
+* バージョン: [JP Language Model Evaluation Harness v0.3.0](https://github.com/Stability-AI/lm-evaluation-harness) (commit #9b42d41)
 * ライセンス: Copyright (c) 2020 EleutherAI, MIT License ([LICENSE](lm-evaluation-harness-jp/LICENSE.md))
 
 #### 主な変更点
@@ -126,7 +126,7 @@ python -m venv .venv_fastchat
 
 なお、以下の環境構築コードは、我々の計算環境においては動作検証をしておりますが、 \
 利用される計算環境によってはバージョンが合わないことが考えられます。 \
-その際は適宜適当なバージョンに置き換えてください。 \
+その際は適宜適当なバージョンに置き換えてください。
 
 ### llm-jp-eval の環境構築
 
