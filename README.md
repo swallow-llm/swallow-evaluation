@@ -183,6 +183,23 @@ pip install vllm==v0.6.3.post1
 pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
+仮想環境構築に加えて、dockerイメージのビルドが必要です。
+
+<details>
+  <summary>dockerイメージビルドの手順例（クリックして表示）</summary>
+  
+  [docker://ghcr.io/bigcode-project/evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) を `swallow-evaluation/evaluation-harness.sif` として \
+  pull を行う必要があります。 また、その用意したコンテナの中で datasets==2.21.0 をインストールする必要もあります。
+  
+  例：Apptainer を使う場合（Docker、Singularityの場合も同様）
+  ```
+  cd （cloneしたswallow-evaluationへのパス）
+  apptainer pull --name evaluation-harness.sif docker://ghcr.io/bigcode-project/evaluation-harness
+  apptainer exec evaluation-harness.sif pip install --user datasets==2.21.0
+  ```
+</details>
+
+
 ### FastChat の環境構築
 
 ```bash
@@ -267,7 +284,7 @@ cat {ndjsonファイル} | jq -r '[.[]] | @tsv' >> output.tsv
 
 ### JP Language Model Evaluation Harness が対応するタスクの評価
 
-XL-Sum（自動要約）, MGSM（算術推論）、WMT20（機械翻訳）の評価が実行されます。
+XL-Sum（自動要約）、MGSM（算術推論）、WMT20（機械翻訳）の評価が実行されます。
 
 ```bash
 bash scripts/evaluate_ja_xlsum.sh $MODEL_PATH
@@ -279,8 +296,6 @@ bash scripts/evaluate_ja_wmt20_{enja,jaen}.sh $MODEL_PATH
 
 JHumanEval, MBPP-Ja の評価が実行されます。  
 
-評価を行うにはdockerイメージのビルドが必要です。
-
 結果は
 `./results/${MODEL_PATH}/ja/${task_name}_${NUM_FEWSHOT}shot_${NUM_TESTCASE}cases/`
 に保存されます。
@@ -288,20 +303,6 @@ JHumanEval, MBPP-Ja の評価が実行されます。
 ```bash
 bash scripts/evaluate_ja_{humaneval-unstripped,mbpp}.sh $MODEL_PATH true true
 ```
-
-<details>
-  <summary>具体的なビルドの手順例</summary>
-  
-  [docker://ghcr.io/bigcode-project/evaluation-harness](https://github.com/bigcode-project/bigcode-evaluation-harness) を `swallow-evaluation/evaluation-harness.sif` として \
-  pull を行う必要があります。 また、その用意したコンテナの中で datasets==2.21.0 をインストールする必要もあります。
-  
-  例：Apptainer を使う場合（Docker、Singularityの場合も同様）
-  ```
-  cd （cloneしたswallow-evaluationへのパス）
-  apptainer pull --name evaluation-harness.sif docker://ghcr.io/bigcode-project/evaluation-harness
-  apptainer exec evaluation-harness.sif pip install --user datasets==2.21.0
-  ```
-</details>
 
 ### FastChat が対応するタスクの評価
 
